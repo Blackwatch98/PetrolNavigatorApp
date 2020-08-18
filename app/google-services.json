@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "590931125902",
+    "firebase_url": "https://petrolnavigator.firebaseio.com",
+    "project_id": "petrolnavigator",
+    "storage_bucket": "petrolnavigator.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:590931125902:android:eeb90df5e0df79640bcbdf",
+        "android_client_info": {
+          "package_name": "com.example.petrolnavigatorapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "590931125902-bnpg4p4ip8cec08qto8jbm8bf7ln73b7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAysVFlNFG8koa5oo-bVloMWWI2346onyU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "590931125902-bnpg4p4ip8cec08qto8jbm8bf7ln73b7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
