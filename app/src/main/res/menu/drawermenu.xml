@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:id="@+id/db" android:title="Strona główna" android:icon="@drawable/ic_baseline_home_24"/>
+<item android:id="@+id/maps" android:title="Maps" android:icon="@drawable/ic_baseline_map_24"/>
+<item android:id="@+id/activities" android:title="Cars" android:icon="@drawable/ic_baseline_directions_car_24"/>
+<item android:id="@+id/settings" android:title="Settings" android:icon="@drawable/ic_baseline_settings_24"/>
+<item android:id="@+id/logout" android:title="Logout" android:icon="@drawable/ic_baseline_arrow_drop_down_circle_24"/>
+</menu>
