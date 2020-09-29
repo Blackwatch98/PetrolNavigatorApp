@@ -6,4 +6,6 @@
     <string name="confirmButton">Potwierdź</string>
     <string name="title_activity_maps">Map</string>
     <string name="google_places_key">AIzaSyB1yvvhSeE46w2jkAm8AJ7F5UA3JqkIanM</string>
+    <string name="navigation_drawer_open">Open Navigation Drawer</string>
+    <string name="navigation_drawer_close">Close Navigation Drawer</string>
 </resources>
