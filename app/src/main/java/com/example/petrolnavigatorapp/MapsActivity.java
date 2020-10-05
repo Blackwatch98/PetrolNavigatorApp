@@ -51,6 +51,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationRequest request;
     private Location mLastLocation;
     private LatLng latLng;
+    private int radius;
     private FusedLocationProviderClient mFusedProviderClient;
 
     private LocationCallback mLocationCallback = new LocationCallback()
@@ -74,6 +75,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        Bundle bundle = getIntent().getExtras();
+        radius = bundle.getInt("seekBarValue");
+
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -122,7 +128,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     {
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         stringBuilder.append("location=" + latLng.latitude + "," + latLng.longitude);
-        stringBuilder.append("&radius=" + 2000);
+        stringBuilder.append("&radius=" + radius);
         stringBuilder.append("&keyword=" + "petrol");
         stringBuilder.append("&key="+getResources().getString(R.string.google_places_key));
 
@@ -132,8 +138,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         dataTransfer[0] = mMap;
         dataTransfer[1] = url;
         dataTransfer[2] = this;
-        
 
+        System.out.println("DATA = " + dataTransfer[0] + " " + dataTransfer[1]);
         GetNearbyPetrols getNearbyPetrols = new GetNearbyPetrols();
         getNearbyPetrols.execute(dataTransfer);
     }
