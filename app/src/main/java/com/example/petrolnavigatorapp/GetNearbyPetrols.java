@@ -3,6 +3,7 @@ package com.example.petrolnavigatorapp;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -14,6 +15,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
@@ -40,16 +42,17 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
     private StringBuilder stringBuilder;
     private  String data;
 
-    //Firebase
     private DatabaseReference reff;
-    private Petrol petrol;
-    private long maxId = 0;
     private List<Marker> markers;
     private TaskListener taskListener;
-    private DataSnapshot myDs;
+
+    private List<Petrol> petrolsList;
+    private long counter = 0;
+    private boolean  counterFlag = true;
 
     GetNearbyPetrols()
     {
+        petrolsList = new LinkedList<>();
     };
 
     @Override
@@ -59,7 +62,6 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
         markers = new LinkedList<>();
         mapsActivity = (MapsActivity)objects[2];
         taskListener = (TaskListener)objects[2];
-
 
         try
         {
@@ -87,7 +89,7 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
         {
             e.getMessage();
         }
-        System.out.println(data);
+
         return data;
     }
 
@@ -96,9 +98,9 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
         super.onPostExecute(s);
         try
         {
-            JSONObject parentObject = new JSONObject(s);
-            JSONArray resultsArray = parentObject.getJSONArray("results");
-            System.out.println(resultsArray.length());
+            final JSONObject parentObject = new JSONObject(s);
+            final JSONArray resultsArray = parentObject.getJSONArray("results");
+
             for(int i = 0; i < resultsArray.length(); i++)
             {
                 JSONObject jsonObject = resultsArray.getJSONObject(i);
@@ -108,68 +110,113 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                 String longitude = locationObject.getString("lng");
 
                 JSONObject nameObject = resultsArray.getJSONObject(i);
-                String name_petrol = nameObject.getString("name");
+                String testName = nameObject.getString("name");
                 String vincity = nameObject.getString("vicinity");
 
-                LatLng latLng = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
+                LatLng testCoor = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
+                petrolsList.add(new Petrol(testName,testCoor));
+
                 MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.title(name_petrol+"," + vincity);
-                markerOptions.position(latLng);
+                markerOptions.title(testName+"," + vincity);
+                markerOptions.position(testCoor);
 
                 Marker mLocationMarker = mMap.addMarker(markerOptions);
                 markers.add(mLocationMarker);
 
-                reff = FirebaseDatabase.getInstance().getReference().child("Petrol");
-
-                //po wciśnięciu na marker ustaw paliwa
-                //mMap.setOnMarkerClickListener();
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
-                        //MarkerInfo m = (MarkerInfo)map.get(marker);
-                        //FragmentManager fragmentManager = mapsActivity.getSupportFragmentManager();
-                        //FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                        //PetrolMarkerFragment fragment = new PetrolMarkerFragment();
-                        //fragmentTransaction.add(R.id.map, fragment);
-                        //fragmentTransaction.commit();
-
-                        /*
-                        Intent intent = new Intent(mapsActivity, PopUpActivity.class);
+                        Intent intent = new Intent(mapsActivity, PetrolPopUpActivity.class);
                         intent.putExtra("petrolName", marker.getTitle());
-                        intent.putExtra("latitude",marker.getPosition().latitude);
-                        intent.putExtra("longitude",marker.getPosition().longitude);
+                        intent.putExtra("latitude", marker.getPosition().latitude);
+                        intent.putExtra("longitude", marker.getPosition().longitude);
                         mapsActivity.startActivity(intent);
 
-                         */
                         return false;
                     }
                 });
+            }
 
-
-                reff.addValueEventListener(new ValueEventListener() {
+            //DRUGA METODA (OBECNIE NIE DZIAŁA)
+            //PRAWDOPODOBNIE DO USUNIĘCIA ALE NA TĄ CHWILĘ POZOSTAJE
+/*
+            reff = FirebaseDatabase.getInstance().getReference("Petrol");
+            Query query;
+            for(Petrol test : petrolsList) {
+                petrol = test;
+                query = reff.orderByChild("name");
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        System.out.println(dataSnapshot);
                         if(dataSnapshot.exists())
                         {
-                            maxId = dataSnapshot.getChildrenCount();
+                            System.out.println("Jest");
                         }
-                        myDs = dataSnapshot;
+                        else
+                        {
+                            reff.push().setValue(new Petrol());
+                            System.out.println("Dodałem nowe");
+                        }
+
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
                     }
                 });
-
-//                if(!myDs.exists())
-//                {
-                    petrol = new Petrol(name_petrol,latLng);
-                    reff.child(String.valueOf(maxId+i)).setValue(petrol);
-       //          }
-
-
             }
+ */
+
+            reff = FirebaseDatabase.getInstance().getReference("Petrols");
+
+            reff.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(counterFlag)
+                    {
+                        counter = dataSnapshot.getChildrenCount();
+                        counterFlag = false;
+                    }
+
+                    if(dataSnapshot.exists())
+                    {
+                        if(dataSnapshot.getChildrenCount() < counter)
+                            return;
+
+                        for(Petrol ps : petrolsList) {
+                            boolean isInDB = false;
+
+                            for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                                LatLng temp = new LatLng(Double.parseDouble(ds.child("coordinates").child("latitude").getValue().toString()),
+                                        Double.parseDouble(ds.child("coordinates").child("longitude").getValue().toString()));
+
+                                if (ps.getCoordinates().equals(temp)) {
+                                    //System.out.println("Jest");
+                                    isInDB = true;
+                                    break;
+                                }
+
+                            }
+                            if (!isInDB) {
+                                reff.child(String.valueOf(counter)).setValue(ps);
+                                counter++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for(Petrol test : petrolsList)
+                            reff.child(String.valueOf(counter)).setValue(test);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    System.out.println("Wystąpił błąd snapshota!");
+                }
+            });
+
         }
         catch(JSONException e)
         {
@@ -177,6 +224,4 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
         }
         taskListener.onTaskFinish(markers);
     }
-
-
 }

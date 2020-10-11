@@ -23,12 +23,10 @@ public class Petrol implements Serializable {
         this.name = name;
         this.coordinates = coordinates;
         this.availableFuels = new HashMap<>();
-        availableFuels.put("Benzyna",false);
-        availableFuels.put("Diesel",false);
-        availableFuels.put("LPG",true);
-        availableFuels.put("Etanol",false);
-        availableFuels.put("Elektryczny",false);
-        availableFuels.put("CNG",true);
+        String[] fuelTypes = {"Benzyna", "Diesel", "LPG", "Etanol", "Elektryczny", "CNG"};
+        for(String fuelName : fuelTypes)
+            this.availableFuels.put(fuelName,false);
+
         this.fuels = new LinkedList<>();
     }
 

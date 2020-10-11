@@ -79,7 +79,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Bundle bundle = getIntent().getExtras();
         radius = bundle.getInt("seekBarValue");
 
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
