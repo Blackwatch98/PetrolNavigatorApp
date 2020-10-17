@@ -9,6 +9,11 @@
 
     <style name="AppTheme.CustomTheme">
         <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/colorBackgroundPromotions</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="AppTheme.TransHide">
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
