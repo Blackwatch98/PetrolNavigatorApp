@@ -27,6 +27,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class PetrolPopUpActivity extends Activity {
@@ -43,21 +45,22 @@ public class PetrolPopUpActivity extends Activity {
     //private Integer[] imgId = {R.drawable.pb95, R.drawable.pb98,R.drawable.on};
     private Integer[] imgId2 = {R.drawable.benz, R.drawable.cng, R.drawable.diesel, R.drawable.elektr, R.drawable.etan, R.drawable.lpg};
 
+    private String[] imgNames= {"Elektryczny", "Benzyna", "LPG", "Etanol", "Diesel", "CNG"};
+    private Integer[] imgId = {R.drawable.elektr, R.drawable.benz, R.drawable.lpg, R.drawable.etan, R.drawable.diesel, R.drawable.cng};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_petrol_pop_up);
         context = this;
-        availableFuelsLayout = (LinearLayout) findViewById(R.id.availableFuels);
+        availableFuelsLayout = findViewById(R.id.availableFuels);
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             String name = bundle.getString("petrolName");
             lat=bundle.getDouble("latitude");
             lon=bundle.getDouble("longitude");
 
-            NestedScrollView nestedScrollView = findViewById(R.id.nest);
             CoordinatorLayout coordinatorLayout = findViewById(R.id.ok);
-
             coordinatorLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -71,6 +74,8 @@ public class PetrolPopUpActivity extends Activity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if(dataSnapshot.exists()) {
+                        //List<String> fuelTypes = new LinkedList<>();
+
                         for(DataSnapshot ds : dataSnapshot.getChildren())
                         {
                             if(ds.child("coordinates").child("latitude").getValue().equals(lat) &&
@@ -83,6 +88,17 @@ public class PetrolPopUpActivity extends Activity {
                                     DataSnapshot item = items.next();
 
                                     availableFuels.put(item.getKey(), (Boolean) item.getValue());
+                                    int pos = 0;
+                                    for(String str : imgNames) {
+                                        if (item.getKey().equals(str) && item.getValue().equals(true)) {
+                                            ImageView img = new ImageView(context);
+                                            img.setImageResource(imgId[pos]);
+                                            availableFuelsLayout.addView(img);
+                                            //fuelTypes.add(item.getKey());
+                                            break;
+                                        }
+                                        pos++;
+                                    }
                                 }
                                 int i = 0;
                                 for(Boolean bool : availableFuels.values())

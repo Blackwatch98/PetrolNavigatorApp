@@ -16,8 +16,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class ChangeFuelTypesActivity extends AppCompatActivity {
 
@@ -74,21 +76,38 @@ public class ChangeFuelTypesActivity extends AppCompatActivity {
                         test.put("latitude",coor.latitude);
                         test.put("longitude", coor.longitude);
 
-                        if(ds.child("coordinates").child("latitude").getValue().equals(test.get("latitude")))
+                        if(ds.child("coordinates").child("latitude").getValue().equals(test.get("latitude")) &&
+                                ds.child("coordinates").child("longitude").getValue().equals(test.get("longitude")))
                         {
                             // to w tym ds zrób coś
                             fuelTypes = (HashMap<String, Boolean>) ds.child("availableFuels").getValue();
                             myDs = ds;
                             if(fuelTypes != null)
                             {
+                                Iterator it = fuelTypes.entrySet().iterator();
+                                while (it.hasNext()) {
+                                    Map.Entry mapElement = (Map.Entry)it.next();
+                                    System.out.println(mapElement.getKey() + " = " + mapElement.getValue());
+                                    for(Switch sw : switches)
+                                        if(sw.getText().equals(mapElement.getKey()))
+                                        {
+                                            if((Boolean) mapElement.getValue())
+                                                sw.setChecked(true);
+                                        }
+                                }
+                                /*
                                 for(int i = 0; i < fuelTypes.size(); i++)
                                 {
+                                    //System.out.println((fuelTypes.keySet().toArray())[ i ]);
+                                    //System.out.println(fuelTypes.get( (fuelTypes.keySet().toArray())[ i ] ));
                                     if(fuelTypes.get( (fuelTypes.keySet().toArray())[ i ] ).equals(true))
                                     {
                                         switches.get(i).setChecked(true);
                                     }
                                 }
+                                */
                             }
+                            break;
                         }
                     }
                 }
@@ -105,15 +124,23 @@ public class ChangeFuelTypesActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 HashMap<String,Boolean> availableFuels = new HashMap<>();
+                for(Switch sw : switches)
+                {
+                    if(sw.isChecked())
+                        availableFuels.put(sw.getText().toString(),true);
+                    else
+                        availableFuels.put(sw.getText().toString(),false);
+                }
+                /*
                 for(int i = 0; i < switches.size(); i++)
                 {
                     if(switches.get(i).isChecked())
-                        availableFuels.put(fuelTypes.keySet().toArray()[i].toString(),true);
+                        availableFuels.put(fuelTypes.get(switches));
                     else
                         availableFuels.put(fuelTypes.keySet().toArray()[i].toString(),false);
                         //get( (fuelTypes.keySet().toArray())[ i ])
                 }
-
+                */
                 myDs.getRef().child("availableFuels").setValue(availableFuels);
                 finish();
             }
