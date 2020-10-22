@@ -9,7 +9,6 @@
     android:padding="5dp"
     tools:context=".PetrolPopUpActivity">
 
-
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nest"
         style="@style/AppTheme.TransHide"
@@ -20,53 +19,63 @@
         app:behavior_peekHeight="55dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
-        <LinearLayout
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/petrolCoor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:orientation="vertical">
+            android:layout_marginTop="10dp"
+            android:text="Lokalizacja" />
 
-            <TextView
-                android:id="@+id/petrolCoor"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Lokalizacja" />
+        <TextView
+            android:id="@+id/petrolName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nazwa"
+            android:textSize="22dp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/petrolName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Nazwa"
-                android:textSize="22dp"
-                android:textStyle="bold" />
+        <Button
+            android:id="@+id/setChanges"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:text="Zgłoś zmiany" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Dostępne paliwa:" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Dostępne paliwa:" />
 
-            <Button
-                android:id="@+id/setChanges"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:text="Zgłoś zmiany" />
+        <LinearLayout
+            android:id="@+id/availableFuels"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"></LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/availableFuels"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal"></LinearLayout>
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Ceny paliw:" />
 
-            <TextView
-                android:id="@+id/textView5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Ceny paliw:" />
-        </LinearLayout>
+        <Spinner
+            android:id="@+id/fuelTypesSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerPetrolView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -9,4 +9,10 @@
     <string name="google_places_key">AIzaSyB1yvvhSeE46w2jkAm8AJ7F5UA3JqkIanM</string>
     <string name="navigation_drawer_open">Open Navigation Drawer</string>
     <string name="navigation_drawer_close">Close Navigation Drawer</string>
+    <string-array name="fuelTypes">
+        <item>Płynny</item>
+        <item>Gazowy</item>
+        <item>Niekonwencjonalny</item>
+    </string-array>
+
 </resources>
