@@ -27,7 +27,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 
 public class PetrolPopUpActivity extends Activity {
@@ -39,8 +38,8 @@ public class PetrolPopUpActivity extends Activity {
     private double lon;
     private Context context;
     private DataSnapshot popedPetrol;
+    private PetrolRecyclerViewAdapter petrolRecyclerViewAdapter;
 
-    //;
     //private Integer[] imgId = {R.drawable.pb95, R.drawable.pb98,R.drawable.on};
 
     private String[] imgNames= {"Elektryczny", "Benzyna", "LPG", "Etanol", "Diesel", "CNG"};
@@ -72,13 +71,10 @@ public class PetrolPopUpActivity extends Activity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if(dataSnapshot.exists()) {
-                        //List<String> fuelTypes = new LinkedList<>();
-
                         for(DataSnapshot ds : dataSnapshot.getChildren())
                         {
                             if(ds.child("coordinates").child("latitude").getValue().equals(lat) &&
-                                    ds.child("coordinates").child("longitude").getValue().equals(lon))
-                            {
+                                    ds.child("coordinates").child("longitude").getValue().equals(lon)) {
                                 popedPetrol = ds;
 
                                 Iterator<DataSnapshot> items = ds.child("availableFuels").getChildren().iterator();
@@ -116,23 +112,19 @@ public class PetrolPopUpActivity extends Activity {
                                 for(DataSnapshot ds : popedPetrol.child("fuels").getChildren())
                                 {
                                     Fuel fuel = new Fuel(Integer.parseInt(ds.child("icon").getValue().toString()),
-                                            Double.parseDouble(ds.child("price").getValue().toString()),
+                                            ds.child("price").getValue().toString(),
                                             ds.child("name").getValue().toString(),
                                             ds.child("type").getValue().toString());
 
                                     if(position == 0 && fuel.getType().equals("fluid"))
                                         fuelList.add(fuel);
                                     else if(position == 1 && fuel.getType().equals("gas"))
-                                    {
                                         fuelList.add(fuel);
-                                    }
                                     else if(position == 2 && fuel.getType().equals("unconv"))
-                                    {
                                         fuelList.add(fuel);
-                                    }
                                 }
 
-                                PetrolRecyclerViewAdapter petrolRecyclerViewAdapter = new PetrolRecyclerViewAdapter(fuelList,context);
+                                petrolRecyclerViewAdapter = new PetrolRecyclerViewAdapter(fuelList, context);
                                 recyclerView.setLayoutManager(layoutManager);
                                 recyclerView.setAdapter(petrolRecyclerViewAdapter);
                                 recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -170,5 +162,28 @@ public class PetrolPopUpActivity extends Activity {
             petrolName.setText(name);
             petrolCoor.setText(""+lat+", "+lon);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode==RESULT_OK)
+        {
+            if(requestCode == 1)
+            {
+                Bundle extras = data.getExtras();
+                String price = extras.getString("priceString");
+                String name = extras.getString("fuelName");
+                String num = null;
+
+                for(DataSnapshot ds : popedPetrol.child("fuels").getChildren())
+                    if(ds.child("name").getValue().toString().equals(name))
+                        num = ds.getKey();
+
+                mRef.child(popedPetrol.getKey()).child("fuels").child(num).child("price").setValue(price);
+            }
+        }
+
     }
 }

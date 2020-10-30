@@ -13,10 +13,7 @@ public class Petrol implements Serializable {
     private HashMap<String,Boolean> availableFuels;
     private List<Fuel> fuels;
 
-    public Petrol()
-    {
-
-    }
+    Petrol(){}
 
     public Petrol(String name, LatLng coordinates)
     {
@@ -24,17 +21,19 @@ public class Petrol implements Serializable {
         this.coordinates = coordinates;
         this.availableFuels = new HashMap<>();
         String[] fuelTypes = {"Benzyna", "Diesel", "LPG", "Etanol", "Elektryczny", "CNG"};
+
         for(String fuelName : fuelTypes)
             this.availableFuels.put(fuelName,false);
 
         this.fuels = new LinkedList<>();
+
         String [] names = {"Pb98", "Pb95", "ON", "LPG", "CNG", "Elektryczny", "Etanol"};
         String[] fuelStates = {"fluid", "fluid", "fluid", "gas", "gas","unconv", "unconv"};
-        int [] icons = {R.drawable.benz, R.drawable.benz, R.drawable.diesel, R.drawable.lpg, R.drawable.cng, R.drawable.elektr,  R.drawable.etan};
+        int [] icons = {R.drawable.benz, R.drawable.benz, R.drawable.diesel,
+                R.drawable.lpg, R.drawable.cng, R.drawable.elektr,  R.drawable.etan};
+
         for(int i = 0; i < names.length; i++)
-        {
-            fuels.add(new Fuel(icons[i],0.0, names[i], fuelStates[i]));
-        }
+            fuels.add(new Fuel(icons[i],"0.00", names[i], fuelStates[i]));
     }
 
     public String getName() {

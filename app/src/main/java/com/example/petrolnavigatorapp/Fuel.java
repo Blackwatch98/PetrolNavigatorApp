@@ -1,12 +1,14 @@
 package com.example.petrolnavigatorapp;
 
+import java.io.Serializable;
+
 public class Fuel {
     private int icon;
     private String name;
     private String type;
-    private double price;
+    private String price;
 
-    Fuel(int i, double price, String name, String type)
+    Fuel(int i, String price, String name, String type)
     {
         this.icon = i;
         this.name = name;
@@ -30,11 +32,11 @@ public class Fuel {
         this.type = type;
     }
 
-    public double getPrice() {
+    public String getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(String price) {
         this.price = price;
     }
 
