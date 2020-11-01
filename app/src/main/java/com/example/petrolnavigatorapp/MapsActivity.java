@@ -8,10 +8,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -35,6 +34,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import android.location.Location;
 import android.location.LocationListener;
@@ -46,6 +46,7 @@ import java.util.List;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, NavigationView.OnNavigationItemSelectedListener, TaskListener {
 
     private GoogleMap mMap;
+    private Context context;
     private DrawerLayout drawer;
     private List<Marker> markers;
     private LocationRequest request;
@@ -53,6 +54,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng latLng;
     private int radius;
     private FusedLocationProviderClient mFusedProviderClient;
+    private float cameraZoom;
 
     private LocationCallback mLocationCallback = new LocationCallback()
     {
@@ -75,19 +77,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        context = this;
 
         Bundle bundle = getIntent().getExtras();
-        radius = bundle.getInt("seekBarValue");
 
+        radius = bundle.getInt("seekBarValue");
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         drawer = findViewById(R.id.drawer_layout);
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.bringToFront();
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,drawer,toolbar,
                 R.string.navigation_drawer_open,R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -105,6 +110,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        cameraZoom = mMap.getCameraPosition().zoom;
+
         request = new LocationRequest();
         //request.setInterval(1000);
         request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -116,12 +123,46 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mFusedProviderClient.requestLocationUpdates(request, mLocationCallback,
                         Looper.myLooper());
                 mMap.setMyLocationEnabled(true);
+                mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                    @Override
+                    public void onMapLongClick(LatLng latLng2) {
+                        latLng = latLng2;
+                        if(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                        mMap.setMyLocationEnabled(false);
+                        mMap.setMyLocationEnabled(true);
+                    }
+                });
+                mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
+                    @Override
+                    public void onCameraMoveStarted(int i) {
+                        if (cameraZoom != mMap.getCameraPosition().zoom)
+                        {
+                            if(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                            {
+                                mFusedProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location location) {
+                                    if (location != null) {
+                                        Toast.makeText(context, "Uaktualniam pozycję...", Toast.LENGTH_SHORT).show();
+                                        //latLng = new LatLng(location.getLatitude(),location.getLongitude());
+                                        cameraZoom = mMap.getCameraPosition().zoom;
+                                        findPetrols();
+                                    }
+                                }
+                            });
+                            }
+
+                        }
+                    }
+                });
             }
             else
             {
                 checkLocationPermission();
             }
         }
+
+
     }
 
     public void findPetrols()
@@ -133,18 +174,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         stringBuilder.append("&key="+getResources().getString(R.string.google_places_key));
 
         String url = stringBuilder.toString();
-        System.out.println("URL" + url);
+
         Object []dataTransfer = new Object[3];
         dataTransfer[0] = mMap;
         dataTransfer[1] = url;
         dataTransfer[2] = this;
 
-        System.out.println("DATA = " + dataTransfer[0] + " " + dataTransfer[1]);
         GetNearbyPetrols getNearbyPetrols = new GetNearbyPetrols();
         getNearbyPetrols.execute(dataTransfer);
     }
-
-
 
     private void checkLocationPermission() {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)

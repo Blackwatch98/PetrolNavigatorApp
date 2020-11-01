@@ -58,7 +58,7 @@
         android:maxHeight="6dip"
         android:thumbTint="@android:color/holo_red_light"
         android:max="5"
-        android:tickMark="@drawable/tickmark"
+        app:tickMark="@drawable/tickmark"
         android:layout_height="wrap_content" />
 
     <Button
