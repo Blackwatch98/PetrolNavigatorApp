@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class ChangePriceActivity extends AppCompatActivity {
 
+    private String fuelName;
     private NumberPicker integer_picker;
     private NumberPicker fraction_picker;
     private NumberPicker fraction_picker2;
@@ -28,6 +29,7 @@ public class ChangePriceActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         String values = bundle.getString("fuelClass");
+        fuelName = bundle.getString("fuelName");
 
         integer_picker.setMinValue(0);
         integer_picker.setMaxValue(9);
@@ -50,7 +52,7 @@ public class ChangePriceActivity extends AppCompatActivity {
 
                 Intent i = new Intent();
                 i.putExtra("priceString",stringBuilder.toString());
-                i.putExtra("fuelName","Pb98");
+                i.putExtra("fuelName",fuelName);
                 setResult(RESULT_OK,i);
 
                 finish();

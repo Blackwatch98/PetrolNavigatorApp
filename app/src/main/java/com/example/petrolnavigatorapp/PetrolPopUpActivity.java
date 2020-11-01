@@ -88,7 +88,6 @@ public class PetrolPopUpActivity extends Activity {
                                             ImageView img = new ImageView(context);
                                             img.setImageResource(imgId[pos]);
                                             availableFuelsLayout.addView(img);
-                                            //fuelTypes.add(item.getKey());
                                             break;
                                         }
                                         pos++;

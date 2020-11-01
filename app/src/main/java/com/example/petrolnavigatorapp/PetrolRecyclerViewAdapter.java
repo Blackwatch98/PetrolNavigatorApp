@@ -53,6 +53,7 @@ public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecycl
             public void onClick(View view) {
                 Intent intent = new Intent(context, ChangePriceActivity.class);
                 intent.putExtra("fuelClass", String.valueOf(fuelsList.get(position).getPrice()));
+                intent.putExtra("fuelName", fuelsList.get(position).getName());
                 ((PetrolPopUpActivity)context).startActivityForResult(intent, 1);
             }
         });
