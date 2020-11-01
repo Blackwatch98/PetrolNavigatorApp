@@ -17,8 +17,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DataSnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecyclerViewAdapter.PetrolRecyclerViewHolder> {
 
@@ -45,6 +49,22 @@ public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecycl
         holder.fuelIcon.setImageResource(fuelsList.get(position).getIcon());
         holder.dateText.setText(fuelsList.get(position).getName());
         holder.priceText.setText(fuelsList.get(position).getPrice() +"zł");
+
+        try
+        {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date firstDate = sdf.parse(fuelsList.get(position).getLastReportDate());
+            Date secondDate = new Date();
+
+            long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
+            long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+            holder.dateText.setText(""+diff+" dni temu");
+        }
+        catch (ParseException e)
+        {
+            e.getMessage();
+        }
+        holder.reportText.setText("Liczba zgłoszeń: "+fuelsList.get(position).getReportCounter());
         holder.priceText.setEnabled(false);
         changeButtonsList.add(holder.changeButton);
 

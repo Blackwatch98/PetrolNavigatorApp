@@ -25,8 +25,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 
 public class PetrolPopUpActivity extends Activity {
@@ -113,7 +117,9 @@ public class PetrolPopUpActivity extends Activity {
                                     Fuel fuel = new Fuel(Integer.parseInt(ds.child("icon").getValue().toString()),
                                             ds.child("price").getValue().toString(),
                                             ds.child("name").getValue().toString(),
-                                            ds.child("type").getValue().toString());
+                                            ds.child("type").getValue().toString(),
+                                            Integer.parseInt(ds.child("reportCounter").getValue().toString()),
+                                            ds.child("lastReportDate").getValue().toString());
 
                                     if(position == 0 && fuel.getType().equals("fluid"))
                                         fuelList.add(fuel);
@@ -180,7 +186,21 @@ public class PetrolPopUpActivity extends Activity {
                     if(ds.child("name").getValue().toString().equals(name))
                         num = ds.getKey();
 
-                mRef.child(popedPetrol.getKey()).child("fuels").child(num).child("price").setValue(price);
+                if(popedPetrol.child("fuels").child(num).child("price").getValue().equals(price))
+                {
+                    mRef.child(popedPetrol.getKey()).child("fuels").child(num).
+                            child("reportCounter").setValue((Long)popedPetrol.child("fuels").child(num)
+                            .child("reportCounter").getValue()+1);
+                }
+                else
+                {
+                    mRef.child(popedPetrol.getKey()).child("fuels").child(num).
+                            child("reportCounter").setValue(1);
+
+                    mRef.child(popedPetrol.getKey()).child("fuels").child(num).child("price").setValue(price);
+                }
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                mRef.child(popedPetrol.getKey()).child("fuels").child(num).child("lastReportDate").setValue(sdf.format(new Date()));
             }
         }
 
