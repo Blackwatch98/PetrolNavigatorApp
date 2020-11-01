@@ -137,37 +137,6 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                 });
             }
 
-            //DRUGA METODA (OBECNIE NIE DZIAŁA)
-            //PRAWDOPODOBNIE DO USUNIĘCIA ALE NA TĄ CHWILĘ POZOSTAJE
-/*
-            reff = FirebaseDatabase.getInstance().getReference("Petrol");
-            Query query;
-            for(Petrol test : petrolsList) {
-                petrol = test;
-                query = reff.orderByChild("name");
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        System.out.println(dataSnapshot);
-                        if(dataSnapshot.exists())
-                        {
-                            System.out.println("Jest");
-                        }
-                        else
-                        {
-                            reff.push().setValue(new Petrol());
-                            System.out.println("Dodałem nowe");
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
-            }
- */
-
             reff = FirebaseDatabase.getInstance().getReference("Petrols");
 
             reff.addValueEventListener(new ValueEventListener() {
@@ -179,8 +148,7 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                         counterFlag = false;
                     }
 
-                    if(dataSnapshot.exists())
-                    {
+                    if(dataSnapshot.exists()) {
                         if(dataSnapshot.getChildrenCount() < counter)
                             return;
 
@@ -192,7 +160,6 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                                         Double.parseDouble(ds.child("coordinates").child("longitude").getValue().toString()));
 
                                 if (ps.getCoordinates().equals(temp)) {
-                                    //System.out.println("Jest");
                                     isInDB = true;
                                     break;
                                 }
