@@ -6,22 +6,22 @@
     android:padding="10dp">
 
 
-
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@color/colorPrimary"
-        android:padding="5dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
         app:srcCompat="@drawable/petrol_pump" />
 
     <EditText
         android:id="@+id/priceView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/imageView"
+        android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
+        android:layout_toEndOf="@id/imageView"
         android:ems="3"
         android:inputType="number" />
 
@@ -29,10 +29,11 @@
         android:id="@+id/dateText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/priceView"
+        android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
-        android:text="Data zgłoszenia"
-        />
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@id/priceView"
+        android:text="Data zgłoszenia" />
 
     <TextView
         android:id="@+id/reportText"
@@ -46,8 +47,12 @@
     <Button
         android:id="@+id/changePriceBtn"
         android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_toEndOf="@id/imageView"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
         android:layout_marginLeft="200dp"
-        android:text="Zmień"/>
+        android:layout_marginTop="10dp"
+        android:background="@drawable/custom_change_button"
+        android:drawableLeft="@drawable/ic_baseline_edit_24"
+        android:text="Zmień" />
 </RelativeLayout>
