@@ -114,7 +114,7 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                 String vincity = nameObject.getString("vicinity");
 
                 LatLng testCoor = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
-                petrolsList.add(new Petrol(testName,testCoor));
+                petrolsList.add(new Petrol(testName,testCoor,vincity));
 
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.title(testName+"," + vincity);

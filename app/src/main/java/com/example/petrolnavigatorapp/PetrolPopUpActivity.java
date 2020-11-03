@@ -3,6 +3,8 @@ package com.example.petrolnavigatorapp;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -19,18 +22,22 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
-import java.text.ParseException;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
 
 
 public class PetrolPopUpActivity extends Activity {
@@ -38,13 +45,13 @@ public class PetrolPopUpActivity extends Activity {
     private LinearLayout availableFuelsLayout;
     private Button changeTypeBtn;
     private DatabaseReference mRef;
+    private StorageReference sRef;
     private double lat;
     private double lon;
     private Context context;
     private DataSnapshot popedPetrol;
     private PetrolRecyclerViewAdapter petrolRecyclerViewAdapter;
 
-    //private Integer[] imgId = {R.drawable.pb95, R.drawable.pb98,R.drawable.on};
 
     private String[] imgNames = {"Elektryczny", "Benzyna", "LPG", "Etanol", "Diesel", "CNG"};
     private Integer[] imgId = {R.drawable.elektr, R.drawable.benz, R.drawable.lpg, R.drawable.etan, R.drawable.diesel, R.drawable.cng};
@@ -71,6 +78,24 @@ public class PetrolPopUpActivity extends Activity {
                 finish();
             }
         });
+
+        sRef = FirebaseStorage.getInstance().getReference().child("petrols_icons/bp_logo.jpg");
+        try
+        {
+            final File localFile = File.createTempFile("petrol_icon","jpg");
+            sRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    Toast.makeText(context, "U got your file",Toast.LENGTH_SHORT).show();
+                    Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                    ((ImageView)findViewById(R.id.petrol_icon)).setImageBitmap(bitmap);
+                }
+            });
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
         mRef = FirebaseDatabase.getInstance().getReference("Petrols");
 
@@ -136,6 +161,12 @@ public class PetrolPopUpActivity extends Activity {
                             recyclerView.setLayoutManager(layoutManager);
                             recyclerView.setAdapter(petrolRecyclerViewAdapter);
                             recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+                            TextView petrolName = findViewById(R.id.petrolName);
+                            TextView petrolCoor= findViewById(R.id.petrolCoor);
+
+                            petrolName.setText(popedPetrol.child("name").getValue().toString());
+                            petrolCoor.setText(popedPetrol.child("address").getValue().toString());
                         }
 
                         @Override
@@ -163,13 +194,6 @@ public class PetrolPopUpActivity extends Activity {
                 view.getContext().startActivity(intent);
             }
         });
-
-        TextView petrolName = findViewById(R.id.petrolName);
-        TextView petrolCoor= findViewById(R.id.petrolCoor);
-
-        petrolName.setText(name);
-        petrolCoor.setText(""+lat+", "+lon);
-
     }
 
     @Override
