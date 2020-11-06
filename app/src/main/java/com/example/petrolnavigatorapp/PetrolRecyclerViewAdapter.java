@@ -64,7 +64,7 @@ public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecycl
         {
             e.getMessage();
         }
-        holder.reportText.setText("Liczba zgłoszeń: "+fuelsList.get(position).getReportCounter());
+        holder.reportText.setText("Zgłoszeń: "+fuelsList.get(position).getReportCounter());
         holder.priceText.setEnabled(false);
         changeButtonsList.add(holder.changeButton);
 
