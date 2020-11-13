@@ -17,7 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -25,6 +24,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.petrolnavigatorapp.firebase_utils.MyFirebaseStorage;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,8 +32,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +46,7 @@ public class PetrolPopUpActivity extends Activity {
     final int FUELS_IN_LINEAR_ROW = 4;
     private LinearLayout availableFuelsLayout;
     private DatabaseReference mRef;
-    private StorageReference sRef;
+    private MyFirebaseStorage sRef;
     private double lat, lon;
     private Context context;
     private DataSnapshot popedPetrol;
@@ -70,7 +68,7 @@ public class PetrolPopUpActivity extends Activity {
         final int height = displayMetrics.heightPixels;
         final int width = displayMetrics.widthPixels;
 
-        String name = bundle.getString("petrolName");
+        String petrolName = bundle.getString("petrolName");
         lat = bundle.getDouble("latitude");
         lon = bundle.getDouble("longitude");
 
@@ -82,14 +80,13 @@ public class PetrolPopUpActivity extends Activity {
             }
         });
 
-        sRef = FirebaseStorage.getInstance().getReference().child("petrols_icons/bp_logo.png");
+        sRef = new MyFirebaseStorage();
         try
         {
             final File localFile = File.createTempFile("petrol_icon","png");
-            sRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+            sRef.getPetrolIconRef(petrolName).getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    Toast.makeText(context, "U got your file",Toast.LENGTH_SHORT).show();
                     Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
                     ((ImageView)findViewById(R.id.petrol_icon)).setImageBitmap(bitmap);
                 }
