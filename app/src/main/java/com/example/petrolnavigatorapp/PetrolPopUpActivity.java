@@ -3,15 +3,18 @@ package com.example.petrolnavigatorapp;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,16 +45,14 @@ import java.util.LinkedList;
 
 public class PetrolPopUpActivity extends Activity {
 
+    final int FUELS_IN_LINEAR_ROW = 4;
     private LinearLayout availableFuelsLayout;
-    private Button changeTypeBtn;
     private DatabaseReference mRef;
     private StorageReference sRef;
-    private double lat;
-    private double lon;
+    private double lat, lon;
     private Context context;
     private DataSnapshot popedPetrol;
     private PetrolRecyclerViewAdapter petrolRecyclerViewAdapter;
-
 
     private String[] imgNames = {"Elektryczny", "Benzyna", "LPG", "Etanol", "Diesel", "CNG"};
     private Integer[] imgId = {R.drawable.elektr, R.drawable.benz, R.drawable.lpg, R.drawable.etan, R.drawable.diesel, R.drawable.cng};
@@ -63,15 +64,17 @@ public class PetrolPopUpActivity extends Activity {
         context = this;
         availableFuelsLayout = findViewById(R.id.availableFuels);
         Bundle bundle = getIntent().getExtras();
-        if (bundle == null) {
-            return;
-        }
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        final int height = displayMetrics.heightPixels;
+        final int width = displayMetrics.widthPixels;
 
         String name = bundle.getString("petrolName");
         lat = bundle.getDouble("latitude");
         lon = bundle.getDouble("longitude");
 
-        CoordinatorLayout coordinatorLayout = findViewById(R.id.ok);
+        CoordinatorLayout coordinatorLayout = findViewById(R.id.popUpBackground);
         coordinatorLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -79,10 +82,10 @@ public class PetrolPopUpActivity extends Activity {
             }
         });
 
-        sRef = FirebaseStorage.getInstance().getReference().child("petrols_icons/bp_logo.jpg");
+        sRef = FirebaseStorage.getInstance().getReference().child("petrols_icons/bp_logo.png");
         try
         {
-            final File localFile = File.createTempFile("petrol_icon","jpg");
+            final File localFile = File.createTempFile("petrol_icon","png");
             sRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
@@ -98,7 +101,6 @@ public class PetrolPopUpActivity extends Activity {
         }
 
         mRef = FirebaseDatabase.getInstance().getReference("Petrols");
-
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -112,20 +114,47 @@ public class PetrolPopUpActivity extends Activity {
                     }
 
                     Iterator<DataSnapshot> items = popedPetrol.child("availableFuels").getChildren().iterator();
-                    while(items.hasNext())
-                    {
+                    LinkedList<Integer> images = new LinkedList<>();
+                    while (items.hasNext()) {
                         DataSnapshot item = items.next();
-
                         int pos = 0;
-                        for(String str : imgNames) {
+                        for (String str : imgNames) {
                             if (item.getKey().equals(str) && item.getValue().equals(true)) {
-                                ImageView img = new ImageView(context);
-                                img.setImageResource(imgId[pos]);
-                                availableFuelsLayout.addView(img);
+                                images.add(pos);
                                 break;
                             }
                             pos++;
                         }
+                    }
+                    int counter;
+                    for (int i = 0; i <= imgId.length/FUELS_IN_LINEAR_ROW; i++) {
+                        LinearLayout row = new LinearLayout(context);
+                        if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                        }
+                        else if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                            row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
+                        }
+                        if(images.size() < FUELS_IN_LINEAR_ROW)
+                            counter = images.size();
+                        else
+                            counter = FUELS_IN_LINEAR_ROW;
+
+                        for (int j = 0; j < counter; j++) {
+                            RelativeLayout.LayoutParams layoutParams;
+                            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+                                layoutParams = new RelativeLayout.LayoutParams(width / 5, height / 17);
+                            else
+                                layoutParams = new RelativeLayout.LayoutParams(height / 5, width / 17);
+
+                            ImageView img = new ImageView(context);
+                            img.setPadding(5, 5, 5, 5);
+                            img.setLayoutParams(layoutParams);
+                            img.setImageResource(imgId[images.get(images.size()-1)]);
+                            images.remove(images.size()-1);
+                            row.addView(img);
+                        }
+                        availableFuelsLayout.addView(row);
                     }
 
                     Spinner spinner = findViewById(R.id.fuelTypesSpinner);
@@ -183,8 +212,7 @@ public class PetrolPopUpActivity extends Activity {
             }
         });
 
-        changeTypeBtn = findViewById(R.id.setChanges);
-
+        Button changeTypeBtn = findViewById(R.id.setChanges);
         changeTypeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
