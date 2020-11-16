@@ -64,10 +64,12 @@ public class InitialSettingsActivity extends AppCompatActivity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction()==MotionEvent.ACTION_DOWN)
                 {
+                    scale_up.setStartTime(0);
                     confirmButton.startAnimation(scale_up);
                 }
                 else if(motionEvent.getAction()==MotionEvent.ACTION_UP)
                 {
+                    scale_up.setStartTime(0);
                     confirmButton.startAnimation(scale_down);
                 }
 

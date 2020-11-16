@@ -110,14 +110,14 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                 String longitude = locationObject.getString("lng");
 
                 JSONObject nameObject = resultsArray.getJSONObject(i);
-                String testName = nameObject.getString("name");
+                final String petrolName = nameObject.getString("name");
                 String vincity = nameObject.getString("vicinity");
 
                 LatLng testCoor = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
-                petrolsList.add(new Petrol(testName,testCoor,vincity));
+                petrolsList.add(new Petrol(petrolName,testCoor,vincity));
 
                 MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.title(testName+"," + vincity);
+                markerOptions.title(petrolName+"," + vincity);
                 markerOptions.position(testCoor);
 
                 Marker mLocationMarker = mMap.addMarker(markerOptions);
@@ -127,7 +127,6 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
                         Intent intent = new Intent(mapsActivity, PetrolPopUpActivity.class);
-                        intent.putExtra("petrolName", marker.getTitle());
                         intent.putExtra("latitude", marker.getPosition().latitude);
                         intent.putExtra("longitude", marker.getPosition().longitude);
                         mapsActivity.startActivity(intent);

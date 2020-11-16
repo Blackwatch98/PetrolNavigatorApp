@@ -8,7 +8,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -51,6 +54,7 @@ public class PetrolPopUpActivity extends Activity {
     private Context context;
     private DataSnapshot popedPetrol;
     private PetrolRecyclerViewAdapter petrolRecyclerViewAdapter;
+    private Animation scale_up, scale_down;
 
     private String[] imgNames = {"Elektryczny", "Benzyna", "LPG", "Etanol", "Diesel", "CNG"};
     private Integer[] imgId = {R.drawable.elektr, R.drawable.benz, R.drawable.lpg, R.drawable.etan, R.drawable.diesel, R.drawable.cng};
@@ -68,7 +72,6 @@ public class PetrolPopUpActivity extends Activity {
         final int height = displayMetrics.heightPixels;
         final int width = displayMetrics.widthPixels;
 
-        String petrolName = bundle.getString("petrolName");
         lat = bundle.getDouble("latitude");
         lon = bundle.getDouble("longitude");
 
@@ -79,23 +82,6 @@ public class PetrolPopUpActivity extends Activity {
                 finish();
             }
         });
-
-        sRef = new MyFirebaseStorage();
-        try
-        {
-            final File localFile = File.createTempFile("petrol_icon","png");
-            sRef.getPetrolIconRef(petrolName).getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                    ((ImageView)findViewById(R.id.petrol_icon)).setImageBitmap(bitmap);
-                }
-            });
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
 
         mRef = FirebaseDatabase.getInstance().getReference("Petrols");
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -126,12 +112,11 @@ public class PetrolPopUpActivity extends Activity {
                     int counter;
                     for (int i = 0; i <= imgId.length/FUELS_IN_LINEAR_ROW; i++) {
                         LinearLayout row = new LinearLayout(context);
-                        if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
                             row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                        }
-                        else if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        else if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
                             row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
-                        }
+
                         if(images.size() < FUELS_IN_LINEAR_ROW)
                             counter = images.size();
                         else
@@ -189,7 +174,7 @@ public class PetrolPopUpActivity extends Activity {
                             recyclerView.setItemAnimator(new DefaultItemAnimator());
 
                             TextView petrolName = findViewById(R.id.petrolName);
-                            TextView petrolCoor= findViewById(R.id.petrolCoor);
+                            TextView petrolCoor= findViewById(R.id.petrolAddress);
 
                             petrolName.setText(popedPetrol.child("name").getValue().toString());
                             petrolCoor.setText(popedPetrol.child("address").getValue().toString());
@@ -201,6 +186,23 @@ public class PetrolPopUpActivity extends Activity {
                         }
                     });
                 }
+
+                sRef = new MyFirebaseStorage();
+                try
+                {
+                    final File localFile = File.createTempFile("petrol_icon","png");
+                    sRef.getPetrolIconRef(popedPetrol.child("name").getValue().toString()).getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                            ((ImageView)findViewById(R.id.petrol_icon)).setImageBitmap(bitmap);
+                        }
+                    });
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -209,14 +211,30 @@ public class PetrolPopUpActivity extends Activity {
             }
         });
 
-        Button changeTypeBtn = findViewById(R.id.setChanges);
+        final Button changeTypeBtn = findViewById(R.id.setChanges);
         changeTypeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), ChangeFuelTypesActivity.class);
                 intent.putExtra("latitude",lat);
                 intent.putExtra("longitude",lon);
+                intent.putExtra("petrolName",popedPetrol.child("name").getValue().toString());
                 view.getContext().startActivity(intent);
+            }
+        });
+
+
+        scale_up = AnimationUtils.loadAnimation(this,R.anim.scale_up);
+        scale_down = AnimationUtils.loadAnimation(this,R.anim.scale_down);
+        changeTypeBtn.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction()==MotionEvent.ACTION_DOWN)
+                    changeTypeBtn.startAnimation(scale_up);
+                else if(motionEvent.getAction()==MotionEvent.ACTION_UP)
+                    changeTypeBtn.startAnimation(scale_down);
+
+                return false;
             }
         });
     }

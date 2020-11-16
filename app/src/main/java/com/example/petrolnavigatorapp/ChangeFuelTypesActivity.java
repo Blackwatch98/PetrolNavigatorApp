@@ -1,14 +1,23 @@
 package com.example.petrolnavigatorapp;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,17 +30,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class ChangeFuelTypesActivity extends AppCompatActivity {
+public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private HashMap<String,Boolean> fuelTypes;
     private List<Switch> switches;
-    private Switch beznSwitch;
-    private Switch dieselSwitch;
-    private Switch lpgSwitch;
-    private Switch etaSwitch;
-    private Switch elecSwitch;
-    private Switch cngSwitch;
-    private Button confirmBtn;
+    private Switch benzSwitch, dieselSwitch, lpgSwitch, etaSwitch, elecSwitch, cngSwitch;
+    private Button confirmBtn, reportNoExist, cancelBtn;
+    private MapView mapView;
+    private TextView editNameView;
+    private Animation scale_up, scale_down;
+
+    private String petrolName;
     private LatLng coor;
 
     private DatabaseReference reff;
@@ -42,16 +51,23 @@ public class ChangeFuelTypesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_fuel_types);
 
-        beznSwitch = findViewById(R.id.benzSwitch);
+        benzSwitch = findViewById(R.id.benzSwitch);
         dieselSwitch = findViewById(R.id.dieselSwitch);
         lpgSwitch = findViewById(R.id.lpgSwitch);
         etaSwitch = findViewById(R.id.etaSwitch);
         elecSwitch = findViewById(R.id.elecSwitch);
         cngSwitch = findViewById(R.id.cngSwitch);
         confirmBtn = findViewById(R.id.confirmBtn2);
-        switches = new LinkedList<>();
+        editNameView = findViewById(R.id.editTextPetrolName);
+        reportNoExist = findViewById(R.id.notExistBtn);
 
-        switches.add(beznSwitch);
+        mapView = findViewById(R.id.petrolMapView);
+        mapView.getMapAsync(this);
+        mapView.onCreate(savedInstanceState);
+
+
+        switches = new LinkedList<>();
+        switches.add(benzSwitch);
         switches.add(dieselSwitch);
         switches.add(lpgSwitch);
         switches.add(etaSwitch);
@@ -59,11 +75,13 @@ public class ChangeFuelTypesActivity extends AppCompatActivity {
         switches.add(cngSwitch);
 
         reff = FirebaseDatabase.getInstance().getReference().child("Petrols");
+
         Bundle bundle = getIntent().getExtras();
         double lat=bundle.getDouble("latitude");
         double lon=bundle.getDouble("longitude");
+        petrolName = bundle.getString("petrolName");
+        editNameView.setText(petrolName);
         this.coor = new LatLng(lat,lon);
-
 
         reff.addValueEventListener(new ValueEventListener() {
             @Override
@@ -79,7 +97,6 @@ public class ChangeFuelTypesActivity extends AppCompatActivity {
                         if(ds.child("coordinates").child("latitude").getValue().equals(test.get("latitude")) &&
                                 ds.child("coordinates").child("longitude").getValue().equals(test.get("longitude")))
                         {
-                            // to w tym ds zrób coś
                             fuelTypes = (HashMap<String, Boolean>) ds.child("availableFuels").getValue();
                             myDs = ds;
                             if(fuelTypes != null)
@@ -95,17 +112,6 @@ public class ChangeFuelTypesActivity extends AppCompatActivity {
                                                 sw.setChecked(true);
                                         }
                                 }
-                                /*
-                                for(int i = 0; i < fuelTypes.size(); i++)
-                                {
-                                    //System.out.println((fuelTypes.keySet().toArray())[ i ]);
-                                    //System.out.println(fuelTypes.get( (fuelTypes.keySet().toArray())[ i ] ));
-                                    if(fuelTypes.get( (fuelTypes.keySet().toArray())[ i ] ).equals(true))
-                                    {
-                                        switches.get(i).setChecked(true);
-                                    }
-                                }
-                                */
                             }
                             break;
                         }
@@ -119,7 +125,6 @@ public class ChangeFuelTypesActivity extends AppCompatActivity {
             }
         });
 
-
         confirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -131,19 +136,73 @@ public class ChangeFuelTypesActivity extends AppCompatActivity {
                     else
                         availableFuels.put(sw.getText().toString(),false);
                 }
-                /*
-                for(int i = 0; i < switches.size(); i++)
-                {
-                    if(switches.get(i).isChecked())
-                        availableFuels.put(fuelTypes.get(switches));
-                    else
-                        availableFuels.put(fuelTypes.keySet().toArray()[i].toString(),false);
-                        //get( (fuelTypes.keySet().toArray())[ i ])
-                }
-                */
                 myDs.getRef().child("availableFuels").setValue(availableFuels);
                 finish();
             }
         });
+
+        scale_up = AnimationUtils.loadAnimation(this,R.anim.scale_up);
+        scale_down = AnimationUtils.loadAnimation(this,R.anim.scale_down);
+
+        reportNoExist.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction()==MotionEvent.ACTION_DOWN)
+                {
+                    scale_up.setStartTime(0);
+                    reportNoExist.startAnimation(scale_up);
+                }
+                else if(motionEvent.getAction()==MotionEvent.ACTION_UP)
+                {
+                    scale_up.setStartTime(0);
+                    reportNoExist.startAnimation(scale_down);
+                }
+
+                return false;
+            }
+        });
+
+        cancelBtn = findViewById(R.id.cancelBtn);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View view) {
+                 finish();
+             }
+         }
+        );
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        googleMap.addMarker(new MarkerOptions().position(coor).title(petrolName));
+        float zoomLevel = 16.0f;
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coor, zoomLevel));
+        googleMap.getUiSettings().setAllGesturesEnabled(false);
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+    }
+
+    @Override
+    public void onResume() {
+        mapView.onResume();
+        super.onResume();
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
     }
 }
