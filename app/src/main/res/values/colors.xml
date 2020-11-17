@@ -8,4 +8,5 @@
     <color name ="mainAppBackground">#1F1F1F</color>
     <color name="textColorPrimary">#ffff</color>
     <color name="buttonColor">#FF3061</color>
+    <color name="red">#FF0000</color>
 </resources>
