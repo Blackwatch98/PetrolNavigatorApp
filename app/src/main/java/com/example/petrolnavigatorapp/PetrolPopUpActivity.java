@@ -271,6 +271,8 @@ public class PetrolPopUpActivity extends Activity {
                 }
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                 mRef.child(popedPetrol.getKey()).child("fuels").child(num).child("lastReportDate").setValue(sdf.format(new Date()));
+                finish();
+                startActivity(getIntent());
             }
         }
 
