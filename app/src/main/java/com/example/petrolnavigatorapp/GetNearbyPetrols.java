@@ -110,14 +110,14 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                 String longitude = locationObject.getString("lng");
 
                 JSONObject nameObject = resultsArray.getJSONObject(i);
-                String testName = nameObject.getString("name");
+                final String petrolName = nameObject.getString("name");
                 String vincity = nameObject.getString("vicinity");
 
                 LatLng testCoor = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
-                petrolsList.add(new Petrol(testName,testCoor));
+                petrolsList.add(new Petrol(petrolName,testCoor,vincity));
 
                 MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.title(testName+"," + vincity);
+                markerOptions.title(petrolName+"," + vincity);
                 markerOptions.position(testCoor);
 
                 Marker mLocationMarker = mMap.addMarker(markerOptions);
@@ -127,7 +127,6 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
                         Intent intent = new Intent(mapsActivity, PetrolPopUpActivity.class);
-                        intent.putExtra("petrolName", marker.getTitle());
                         intent.putExtra("latitude", marker.getPosition().latitude);
                         intent.putExtra("longitude", marker.getPosition().longitude);
                         mapsActivity.startActivity(intent);
@@ -136,37 +135,6 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                     }
                 });
             }
-
-            //DRUGA METODA (OBECNIE NIE DZIAŁA)
-            //PRAWDOPODOBNIE DO USUNIĘCIA ALE NA TĄ CHWILĘ POZOSTAJE
-/*
-            reff = FirebaseDatabase.getInstance().getReference("Petrol");
-            Query query;
-            for(Petrol test : petrolsList) {
-                petrol = test;
-                query = reff.orderByChild("name");
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        System.out.println(dataSnapshot);
-                        if(dataSnapshot.exists())
-                        {
-                            System.out.println("Jest");
-                        }
-                        else
-                        {
-                            reff.push().setValue(new Petrol());
-                            System.out.println("Dodałem nowe");
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
-            }
- */
 
             reff = FirebaseDatabase.getInstance().getReference("Petrols");
 
@@ -179,8 +147,7 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                         counterFlag = false;
                     }
 
-                    if(dataSnapshot.exists())
-                    {
+                    if(dataSnapshot.exists()) {
                         if(dataSnapshot.getChildrenCount() < counter)
                             return;
 
@@ -192,7 +159,6 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                                         Double.parseDouble(ds.child("coordinates").child("longitude").getValue().toString()));
 
                                 if (ps.getCoordinates().equals(temp)) {
-                                    //System.out.println("Jest");
                                     isInDB = true;
                                     break;
                                 }

@@ -3,7 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/colorPrimary"
+    android:background="@color/mainAppBackground"
+    app:title="Mapa"
+    app:titleTextColor="@color/white"
     app:menu="@menu/drawermenu"
     android:elevation="4dp">
 

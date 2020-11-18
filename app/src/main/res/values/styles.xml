@@ -17,4 +17,17 @@
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="NumberPickerCustomText">
+        <item name="android:textSize">30sp</item>
+        <item name="android:fontFamily">@font/ds_crystal</item>
+    </style>
 </resources>

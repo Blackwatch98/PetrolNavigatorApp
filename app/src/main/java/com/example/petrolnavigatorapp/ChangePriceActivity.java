@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,16 +22,22 @@ public class ChangePriceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_price);
 
-        Button confirmBtn;
+        Button confirmBtn, cancelBtn, voiceBtn, fotoBtn;
+        TextView fuelNameTextView;
 
+        fuelNameTextView = findViewById(R.id.fuelName);
         integer_picker = findViewById(R.id.integer_picker);
         fraction_picker = findViewById(R.id.fraction_picker);
         fraction_picker2 = findViewById(R.id.fraction_picker2);
         confirmBtn = findViewById(R.id.confirmBtn);
+        cancelBtn = findViewById(R.id.cancelBtn2);
+        voiceBtn = findViewById(R.id.voiceBtn);
+        fotoBtn = findViewById(R.id.fotoBtn);
 
         Bundle bundle = getIntent().getExtras();
         String values = bundle.getString("fuelClass");
         fuelName = bundle.getString("fuelName");
+        fuelNameTextView.setText(fuelName);
 
         integer_picker.setMinValue(0);
         integer_picker.setMaxValue(9);
@@ -37,6 +45,7 @@ public class ChangePriceActivity extends AppCompatActivity {
         fraction_picker.setMaxValue(9);
         fraction_picker2.setMinValue(0);
         fraction_picker2.setMaxValue(9);
+
 
         integer_picker.setValue(Character.getNumericValue((values.charAt(0))));
         fraction_picker.setValue(Character.getNumericValue((values.charAt(2))));
@@ -54,9 +63,20 @@ public class ChangePriceActivity extends AppCompatActivity {
                 i.putExtra("priceString",stringBuilder.toString());
                 i.putExtra("fuelName",fuelName);
                 setResult(RESULT_OK,i);
-
+                Toast.makeText(getBaseContext(),"Wysłano zgłoszenie", Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getBaseContext(),"Anulowano zgłoszenie", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+
+        fotoBtn.setEnabled(false);
+        voiceBtn.setEnabled(false);
     }
 }
