@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        Intent intent = new Intent(MainActivity.this,InitialSettingsActivity.class);
+                        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
                         startActivity(intent);
                         engineSound.stop();
                         finish();
