@@ -36,12 +36,18 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import android.location.Location;
 import android.location.LocationListener;
 import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, NavigationView.OnNavigationItemSelectedListener, TaskListener {
 
@@ -55,6 +61,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int radius;
     private FusedLocationProviderClient mFusedProviderClient;
     private float cameraZoom;
+    private FirebaseFirestore fireStore;
 
     private LocationCallback mLocationCallback = new LocationCallback()
     {
@@ -79,9 +86,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
         context = this;
 
+        fireStore = FirebaseFirestore.getInstance();
+        DocumentReference documentReference = fireStore.collection("users")
+            .document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot.exists())
+                {
+                    Map <String, Object> map = (Map<String,Object>)documentSnapshot.get("userSettings");
+                    radius = Integer.parseInt(map.get("searchRadius").toString())*1000;
+                }
+            }
+        });
+
         Bundle bundle = getIntent().getExtras();
 
-        radius = bundle.getInt("seekBarValue");
+        //DEPRECATED GET RADIUS
+        //radius = bundle.getInt("seekBarValue");
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -245,7 +268,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Intent intent = new Intent(MapsActivity.this,MainActivity.class);
                 startActivity(intent);
                 finish();
-            break;
+                break;
+            case R.id.logout:
+                FirebaseAuth.getInstance().signOut();
+                break;
             }
         return true;
     }
