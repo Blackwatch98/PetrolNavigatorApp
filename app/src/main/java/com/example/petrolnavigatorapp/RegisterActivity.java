@@ -17,29 +17,26 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
-import java.net.Inet4Address;
-
-public class LoginActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private EditText mLogin, mPassword;
     private Button confirmBtn;
     private ProgressBar progressBar;
-    private TextView registerReference;
+    private TextView loginReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
-        mLogin = findViewById(R.id.loginTextEmailAddress);
-        mPassword = findViewById(R.id.loginTextPassword);
-        confirmBtn = findViewById(R.id.loginConfirmBtn);
-        progressBar = findViewById(R.id.progressBar);
-        registerReference = findViewById(R.id.registerReferenceText);
+        mLogin = findViewById(R.id.registerTextEmailAddress);
+        mPassword = findViewById(R.id.registerTextPassword);
+        confirmBtn = findViewById(R.id.registerConfirmBtn);
+        progressBar = findViewById(R.id.progressBar2);
+        loginReference = findViewById(R.id.loginReferenceText);
 
         if(mAuth.getCurrentUser() != null)
         {
@@ -48,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         }
 
-        registerReference.setOnClickListener(new View.OnClickListener() {
+        loginReference.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
@@ -79,17 +76,17 @@ public class LoginActivity extends AppCompatActivity {
 
                 progressBar.setVisibility(View.VISIBLE);
 
-                mAuth.signInWithEmailAndPassword(login, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                mAuth.createUserWithEmailAndPassword(login, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful())
                         {
                             startActivity(new Intent(getApplicationContext(), InitialSettingsActivity.class));
-                            Toast.makeText(LoginActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                         else
                         {
-                            Toast.makeText(LoginActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);
                         }
                     }
