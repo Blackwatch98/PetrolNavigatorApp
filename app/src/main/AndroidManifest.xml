@@ -44,6 +44,8 @@
             android:name=".PetrolPopUpActivity"
             android:theme="@style/AppTheme.CustomTheme" />
         <activity android:name=".ChangeFuelTypesActivity" />
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".RegisterActivity" />
     </application>
 
 </manifest>

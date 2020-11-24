@@ -14,10 +14,13 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class MainActivity extends AppCompatActivity {
 
 
     private TextView text;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
         final MediaPlayer engineSound = MediaPlayer.create(this, R.raw.engine_sound);
         final Button btn = findViewById(R.id.startButton);
         text = findViewById(R.id.appTitle);
+        mAuth = FirebaseAuth.getInstance();
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,10 +47,16 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        Intent intent = new Intent(MainActivity.this,InitialSettingsActivity.class);
-                        startActivity(intent);
                         engineSound.stop();
+                        Intent intent;
+                        if(mAuth.getCurrentUser() == null)
+                            intent = new Intent(MainActivity.this,LoginActivity.class);
+                        else
+                            intent = new Intent(MainActivity.this,MapsActivity.class);
+
+                        startActivity(intent);
                         finish();
+                        //mAuth.signOut();
                     }
 
                     @Override

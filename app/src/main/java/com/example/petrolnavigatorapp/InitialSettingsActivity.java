@@ -12,16 +12,24 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class InitialSettingsActivity extends AppCompatActivity {
 
     private SeekBar seekBar;
     private TextView currentRadiusText;
     private Animation scale_up, scale_down;
+    private FirebaseFirestore fireStore;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_initial_settings);
+
+        fireStore = FirebaseFirestore.getInstance();
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         final Button confirmButton = findViewById(R.id.confirmButton1);
         currentRadiusText = findViewById(R.id.radiusValue);
@@ -48,6 +56,7 @@ public class InitialSettingsActivity extends AppCompatActivity {
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //fireStore.collection("users").document(userId).collection("");
                 Intent intent = new Intent(InitialSettingsActivity.this, MapsActivity.class);
                 int value = seekBar.getProgress();
                 intent.putExtra("seekBarValue", value*1000);
