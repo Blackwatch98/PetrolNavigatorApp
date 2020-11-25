@@ -124,9 +124,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         markers = new LinkedList<>();
         mFusedProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        if(savedInstanceState == null) {
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+        }
     }
 
     @Override
@@ -269,10 +271,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 startActivity(intent);
                 finish();
                 break;
+            case R.id.maps:
+                //
+                break;
+            case R.id.settings:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new SettingsFragment()).commit();
+                break;
             case R.id.logout:
                 FirebaseAuth.getInstance().signOut();
                 break;
-            }
+        }
+        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 

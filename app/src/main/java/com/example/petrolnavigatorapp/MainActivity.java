@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onAnimationEnd(Animation animation) {
                         engineSound.stop();
+                        engineSound.release();
                         Intent intent;
 
                         if(mAuth.getCurrentUser() == null)
