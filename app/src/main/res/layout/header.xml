@@ -4,6 +4,7 @@
     android:layout_height="160dp"
     android:orientation="vertical"
     android:background="@drawable/petrol"
+    android:gravity="bottom"
     android:padding="20dp">
 
     <ImageView

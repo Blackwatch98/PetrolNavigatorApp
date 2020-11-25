@@ -44,6 +44,8 @@ public class LoginActivity extends AppCompatActivity {
         if(mAuth.getCurrentUser() != null)
         {
             //sprawdź czy wybrany został przynajmniej promień
+            System.out.println(mAuth.getCurrentUser());
+            System.out.println(mAuth.getCurrentUser().getUid());
             startActivity(new Intent(getApplicationContext(), InitialSettingsActivity.class));
             finish();
         }
@@ -85,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                         if(task.isSuccessful())
                         {
                             startActivity(new Intent(getApplicationContext(), InitialSettingsActivity.class));
-                            Toast.makeText(LoginActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Udało ci się zalogować :)", Toast.LENGTH_SHORT).show();
                             finish();
                         }
                         else

@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onAnimationEnd(Animation animation) {
                         engineSound.stop();
                         Intent intent;
+
                         if(mAuth.getCurrentUser() == null)
                             intent = new Intent(MainActivity.this,LoginActivity.class);
                         else

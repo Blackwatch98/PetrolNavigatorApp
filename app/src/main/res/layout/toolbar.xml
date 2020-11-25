@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/mainAppBackground"
-    app:title="Mapa"
+    app:title="Mapa stacji"
     app:titleTextColor="@color/white"
     app:menu="@menu/drawermenu"
     android:elevation="4dp">
