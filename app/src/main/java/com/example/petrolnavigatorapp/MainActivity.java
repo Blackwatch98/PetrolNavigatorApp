@@ -1,12 +1,10 @@
 package com.example.petrolnavigatorapp;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -54,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
                         if(mAuth.getCurrentUser() == null)
                             intent = new Intent(MainActivity.this,LoginActivity.class);
                         else
-                            intent = new Intent(MainActivity.this,MapsActivity.class);
+                            intent = new Intent(MainActivity.this, NavigationDrawerActivity.class);
 
                         startActivity(intent);
                         finish();

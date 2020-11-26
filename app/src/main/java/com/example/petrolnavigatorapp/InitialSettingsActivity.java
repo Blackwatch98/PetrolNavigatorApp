@@ -57,7 +57,7 @@ public class InitialSettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //fireStore.collection("users").document(userId).collection("");
-                Intent intent = new Intent(InitialSettingsActivity.this, MapsActivity.class);
+                Intent intent = new Intent(InitialSettingsActivity.this, NavigationDrawerActivity.class);
                 int value = seekBar.getProgress();
                 intent.putExtra("seekBarValue", value*1000);
                 startActivity(intent);

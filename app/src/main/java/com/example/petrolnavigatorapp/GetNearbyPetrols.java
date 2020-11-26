@@ -3,7 +3,6 @@ package com.example.petrolnavigatorapp;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -15,7 +14,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
@@ -36,7 +34,7 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
 
     private GoogleMap mMap;
     private String url;
-    private MapsActivity mapsActivity;
+    private NavigationDrawerActivity mapsActivity;
     private InputStream is;
     private BufferedReader bufferedReader;
     private StringBuilder stringBuilder;
@@ -60,8 +58,8 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
         mMap = (GoogleMap)objects[0];
         url = (String)objects[1];
         markers = new LinkedList<>();
-        mapsActivity = (MapsActivity)objects[2];
-        taskListener = (TaskListener)objects[2];
+        mapsActivity = (NavigationDrawerActivity)objects[2];
+        taskListener = (TaskListener)objects[3];
 
         try
         {
