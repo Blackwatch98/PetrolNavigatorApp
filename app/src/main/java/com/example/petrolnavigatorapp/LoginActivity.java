@@ -53,8 +53,8 @@ public class LoginActivity extends AppCompatActivity {
         registerReference.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
                 finish();
+                startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
             }
         });
 
