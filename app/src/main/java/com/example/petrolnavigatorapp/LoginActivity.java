@@ -41,15 +41,6 @@ public class LoginActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         registerReference = findViewById(R.id.registerReferenceText);
 
-        if(mAuth.getCurrentUser() != null)
-        {
-            //sprawdź czy wybrany został przynajmniej promień
-            System.out.println(mAuth.getCurrentUser());
-            System.out.println(mAuth.getCurrentUser().getUid());
-            startActivity(new Intent(getApplicationContext(), InitialSettingsActivity.class));
-            finish();
-        }
-
         registerReference.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -86,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful())
                         {
-                            startActivity(new Intent(getApplicationContext(), InitialSettingsActivity.class));
+                            startActivity(new Intent(getApplicationContext(), NavigationDrawerActivity.class));
                             Toast.makeText(LoginActivity.this, "Udało ci się zalogować :)", Toast.LENGTH_SHORT).show();
                             finish();
                         }

@@ -39,7 +39,7 @@ public class User {
         this.userSettings = userSettings;
     }
 
-    private class UserSettings {
+    public class UserSettings {
 
         private String prefFuelType;
         private String prefFuel;

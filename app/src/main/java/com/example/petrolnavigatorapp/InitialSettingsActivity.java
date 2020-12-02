@@ -12,8 +12,13 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Map;
 
 public class InitialSettingsActivity extends AppCompatActivity {
 
@@ -38,7 +43,7 @@ public class InitialSettingsActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                currentRadiusText.setText(""+seekBar.getProgress()+"km");
+                currentRadiusText.setText(""+seekBar.getProgress()+1+"km");
             }
 
             @Override
@@ -53,13 +58,16 @@ public class InitialSettingsActivity extends AppCompatActivity {
         });
 
 
+
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //fireStore.collection("users").document(userId).collection("");
+                int value = seekBar.getProgress()+1;
+                //WAŻNA ZALETA UPDATE POJEDYŃCZYCH WARTOŚCI SZYBKI I PRZYJEMNY
+                DocumentReference documentReference = fireStore.collection("users").document(userId);
+                documentReference.update("userSettings.searchRadius", value);
+
                 Intent intent = new Intent(InitialSettingsActivity.this, NavigationDrawerActivity.class);
-                int value = seekBar.getProgress();
-                intent.putExtra("seekBarValue", value*1000);
                 startActivity(intent);
                 finish();
             }

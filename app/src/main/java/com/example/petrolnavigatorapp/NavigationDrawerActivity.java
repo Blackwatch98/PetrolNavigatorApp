@@ -109,13 +109,13 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         new SettingsFragment()).commit();
                 current_toolbar = settings_toolbar;
-
                 break;
             case R.id.logout:
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(this, "Wylogowałeś się :)", Toast.LENGTH_SHORT).show();
                 finish();
-                startActivity(getIntent());
+                Intent intent2 = new Intent(NavigationDrawerActivity.this, LoginActivity.class);
+                startActivity(intent2);
                 break;
         }
         drawer.closeDrawer(GravityCompat.START);

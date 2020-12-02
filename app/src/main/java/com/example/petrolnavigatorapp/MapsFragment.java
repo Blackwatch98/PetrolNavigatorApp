@@ -52,6 +52,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private FusedLocationProviderClient mFusedProviderClient;
     private float cameraZoom;
     private FirebaseFirestore fireStore;
+    private FirebaseAuth mAuth;
 
     private LocationCallback mLocationCallback = new LocationCallback()
     {
@@ -86,7 +87,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         dataTransfer[2] = getActivity();
         dataTransfer[3] = this;
 
-        GetNearbyPetrols getNearbyPetrols = new GetNearbyPetrols();
+        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
         getNearbyPetrols.execute(dataTransfer);
     }
 
@@ -106,8 +107,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         mFusedProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         fireStore = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
         DocumentReference documentReference = fireStore.collection("users")
-                .document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                .document(mAuth.getCurrentUser().getUid());
 
         documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
