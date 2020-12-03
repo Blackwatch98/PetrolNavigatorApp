@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:max="10"
+            android:max="15"
             android:maxHeight="6dip"
             android:minHeight="6dip"
             android:paddingLeft="30dp"
