@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Petrol implements Serializable {
     private String name;
-    //==private LatLng coordinates;
+    //private LatLng coordinates;
     private double lat, lon;
     private String address;
     private HashMap<String,Boolean> availableFuels;
@@ -17,12 +17,12 @@ public class Petrol implements Serializable {
 
     Petrol(){}
 
-    public Petrol(String name, LatLng coordinates, String address)
+    public Petrol(String name, double lat, double lon, String address)
     {
         this.name = name;
 //        this.coordinates = coordinates;
-        this.lat = coordinates.latitude;
-        this.lon = coordinates.longitude;
+        this.lat = lat;
+        this.lon = lon;
         this.address = address;
         this.availableFuels = new HashMap<>();
         String[] fuelTypes = {"Benzyna", "Diesel", "LPG", "Etanol", "Elektryczny", "CNG"};
@@ -48,10 +48,6 @@ public class Petrol implements Serializable {
         this.name = name;
     }
 
-//    public LatLng getCoordinates() {
-//        return coordinates;
-//    }
-
     public double getLat() {
         return lat;
     }
@@ -60,9 +56,9 @@ public class Petrol implements Serializable {
         return lon;
     }
 
-    public void setCoordinates(LatLng coordinates) {
-        this.lat = coordinates.latitude;
-        this.lon = coordinates.longitude;
+    public void setCoordinates(double lat, double lon) {
+        this.lat = lat;
+        this.lon = lon;
     }
 
     public String getAddress() {
@@ -87,5 +83,25 @@ public class Petrol implements Serializable {
 
     public void setAvailableFuels(HashMap<String, Boolean> availableFuels) {
         this.availableFuels = availableFuels;
+    }
+
+    public void displayPetrolData()
+    {
+        System.out.println("Name: " + this.name);
+        System.out.println("Coor: " + this.lat + " " + this.lon);
+        System.out.println("Address: " + this.address);
+        System.out.println("AvailableFuels:");
+        for (String name: this.availableFuels.keySet()){
+            String key = name.toString();
+            String value = availableFuels.get(name).toString();
+            System.out.println(key + " " + value);
+        }
+        System.out.println("Fuels:");
+        for(Fuel fuel : fuels)
+        {
+            System.out.println(fuel.getName());
+            System.out.println(fuel.getPrice());
+        }
+        System.out.println("---------------------------------");
     }
 }

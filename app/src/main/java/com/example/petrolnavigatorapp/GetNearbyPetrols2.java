@@ -103,7 +103,7 @@ public class GetNearbyPetrols2 extends AsyncTask<Object,String,String> {
                 String vincity = nameObject.getString("vicinity");
 
                 LatLng coor = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
-                petrolsList.add(new Petrol(petrolName,coor,vincity));
+                petrolsList.add(new Petrol(petrolName,coor.latitude,coor.longitude,vincity));
 
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.title(petrolName+"," + vincity);
@@ -134,9 +134,9 @@ public class GetNearbyPetrols2 extends AsyncTask<Object,String,String> {
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         for(QueryDocumentSnapshot querySnapshot : queryDocumentSnapshots)
                         {
-                            double lat = Double.valueOf(querySnapshot.get("lat").toString());
-                            double lon = Double.valueOf(querySnapshot.get("lon").toString());
-                            if(petrol.getLat() == lat && petrol.getLon() == lon);
+                            double lat = Double.parseDouble(querySnapshot.get("lat").toString());
+                            double lon = Double.parseDouble(querySnapshot.get("lon").toString());
+                            if(petrol.getLat() == lat && petrol.getLon() == lon)
                                 return;
 
                         }

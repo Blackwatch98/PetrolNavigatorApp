@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -53,6 +54,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private float cameraZoom;
     private FirebaseFirestore fireStore;
     private FirebaseAuth mAuth;
+    private Toolbar toolbar;
 
     private LocationCallback mLocationCallback = new LocationCallback()
     {
@@ -67,7 +69,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
             }
-            findPetrols();
+
         }
     };
 
@@ -75,6 +77,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     {
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         stringBuilder.append("location=" + latLng.latitude + "," + latLng.longitude);
+        System.out.println("promien wyszukiwania: " + radius);
         stringBuilder.append("&radius=" + radius);
         stringBuilder.append("&keyword=" + "petrol");
         stringBuilder.append("&key="+getResources().getString(R.string.google_places_key));
@@ -87,8 +90,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         dataTransfer[2] = getActivity();
         dataTransfer[3] = this;
 
+        System.out.println("DEBUGGER");
+        GetNearbyPetrolsFromDB test = new GetNearbyPetrolsFromDB(latLng);
+        test.findNearbyPetrols(radius);
+
+
         GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
         getNearbyPetrols.execute(dataTransfer);
+
     }
 
     @Nullable
@@ -96,7 +105,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_maps, container, false);
+        View view = inflater.inflate(R.layout.fragment_maps, container, false);
+
+        toolbar = view.findViewById(R.id.map_nav_toolbar);
+
+        return view;
     }
 
     @Override
@@ -119,6 +132,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                 {
                     Map<String, Object> map = (Map<String,Object>)documentSnapshot.get("userSettings");
                     radius = Integer.parseInt(map.get("searchRadius").toString())*1000;
+                    findPetrols();
                 }
             }
         });

@@ -1,4 +1,4 @@
-package com.example.petrolnavigatorapp;
+package com.example.petrolnavigatorapp.RealtimeDatabase_utils;
 
 
 import android.content.Intent;
@@ -6,6 +6,10 @@ import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 
+import com.example.petrolnavigatorapp.NavigationDrawerActivity;
+import com.example.petrolnavigatorapp.Petrol;
+import com.example.petrolnavigatorapp.PetrolPopUpActivity;
+import com.example.petrolnavigatorapp.TaskListener;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -112,7 +116,7 @@ public class GetNearbyPetrols extends AsyncTask<Object,String,String> {
                 String vincity = nameObject.getString("vicinity");
 
                 LatLng coor = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
-                petrolsList.add(new Petrol(petrolName,coor,vincity));
+                petrolsList.add(new Petrol(petrolName,coor.latitude,coor.longitude,vincity));
 
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.title(petrolName+"," + vincity);
