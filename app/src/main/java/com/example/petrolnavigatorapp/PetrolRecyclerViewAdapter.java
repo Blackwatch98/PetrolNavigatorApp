@@ -1,12 +1,10 @@
 package com.example.petrolnavigatorapp;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -15,7 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.database.DataSnapshot;
+import com.example.petrolnavigatorapp.utils.Fuel;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,11 +27,13 @@ public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecycl
     private List<Fuel> fuelsList;
     private Context context;
     private LinkedList<Button> changeButtonsList;
+    private String petrolId;
 
-    PetrolRecyclerViewAdapter(List<Fuel> fuels, Context con)
+    PetrolRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId)
     {
         fuelsList = fuels;
         context = con;
+        this.petrolId = petrolId;
         changeButtonsList = new LinkedList<>();
     }
 
@@ -74,6 +74,7 @@ public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecycl
                 Intent intent = new Intent(context, ChangePriceActivity.class);
                 intent.putExtra("fuelClass", String.valueOf(fuelsList.get(position).getPrice()));
                 intent.putExtra("fuelName", fuelsList.get(position).getName());
+                intent.putExtra("petrolId", petrolId);
                 ((PetrolPopUpActivity)context).startActivityForResult(intent, 1);
             }
         });

@@ -128,12 +128,6 @@
                 android:text="Ceny paliw:"
                 android:textStyle="bold" />
 
-            <Spinner
-                android:id="@+id/fuelTypesSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp" />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerPetrolView"
                 android:layout_width="match_parent"

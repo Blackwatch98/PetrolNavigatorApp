@@ -7,7 +7,7 @@ import android.os.AsyncTask;
 import androidx.annotation.NonNull;
 
 import com.example.petrolnavigatorapp.NavigationDrawerActivity;
-import com.example.petrolnavigatorapp.Petrol;
+import com.example.petrolnavigatorapp.utils.Petrol;
 import com.example.petrolnavigatorapp.PetrolPopUpActivity;
 import com.example.petrolnavigatorapp.TaskListener;
 import com.google.android.gms.maps.GoogleMap;
