@@ -1,5 +1,6 @@
 package com.example.petrolnavigatorapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,11 +20,15 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,10 +47,10 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
     private Animation scale_up, scale_down;
 
     private String petrolName;
+    private String petrolId;
     private LatLng coor;
 
-    private DatabaseReference reff;
-    private DataSnapshot myDs;
+    private FirebaseFirestore firestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +71,6 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
         mapView.getMapAsync(this);
         mapView.onCreate(savedInstanceState);
 
-
         switches = new LinkedList<>();
         switches.add(benzSwitch);
         switches.add(dieselSwitch);
@@ -74,54 +79,39 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
         switches.add(elecSwitch);
         switches.add(cngSwitch);
 
-        reff = FirebaseDatabase.getInstance().getReference().child("Petrols");
+        firestore = FirebaseFirestore.getInstance();
 
         Bundle bundle = getIntent().getExtras();
-        double lat=bundle.getDouble("latitude");
-        double lon=bundle.getDouble("longitude");
+        petrolId = bundle.getString("petrolId");
         petrolName = bundle.getString("petrolName");
+        double lat = bundle.getDouble("latitude");
+        double lon = bundle.getDouble("longitude");
+        coor = new LatLng(lat,lon);
         editNameView.setText(petrolName);
-        this.coor = new LatLng(lat,lon);
 
-        reff.addValueEventListener(new ValueEventListener() {
+        final DocumentReference mRef = firestore.collection("petrol_stations").document(petrolId);
+
+        mRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists())
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot.exists())
                 {
-                    for(DataSnapshot ds : dataSnapshot.getChildren())
+                    fuelTypes = (HashMap<String, Boolean>)documentSnapshot.get("availableFuels");
+                    if(fuelTypes != null)
                     {
-                        HashMap<String,Double> test = new HashMap<>();
-                        test.put("latitude",coor.latitude);
-                        test.put("longitude", coor.longitude);
-
-                        if(ds.child("coordinates").child("latitude").getValue().equals(test.get("latitude")) &&
-                                ds.child("coordinates").child("longitude").getValue().equals(test.get("longitude")))
-                        {
-                            fuelTypes = (HashMap<String, Boolean>) ds.child("availableFuels").getValue();
-                            myDs = ds;
-                            if(fuelTypes != null)
-                            {
-                                Iterator it = fuelTypes.entrySet().iterator();
-                                while (it.hasNext()) {
-                                    Map.Entry mapElement = (Map.Entry)it.next();
-                                    System.out.println(mapElement.getKey() + " = " + mapElement.getValue());
-                                    for(Switch sw : switches)
-                                        if(sw.getText().equals(mapElement.getKey()))
-                                        {
-                                            if((Boolean) mapElement.getValue())
-                                                sw.setChecked(true);
-                                        }
+                        Iterator it = fuelTypes.entrySet().iterator();
+                        while (it.hasNext()) {
+                            Map.Entry mapElement = (Map.Entry)it.next();
+                            System.out.println(mapElement.getKey() + " = " + mapElement.getValue());
+                            for(Switch sw : switches)
+                                if(sw.getText().equals(mapElement.getKey()))
+                                {
+                                    if((Boolean) mapElement.getValue())
+                                        sw.setChecked(true);
                                 }
-                            }
-                            break;
                         }
                     }
                 }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
 
@@ -136,7 +126,11 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
                     else
                         availableFuels.put(sw.getText().toString(),false);
                 }
-                myDs.getRef().child("availableFuels").setValue(availableFuels);
+                mRef.update("availableFuels",availableFuels);
+
+                Intent i = new Intent();
+                setResult(RESULT_OK,i);
+                Toast.makeText(getBaseContext(),"Wysłano zgłoszenie", Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
