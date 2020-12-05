@@ -1,6 +1,7 @@
-package com.example.petrolnavigatorapp;
+package com.example.petrolnavigatorapp.utils;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.example.petrolnavigatorapp.R;
+import com.example.petrolnavigatorapp.utils.Fuel;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -9,7 +10,6 @@ import java.util.List;
 
 public class Petrol implements Serializable {
     private String name;
-    //private LatLng coordinates;
     private double lat, lon;
     private String address;
     private HashMap<String,Boolean> availableFuels;
@@ -20,7 +20,6 @@ public class Petrol implements Serializable {
     public Petrol(String name, double lat, double lon, String address)
     {
         this.name = name;
-//        this.coordinates = coordinates;
         this.lat = lat;
         this.lon = lon;
         this.address = address;
@@ -33,7 +32,7 @@ public class Petrol implements Serializable {
         this.fuels = new LinkedList<>();
 
         String [] names = {"Pb98", "Pb95", "ON", "ON_Ultimate", "LPG", "CNG", "Elektryczny", "Etanol"};
-        String[] types = {"Benzyna", "Benzyna", "Diesel", "Diesel", "Gas", "CNG","Elektryczny", "Etanol"};
+        String[] types = {"Benzyna", "Benzyna", "Diesel", "Diesel", "LPG", "CNG","Elektryczny", "Etanol"};
         int [] icons = {R.drawable.pb98, R.drawable.pb95,R.drawable.on, R.drawable.on_ult,R.drawable.lpg2, R.drawable.cng2,R.drawable.ener,R.drawable.e85};
 
         for(int i = 0; i < names.length; i++)
@@ -54,11 +53,6 @@ public class Petrol implements Serializable {
 
     public double getLon() {
         return lon;
-    }
-
-    public void setCoordinates(double lat, double lon) {
-        this.lat = lat;
-        this.lon = lon;
     }
 
     public String getAddress() {

@@ -1,4 +1,4 @@
-package com.example.petrolnavigatorapp;
+package com.example.petrolnavigatorapp.utils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -12,7 +12,7 @@ public class Fuel {
     private int reportCounter;
     private String lastReportDate;
 
-    Fuel(int i, String price, String name, String type) {
+    public Fuel(int i, String price, String name, String type) {
         this.icon = i;
         this.name = name;
         this.price = price;
@@ -24,7 +24,7 @@ public class Fuel {
         lastReportDate = dateFormat.format(date);
     }
 
-    Fuel(int i, String price, String name, String type, int reportCounter, String lastReportDate) {
+    public Fuel(int i, String price, String name, String type, int reportCounter, String lastReportDate) {
         this.icon = i;
         this.name = name;
         this.price = price;
