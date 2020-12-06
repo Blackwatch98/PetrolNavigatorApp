@@ -19,6 +19,9 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -58,6 +61,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private FirebaseAuth mAuth;
     private Toolbar toolbar;
 
+    private FrameLayout frameLayout;
+    private ImageView imageView;
+    private TextView textView;
+
     private LocationCallback mLocationCallback = new LocationCallback()
     {
         @Override
@@ -71,7 +78,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
             }
-//            findPetrols();
+            findNearbyPetrols();
         }
     };
 
@@ -92,8 +99,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         dataTransfer[2] = getActivity();
         dataTransfer[3] = this;
 
-        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
-        getNearbyPetrols.execute(dataTransfer);
+
+        FirestorePetrolsDB test = new FirestorePetrolsDB(latLng, mMap, getContext(),getActivity());
+        test.findNearbyPetrols(radius);
+
+
+//        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+//            @Override
+//            public boolean onMarkerClick(Marker marker) {
+//                Intent intent = new Intent(getActivity(), PetrolPopUpActivity.class);
+//                intent.putExtra("latitude", marker.getPosition().latitude);
+//                intent.putExtra("longitude", marker.getPosition().longitude);
+//                getActivity().startActivity(intent);
+//                return false;
+//            }
+//        });
+//        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
+//        getNearbyPetrols.execute(dataTransfer);
     }
 
     @Nullable
@@ -111,6 +133,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        frameLayout = getView().findViewById(R.id.marker_icon);
+        imageView = getView().findViewById(R.id.ImageView01);
+        textView = getView().findViewById(R.id.text_view_test);
 
         markers = new LinkedList<>();
         mFusedProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
@@ -177,25 +203,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                                     public void onSuccess(Location location) {
                                         if (location != null) {
                                             Toast.makeText(getContext(), "Uaktualniam pozycję...", Toast.LENGTH_SHORT).show();
-                                            //latLng = new LatLng(location.getLatitude(),location.getLongitude());
+                                            latLng = new LatLng(location.getLatitude(),location.getLongitude());
                                             cameraZoom = mMap.getCameraPosition().zoom;
-
-//                                            findPetrols();
-
-                                            FirestorePetrolsDB test = new FirestorePetrolsDB(latLng, mMap);
-                                            test.findNearbyPetrols(radius);
-
-
-                                            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                                                @Override
-                                                public boolean onMarkerClick(Marker marker) {
-                                                    Intent intent = new Intent(getActivity(), PetrolPopUpActivity.class);
-                                                    intent.putExtra("latitude", marker.getPosition().latitude);
-                                                    intent.putExtra("longitude", marker.getPosition().longitude);
-                                                    getActivity().startActivity(intent);
-                                                    return false;
-                                                }
-                                            });
+                                            mMap.clear();
+                                            //mClusterManager.clearItems();
+                                            findNearbyPetrols();
                                         }
                                     }
                                 });

@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.petrolnavigatorapp.adapters.PetrolRecyclerViewAdapter;
 import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.example.petrolnavigatorapp.firebase_utils.MyFirebaseStorage;
 import com.example.petrolnavigatorapp.utils.Fuel;
@@ -109,20 +110,21 @@ public class PetrolPopUpActivity extends Activity {
 
                 HashMap<String, Integer> map = getFuelImages(popedPetrol.getAvailableFuels());
                 fuelList = new LinkedList<>();
-                String default_name = map.entrySet().iterator().next().getKey();
-                for(Fuel fuel : popedPetrol.getFuels())
-                    if(fuel.getType().equals(default_name)){
-                        fuelList.add(fuel);
-                    }
+                if(map != null && map.size() > 0) {
+                    String default_name = map.entrySet().iterator().next().getKey();
+                    for (Fuel fuel : popedPetrol.getFuels())
+                        if (fuel.getType().equals(default_name)) {
+                            fuelList.add(fuel);
+                        }
 
-                RecyclerView recyclerView = findViewById(R.id.recyclerPetrolView);
-                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
+                    RecyclerView recyclerView = findViewById(R.id.recyclerPetrolView);
+                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
-                petrolRecyclerViewAdapter = new PetrolRecyclerViewAdapter(fuelList, context, petrolId);
-                recyclerView.setLayoutManager(layoutManager);
-                recyclerView.setAdapter(petrolRecyclerViewAdapter);
-                recyclerView.setItemAnimator(new DefaultItemAnimator());
-
+                    petrolRecyclerViewAdapter = new PetrolRecyclerViewAdapter(fuelList, context, petrolId);
+                    recyclerView.setLayoutManager(layoutManager);
+                    recyclerView.setAdapter(petrolRecyclerViewAdapter);
+                    recyclerView.setItemAnimator(new DefaultItemAnimator());
+                }
                 int list_size = map.size();
                 if(latitude == popedPetrol.getLat() && longitude == popedPetrol.getLon())
                 {
@@ -241,12 +243,12 @@ public class PetrolPopUpActivity extends Activity {
             if(requestCode == 1 )
             {
                 finish();
-                startActivity(getIntent());
+                //startActivity(getIntent());
             }
             else if(requestCode == 2)
             {
                 finish();
-                startActivity(getIntent());
+                //startActivity(getIntent());
             }
         }
 

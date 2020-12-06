@@ -1,4 +1,4 @@
-package com.example.petrolnavigatorapp;
+package com.example.petrolnavigatorapp.adapters;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.petrolnavigatorapp.R;
 import com.example.petrolnavigatorapp.dummy.DummyContent.DummyItem;
 
 import java.util.List;

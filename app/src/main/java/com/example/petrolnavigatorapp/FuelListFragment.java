@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.petrolnavigatorapp.adapters.MyFuelRecyclerViewAdapter;
 import com.example.petrolnavigatorapp.dummy.DummyContent;
 
 /**

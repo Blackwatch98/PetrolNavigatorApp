@@ -1,4 +1,4 @@
-package com.example.petrolnavigatorapp;
+package com.example.petrolnavigatorapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +13,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.petrolnavigatorapp.ChangePriceActivity;
+import com.example.petrolnavigatorapp.PetrolPopUpActivity;
+import com.example.petrolnavigatorapp.R;
 import com.example.petrolnavigatorapp.utils.Fuel;
 
 import java.text.ParseException;
@@ -29,7 +32,7 @@ public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecycl
     private LinkedList<Button> changeButtonsList;
     private String petrolId;
 
-    PetrolRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId)
+    public PetrolRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId)
     {
         fuelsList = fuels;
         context = con;

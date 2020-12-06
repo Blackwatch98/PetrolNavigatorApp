@@ -29,7 +29,7 @@
 //
 //import com.example.petrolnavigatorapp.ChangeFuelTypesActivity;
 //import com.example.petrolnavigatorapp.utils.Fuel;
-//import com.example.petrolnavigatorapp.PetrolRecyclerViewAdapter;
+//import com.example.petrolnavigatorapp.adapters.PetrolRecyclerViewAdapter;
 //import com.example.petrolnavigatorapp.R;
 //import com.example.petrolnavigatorapp.firebase_utils.MyFirebaseStorage;
 //import com.google.android.gms.tasks.OnSuccessListener;
