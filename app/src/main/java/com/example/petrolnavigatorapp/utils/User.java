@@ -1,4 +1,4 @@
-package com.example.petrolnavigatorapp;
+package com.example.petrolnavigatorapp.utils;
 
 public class User {
 
@@ -8,7 +8,7 @@ public class User {
 
     User(){}
 
-    User(String userId, String userName)
+    public User(String userId, String userName)
     {
         this.userId = userId;
         this.userName = userName;

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -18,9 +19,13 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -56,6 +61,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private FirebaseAuth mAuth;
     private Toolbar toolbar;
 
+    private FrameLayout frameLayout;
+    private ImageView imageView;
+    private TextView textView;
+
     private LocationCallback mLocationCallback = new LocationCallback()
     {
         @Override
@@ -69,11 +78,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
             }
-
+            findNearbyPetrols();
         }
     };
 
-    public void findPetrols()
+    public void findNearbyPetrols()
     {
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         stringBuilder.append("location=" + latLng.latitude + "," + latLng.longitude);
@@ -90,14 +99,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         dataTransfer[2] = getActivity();
         dataTransfer[3] = this;
 
-        System.out.println("DEBUGGER");
-        GetNearbyPetrolsFromDB test = new GetNearbyPetrolsFromDB(latLng);
+
+        FirestorePetrolsDB test = new FirestorePetrolsDB(latLng, mMap, getContext(),getActivity());
         test.findNearbyPetrols(radius);
 
 
-        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
-        getNearbyPetrols.execute(dataTransfer);
-
+//        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+//            @Override
+//            public boolean onMarkerClick(Marker marker) {
+//                Intent intent = new Intent(getActivity(), PetrolPopUpActivity.class);
+//                intent.putExtra("latitude", marker.getPosition().latitude);
+//                intent.putExtra("longitude", marker.getPosition().longitude);
+//                getActivity().startActivity(intent);
+//                return false;
+//            }
+//        });
+//        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
+//        getNearbyPetrols.execute(dataTransfer);
     }
 
     @Nullable
@@ -116,6 +134,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        frameLayout = getView().findViewById(R.id.marker_icon);
+        imageView = getView().findViewById(R.id.ImageView01);
+        textView = getView().findViewById(R.id.text_view_test);
+
         markers = new LinkedList<>();
         mFusedProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
@@ -132,7 +154,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                 {
                     Map<String, Object> map = (Map<String,Object>)documentSnapshot.get("userSettings");
                     radius = Integer.parseInt(map.get("searchRadius").toString())*1000;
-                    findPetrols();
                 }
             }
         });
@@ -182,9 +203,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                                     public void onSuccess(Location location) {
                                         if (location != null) {
                                             Toast.makeText(getContext(), "Uaktualniam pozycję...", Toast.LENGTH_SHORT).show();
-                                            //latLng = new LatLng(location.getLatitude(),location.getLongitude());
+                                            latLng = new LatLng(location.getLatitude(),location.getLongitude());
                                             cameraZoom = mMap.getCameraPosition().zoom;
-                                            findPetrols();
+                                            mMap.clear();
+                                            //mClusterManager.clearItems();
+                                            findNearbyPetrols();
                                         }
                                     }
                                 });
@@ -251,7 +274,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     @Override
     public void onTaskFinish(List<Marker> markers) {
         for(Marker marker : markers)
+        {
             this.markers.add(marker);
+        }
+
     }
 
     @Override

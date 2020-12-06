@@ -4,6 +4,7 @@ package com.example.petrolnavigatorapp;
 import android.content.Intent;
 import android.os.AsyncTask;
 
+import com.example.petrolnavigatorapp.utils.Petrol;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;

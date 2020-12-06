@@ -12,52 +12,52 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.petrolnavigatorapp.adapters.PetrolRecyclerViewAdapter;
+import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.example.petrolnavigatorapp.firebase_utils.MyFirebaseStorage;
+import com.example.petrolnavigatorapp.utils.Fuel;
+import com.example.petrolnavigatorapp.utils.Petrol;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FileDownloadTask;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 
 public class PetrolPopUpActivity extends Activity {
 
     final int FUELS_IN_LINEAR_ROW = 4;
-    private LinearLayout availableFuelsLayout;
-    private DatabaseReference mRef;
-    private MyFirebaseStorage sRef;
-    private double lat, lon;
-    private Context context;
-    private DataSnapshot popedPetrol;
-    private PetrolRecyclerViewAdapter petrolRecyclerViewAdapter;
-    private Animation scale_up, scale_down;
+    final int X_SCREEN_DIVIDER = 5, Y_SCREEN_DIVIDER = 17;
 
-    private String[] imgNames = {"Elektryczny", "Benzyna", "LPG", "Etanol", "Diesel", "CNG"};
-    private Integer[] imgId = {R.drawable.elektr, R.drawable.benz, R.drawable.lpg, R.drawable.etan, R.drawable.diesel, R.drawable.cng};
+    private FirebaseFirestore firestore;
+    private MyFirebaseStorage sRef;
+    private double latitude, longitude;
+    private Context context;
+    private PetrolRecyclerViewAdapter petrolRecyclerViewAdapter;
+    private LinearLayout availableFuelsLayout;
+    private Animation scale_up, scale_down;
+    private Petrol popedPetrol;
+    private String petrolId;
+    private  List<Fuel> fuelList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +72,8 @@ public class PetrolPopUpActivity extends Activity {
         final int height = displayMetrics.heightPixels;
         final int width = displayMetrics.widthPixels;
 
-        lat = bundle.getDouble("latitude");
-        lon = bundle.getDouble("longitude");
+        latitude = bundle.getDouble("latitude");
+        longitude = bundle.getDouble("longitude");
 
         CoordinatorLayout coordinatorLayout = findViewById(R.id.popUpBackground);
         coordinatorLayout.setOnClickListener(new View.OnClickListener() {
@@ -83,115 +83,113 @@ public class PetrolPopUpActivity extends Activity {
             }
         });
 
-        mRef = FirebaseDatabase.getInstance().getReference("Petrols");
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        firestore = FirebaseFirestore.getInstance();
+        firestore.collection("petrol_stations").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()) {
-                    for(DataSnapshot ds : dataSnapshot.getChildren()) {
-                        if (ds.child("coordinates").child("latitude").getValue().equals(lat) &&
-                                ds.child("coordinates").child("longitude").getValue().equals(lon)) {
-                            popedPetrol = ds;
-                            break;
-                        }
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                if(queryDocumentSnapshots == null)
+                    return;
+
+                FirestorePetrolsDB test = new FirestorePetrolsDB();
+                for(QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                    double lat = Double.parseDouble(query.get("lat").toString());
+                    double lon = Double.parseDouble(query.get("lon").toString());
+
+                    if(latitude == lat && longitude == lon)
+                    {
+                        popedPetrol = test.SnapshotToPetrol(query);
+                        petrolId = query.getId();
+                        break;
                     }
 
-                    Iterator<DataSnapshot> items = popedPetrol.child("availableFuels").getChildren().iterator();
-                    LinkedList<Integer> images = new LinkedList<>();
-                    while (items.hasNext()) {
-                        DataSnapshot item = items.next();
-                        int pos = 0;
-                        for (String str : imgNames) {
-                            if (item.getKey().equals(str) && item.getValue().equals(true)) {
-                                images.add(pos);
-                                break;
-                            }
-                            pos++;
+                }
+                if(popedPetrol == null) {
+                    System.out.println("Uuups. Something gone wrong!");
+                    return;
+                }
+
+                HashMap<String, Integer> map = getFuelImages(popedPetrol.getAvailableFuels());
+                fuelList = new LinkedList<>();
+                if(map != null && map.size() > 0) {
+                    String default_name = map.entrySet().iterator().next().getKey();
+                    for (Fuel fuel : popedPetrol.getFuels())
+                        if (fuel.getType().equals(default_name)) {
+                            fuelList.add(fuel);
                         }
-                    }
-                    int counter;
-                    for (int i = 0; i <= imgId.length/FUELS_IN_LINEAR_ROW; i++) {
+
+                    RecyclerView recyclerView = findViewById(R.id.recyclerPetrolView);
+                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+
+                    petrolRecyclerViewAdapter = new PetrolRecyclerViewAdapter(fuelList, context, petrolId);
+                    recyclerView.setLayoutManager(layoutManager);
+                    recyclerView.setAdapter(petrolRecyclerViewAdapter);
+                    recyclerView.setItemAnimator(new DefaultItemAnimator());
+                }
+                int list_size = map.size();
+                if(latitude == popedPetrol.getLat() && longitude == popedPetrol.getLon())
+                {
+                    int counter = 0;
+                    for (int i = 0; i <= list_size/FUELS_IN_LINEAR_ROW; i++) {
                         LinearLayout row = new LinearLayout(context);
                         if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
                             row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                         else if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
                             row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
 
-                        if(images.size() < FUELS_IN_LINEAR_ROW)
-                            counter = images.size();
+                        if(map.size() < FUELS_IN_LINEAR_ROW)
+                            counter = map.size();
                         else
                             counter = FUELS_IN_LINEAR_ROW;
 
                         for (int j = 0; j < counter; j++) {
                             RelativeLayout.LayoutParams layoutParams;
                             if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-                                layoutParams = new RelativeLayout.LayoutParams(width / 5, height / 17);
+                                layoutParams = new RelativeLayout.LayoutParams(width / X_SCREEN_DIVIDER, height / Y_SCREEN_DIVIDER);
                             else
-                                layoutParams = new RelativeLayout.LayoutParams(height / 5, width / 17);
+                                layoutParams = new RelativeLayout.LayoutParams(height / X_SCREEN_DIVIDER, width / Y_SCREEN_DIVIDER);
+
+                            Map.Entry<String,Integer> entry = map.entrySet().iterator().next();
+                            final String fuelTypeName = entry.getKey();
 
                             ImageView img = new ImageView(context);
                             img.setPadding(5, 5, 5, 5);
                             img.setLayoutParams(layoutParams);
-                            img.setImageResource(imgId[images.get(images.size()-1)]);
-                            images.remove(images.size()-1);
+                            img.setImageResource(map.get(fuelTypeName));
+                            map.remove(fuelTypeName);
+                            img.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Toast.makeText(context, fuelTypeName, Toast.LENGTH_SHORT).show();
+                                    fuelList = new LinkedList<>();
+                                    for(Fuel fuel : popedPetrol.getFuels())
+                                        if(fuel.getType().equals(fuelTypeName))
+                                            fuelList.add(fuel);
+                                    RecyclerView recyclerView = findViewById(R.id.recyclerPetrolView);
+                                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
+
+                                    petrolRecyclerViewAdapter = new PetrolRecyclerViewAdapter(fuelList, context, petrolId);
+                                    recyclerView.setLayoutManager(layoutManager);
+                                    recyclerView.setAdapter(petrolRecyclerViewAdapter);
+                                    recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                }
+                            });
                             row.addView(img);
                         }
                         availableFuelsLayout.addView(row);
                     }
-
-                    Spinner spinner = findViewById(R.id.fuelTypesSpinner);
-                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context,R.array.fuelTypes,R.layout.support_simple_spinner_dropdown_item);
-                    adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-                    spinner.setAdapter(adapter);
-
-                    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                            RecyclerView recyclerView = findViewById(R.id.recyclerPetrolView);
-                            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
-                            LinkedList<Fuel> fuelList = new LinkedList<>();
-
-                            for(DataSnapshot ds : popedPetrol.child("fuels").getChildren())
-                            {
-                                Fuel fuel = new Fuel(Integer.parseInt(ds.child("icon").getValue().toString()),
-                                        ds.child("price").getValue().toString(),
-                                        ds.child("name").getValue().toString(),
-                                        ds.child("type").getValue().toString(),
-                                        Integer.parseInt(ds.child("reportCounter").getValue().toString()),
-                                        ds.child("lastReportDate").getValue().toString());
-
-                                if(position == 0 && fuel.getType().equals("fluid"))
-                                    fuelList.add(fuel);
-                                else if(position == 1 && fuel.getType().equals("gas"))
-                                    fuelList.add(fuel);
-                                else if(position == 2 && fuel.getType().equals("unconv"))
-                                    fuelList.add(fuel);
-                            }
-
-                            petrolRecyclerViewAdapter = new PetrolRecyclerViewAdapter(fuelList, context);
-                            recyclerView.setLayoutManager(layoutManager);
-                            recyclerView.setAdapter(petrolRecyclerViewAdapter);
-                            recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-                            TextView petrolName = findViewById(R.id.petrolName);
-                            TextView petrolCoor= findViewById(R.id.petrolAddress);
-
-                            petrolName.setText(popedPetrol.child("name").getValue().toString());
-                            petrolCoor.setText(popedPetrol.child("address").getValue().toString());
-                        }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-
-                        }
-                    });
                 }
+
+                TextView petrolName = findViewById(R.id.petrolName);
+                TextView petrolCoor= findViewById(R.id.petrolAddress);
+
+                petrolName.setText(popedPetrol.getName());
+                petrolCoor.setText(popedPetrol.getAddress());
 
                 sRef = new MyFirebaseStorage();
                 try
                 {
                     final File localFile = File.createTempFile("petrol_icon","png");
-                    sRef.getPetrolIconRef(popedPetrol.child("name").getValue().toString()).getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    sRef.getPetrolIconRef(popedPetrol.getName()).getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
@@ -203,38 +201,35 @@ public class PetrolPopUpActivity extends Activity {
                 {
                     e.printStackTrace();
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                final Button changeTypeBtn = findViewById(R.id.setChanges);
+                changeTypeBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(popedPetrol != null) {
+                            Intent intent = new Intent(view.getContext(), ChangeFuelTypesActivity.class);
+                            intent.putExtra("latitude",popedPetrol.getLat());
+                            intent.putExtra("longitude",popedPetrol.getLon());
+                            intent.putExtra("petrolName",popedPetrol.getName());
+                            intent.putExtra("petrolId", petrolId);
+                            ((PetrolPopUpActivity)context).startActivityForResult(intent, 2);
+                        }
+                    }
+                });
 
-            }
-        });
+                scale_up = AnimationUtils.loadAnimation(context,R.anim.scale_up);
+                scale_down = AnimationUtils.loadAnimation(context,R.anim.scale_down);
+                changeTypeBtn.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        if(motionEvent.getAction()==MotionEvent.ACTION_DOWN)
+                            changeTypeBtn.startAnimation(scale_up);
+                        else if(motionEvent.getAction()==MotionEvent.ACTION_UP)
+                            changeTypeBtn.startAnimation(scale_down);
 
-        final Button changeTypeBtn = findViewById(R.id.setChanges);
-        changeTypeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), ChangeFuelTypesActivity.class);
-                intent.putExtra("latitude",lat);
-                intent.putExtra("longitude",lon);
-                intent.putExtra("petrolName",popedPetrol.child("name").getValue().toString());
-                view.getContext().startActivity(intent);
-            }
-        });
-
-
-        scale_up = AnimationUtils.loadAnimation(this,R.anim.scale_up);
-        scale_down = AnimationUtils.loadAnimation(this,R.anim.scale_down);
-        changeTypeBtn.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction()==MotionEvent.ACTION_DOWN)
-                    changeTypeBtn.startAnimation(scale_up);
-                else if(motionEvent.getAction()==MotionEvent.ACTION_UP)
-                    changeTypeBtn.startAnimation(scale_down);
-
-                return false;
+                        return false;
+                    }
+                });
             }
         });
     }
@@ -245,36 +240,51 @@ public class PetrolPopUpActivity extends Activity {
 
         if (resultCode==RESULT_OK)
         {
-            if(requestCode == 1)
+            if(requestCode == 1 )
             {
-                Bundle extras = data.getExtras();
-                String price = extras.getString("priceString");
-                String name = extras.getString("fuelName");
-                String num = null;
-
-                for(DataSnapshot ds : popedPetrol.child("fuels").getChildren())
-                    if(ds.child("name").getValue().toString().equals(name))
-                        num = ds.getKey();
-
-                if(popedPetrol.child("fuels").child(num).child("price").getValue().equals(price))
-                {
-                    mRef.child(popedPetrol.getKey()).child("fuels").child(num).
-                            child("reportCounter").setValue((Long)popedPetrol.child("fuels").child(num)
-                            .child("reportCounter").getValue()+1);
-                }
-                else
-                {
-                    mRef.child(popedPetrol.getKey()).child("fuels").child(num).
-                            child("reportCounter").setValue(1);
-
-                    mRef.child(popedPetrol.getKey()).child("fuels").child(num).child("price").setValue(price);
-                }
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                mRef.child(popedPetrol.getKey()).child("fuels").child(num).child("lastReportDate").setValue(sdf.format(new Date()));
                 finish();
-                startActivity(getIntent());
+                //startActivity(getIntent());
+            }
+            else if(requestCode == 2)
+            {
+                finish();
+                //startActivity(getIntent());
             }
         }
 
+    }
+
+    public HashMap<String, Integer> getFuelImages(HashMap<String,Boolean> fuelsMap)
+    {
+        HashMap<String, Integer> map = new HashMap<>();
+        for(String item : fuelsMap.keySet()) {
+            String key = item.toString();
+            Boolean value = fuelsMap.get(item);
+
+            if(value)
+                switch (key)
+                {
+                    case "Benzyna":
+                        map.put("Benzyna", R.drawable.benz);
+                        break;
+                    case "Diesel":
+                        map.put("Diesel", R.drawable.diesel);
+                        break;
+                    case "LPG":
+                        map.put("LPG", R.drawable.lpg);
+                        break;
+                    case "Etanol":
+                        map.put("Etanol", R.drawable.etan);
+                        break;
+                    case "Elektryczny":
+                        map.put("Elektryczny", R.drawable.elektr);
+                        break;
+                    case "CNG":
+                        map.put("CNG", R.drawable.cng);
+                        break;
+                }
+
+        }
+        return map;
     }
 }

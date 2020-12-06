@@ -3,7 +3,6 @@ package com.example.petrolnavigatorapp.utils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.petrolnavigatorapp.Petrol;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
@@ -11,16 +10,19 @@ public class MyCluster implements ClusterItem {
 
     private final LatLng position;
     private final int imageIcon;
-    private final float price;
+    private final String price;
     private String title;
     private String snippet;
-    private Petrol popedPetrol;
+    private Petrol petrol;
 
-    MyCluster(LatLng latLng, int imageIcon, float price)
+    public MyCluster(LatLng latLng, String title, String snippet, int imageIcon, String price, Petrol petrol)
     {
         this.position = latLng;
+        this.title = title;
+        this.snippet = snippet;
         this. imageIcon = imageIcon;
         this.price = price;
+        this.petrol = petrol;
     }
 
     @NonNull
@@ -44,7 +46,7 @@ public class MyCluster implements ClusterItem {
         return imageIcon;
     }
 
-    public float getPrice() {
+    public String getPrice() {
         return price;
     }
 }
