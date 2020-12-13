@@ -99,10 +99,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         dataTransfer[2] = getActivity();
         dataTransfer[3] = this;
 
-
         FirestorePetrolsDB test = new FirestorePetrolsDB(latLng, mMap, getContext(),getActivity());
         test.findNearbyPetrols(radius);
-
 
 //        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 //            @Override
