@@ -167,16 +167,37 @@ public class FirestorePetrolsDB {
                                                     manager.addItem(newClusterMarker);
                                                 }
                                                 mMap.setOnMarkerClickListener(markerManager);
-                                                markerManager.newCollection().setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                                manager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<MyCluster>() {
                                                     @Override
-                                                    public boolean onMarkerClick(Marker marker) {
+                                                    public boolean onClusterItemClick(MyCluster item) {
                                                         Intent intent = new Intent(activity, PetrolPopUpActivity.class);
-                                                        intent.putExtra("latitude", marker.getPosition().latitude);
-                                                        intent.putExtra("longitude", marker.getPosition().longitude);
+                                                        intent.putExtra("latitude", item.getPosition().latitude);
+                                                        intent.putExtra("longitude", item.getPosition().longitude);
                                                         activity.startActivity(intent);
-                                                        return false;
+                                                        return true;
                                                     }
                                                 });
+                                                manager_note_text.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<MyCluster>() {
+                                                    @Override
+                                                    public boolean onClusterItemClick(MyCluster item) {
+                                                        Intent intent = new Intent(activity, PetrolPopUpActivity.class);
+                                                        intent.putExtra("latitude", item.getPosition().latitude);
+                                                        intent.putExtra("longitude", item.getPosition().longitude);
+                                                        activity.startActivity(intent);
+                                                        return true;
+                                                    }
+                                                });
+                                                MarkerManager.Collection collection = manager.getMarkerManager().newCollection();
+//                                                markerManager.newCollection().setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+//                                                    @Override
+//                                                    public boolean onMarkerClick(Marker marker) {
+//                                                        Intent intent = new Intent(activity, PetrolPopUpActivity.class);
+//                                                        intent.putExtra("latitude", marker.getPosition().latitude);
+//                                                        intent.putExtra("longitude", marker.getPosition().longitude);
+//                                                        activity.startActivity(intent);
+//                                                        return true;
+//                                                    }
+//                                                });
                                                 manager.cluster();
                                                 manager_note_text.cluster();
                                             }
