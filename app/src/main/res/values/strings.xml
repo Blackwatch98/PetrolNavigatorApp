@@ -12,11 +12,6 @@
     <string name="google_places_key">AIzaSyB1yvvhSeE46w2jkAm8AJ7F5UA3JqkIanM</string>
     <string name="navigation_drawer_open">Open Navigation Drawer</string>
     <string name="navigation_drawer_close">Close Navigation Drawer</string>
-    <string-array name="fuelTypes">
-        <item>Płynny</item>
-        <item>Gazowy</item>
-        <item>Niekonwencjonalny</item>
-    </string-array>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_drawer">DrawerActivity</string>
@@ -29,4 +24,40 @@
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
 
+    Benzyna", "Diesel", "LPG", "Etanol", "Elektryczny", "CNG"
+    <string-array name="fuelTypes">
+        <item>Wszystko</item>
+        <item>Benzyna</item>
+        <item>Diesel</item>
+        <item>LPG</item>
+        <item>Etanol</item>
+        <item>Elektryczny</item>
+        <item>CNG</item>
+    </string-array>
+    <string-array name="Benzyna">
+        <item>Wszystko</item>
+        <item>Pb95</item>
+        <item>Pb98</item>
+    </string-array>
+    <string-array name="Diesel">
+        <item>Wszystko</item>
+        <item>ON</item>
+        <item>ON+</item>
+    </string-array>
+    <string-array name="LPG">
+        <item>Wszystko</item>
+        <item>LPG</item>
+    </string-array>
+    <string-array name="Etanol">
+        <item>Wszystko</item>
+        <item>E85</item>
+    </string-array>
+    <string-array name="Elektryczny">
+        <item>Wszystko</item>
+        <item>Elektryczny</item>
+    </string-array>
+    <string-array name="CNG">
+        <item>Wszystko</item>
+        <item>CNG</item>
+    </string-array>
 </resources>

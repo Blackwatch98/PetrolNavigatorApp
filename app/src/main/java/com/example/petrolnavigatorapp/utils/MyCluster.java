@@ -1,5 +1,7 @@
 package com.example.petrolnavigatorapp.utils;
 
+import android.graphics.Bitmap;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -9,13 +11,14 @@ import com.google.maps.android.clustering.ClusterItem;
 public class MyCluster implements ClusterItem {
 
     private final LatLng position;
-    private final int imageIcon;
+    //private final int imageIcon;
+    private final Bitmap imageIcon;
     private final String price;
     private String title;
     private String snippet;
     private Petrol petrol;
 
-    public MyCluster(LatLng latLng, String title, String snippet, int imageIcon, String price, Petrol petrol)
+    public MyCluster(LatLng latLng, String title, String snippet, Bitmap imageIcon, String price, Petrol petrol)
     {
         this.position = latLng;
         this.title = title;
@@ -42,7 +45,7 @@ public class MyCluster implements ClusterItem {
         return snippet;
     }
 
-    public int getImageIcon() {
+    public Bitmap getImageIcon() {
         return imageIcon;
     }
 

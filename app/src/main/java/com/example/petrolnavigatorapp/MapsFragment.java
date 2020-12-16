@@ -1,15 +1,8 @@
 package com.example.petrolnavigatorapp;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -19,11 +12,14 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -59,11 +55,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private float cameraZoom;
     private FirebaseFirestore fireStore;
     private FirebaseAuth mAuth;
+    private DocumentReference userDocument;
     private Toolbar toolbar;
 
-    private FrameLayout frameLayout;
-    private ImageView imageView;
-    private TextView textView;
 
     private LocationCallback mLocationCallback = new LocationCallback()
     {
@@ -86,9 +80,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     {
         StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         stringBuilder.append("location=" + latLng.latitude + "," + latLng.longitude);
-        System.out.println("promien wyszukiwania: " + radius);
+        //System.out.println("promien wyszukiwania: " + radius);
         stringBuilder.append("&radius=" + radius);
         stringBuilder.append("&keyword=" + "petrol");
+        ////
         stringBuilder.append("&key="+getResources().getString(R.string.google_places_key));
 
         String url = stringBuilder.toString();
@@ -99,10 +94,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
         dataTransfer[2] = getActivity();
         dataTransfer[3] = this;
 
-
         FirestorePetrolsDB test = new FirestorePetrolsDB(latLng, mMap, getContext(),getActivity());
         test.findNearbyPetrols(radius);
-
 
 //        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 //            @Override
@@ -134,20 +127,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        frameLayout = getView().findViewById(R.id.marker_icon);
-        imageView = getView().findViewById(R.id.ImageView01);
-        textView = getView().findViewById(R.id.text_view_test);
-
         markers = new LinkedList<>();
         mFusedProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         fireStore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        DocumentReference documentReference = fireStore.collection("users")
+        userDocument = fireStore.collection("users")
                 .document(mAuth.getCurrentUser().getUid());
 
-        documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        userDocument.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if(documentSnapshot.exists())
@@ -274,10 +263,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     @Override
     public void onTaskFinish(List<Marker> markers) {
         for(Marker marker : markers)
-        {
             this.markers.add(marker);
-        }
-
     }
 
     @Override

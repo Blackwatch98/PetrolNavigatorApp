@@ -2,6 +2,6 @@
 <resources>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="custom_marker_image_height">25dp</dimen>
-    <dimen name="custom_marker_image_width">50dp</dimen>
+    <dimen name="custom_marker_image_width">35dp</dimen>
     <dimen name="custom_marker_padding">2dp</dimen>
 </resources>

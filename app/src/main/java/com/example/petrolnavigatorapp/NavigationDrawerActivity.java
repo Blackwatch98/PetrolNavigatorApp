@@ -14,10 +14,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FilterDialog.FilterDialogListener {
 
     private DrawerLayout drawer;
     private Toolbar current_toolbar, map_toolbar, list_toolbar, settings_toolbar, vehicles_toolbar;
@@ -112,7 +115,7 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 break;
             case R.id.logout:
                 FirebaseAuth.getInstance().signOut();
-                Toast.makeText(this, "Wylogowałeś się :)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Wylogowałeś się. Do zobaczenia :)", Toast.LENGTH_SHORT).show();
                 finish();
                 Intent intent2 = new Intent(NavigationDrawerActivity.this, LoginActivity.class);
                 startActivity(intent2);
@@ -134,9 +137,31 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
         switch (item.getItemId()) {
             case android.R.id.home:
                 break;
+            case R.id.menu_item_filter:
+                FilterDialog filterDialog = new FilterDialog();
+                filterDialog.show(getSupportFragmentManager(), "dialog");
+                break;
             default:
                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void changeUserPreferences(String prefType, String prefFuel) {
+        FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        DocumentReference userDocument = fireStore.collection("users").document(mAuth.getCurrentUser().getUid());
+        userDocument.update(
+                "userSettings.prefFuel", prefFuel,
+                "userSettings.prefFuelType", prefType
+        ).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(getApplicationContext(), "Zmieniono ustawienia", Toast.LENGTH_SHORT).show();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new MapsFragment()).commit();
+            }
+        });
     }
 }

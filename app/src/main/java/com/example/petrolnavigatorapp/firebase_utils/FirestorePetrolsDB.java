@@ -3,32 +3,37 @@ package com.example.petrolnavigatorapp.firebase_utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.example.petrolnavigatorapp.MyClusterManagerRenderer;
 import com.example.petrolnavigatorapp.PetrolPopUpActivity;
-import com.example.petrolnavigatorapp.R;
 import com.example.petrolnavigatorapp.utils.Fuel;
 import com.example.petrolnavigatorapp.utils.MyCluster;
 import com.example.petrolnavigatorapp.utils.Petrol;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.maps.android.clustering.Cluster;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.collections.MarkerManager;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class FirestorePetrolsDB {
 
@@ -36,120 +41,200 @@ public class FirestorePetrolsDB {
     private GoogleMap mMap;
     private Context context;
     final private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
+    final private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private MyFirebaseStorage sRef;
     private List<Petrol> petrolsList;
     private Activity activity;
 
-    public FirestorePetrolsDB()
-    {
+    public FirestorePetrolsDB() {
 
     }
 
-    public FirestorePetrolsDB(LatLng userLocalization, GoogleMap mMap, Context context, Activity activity)
-    {
+    public FirestorePetrolsDB(LatLng userLocalization, GoogleMap mMap, Context context, Activity activity) {
         this.userLocalization = userLocalization;
         this.mMap = mMap;
         this.context = context;
         this.activity = activity;
     }
 
-    public void findNearbyPetrols(final float radius)
-    {
-        petrolsList = new LinkedList<>();
-        final CollectionReference mRef = fireStore.collection("petrol_stations");
-        mRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+    public void findNearbyPetrols(final float radius) {
+        fireStore.collection("users").document(mAuth.getCurrentUser().getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                if(queryDocumentSnapshots != null)
-                {
-                    ClusterManager<MyCluster> manager = new ClusterManager<MyCluster>(context,mMap);
-                    MyClusterManagerRenderer managerRenderer = new MyClusterManagerRenderer(
-                        context,
-                        mMap,
-                        manager
-                    );
-                    manager.setRenderer(managerRenderer);
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (!documentSnapshot.exists())
+                    return;
+                HashMap<String, Object> data = (HashMap<String, Object>) documentSnapshot.get("userSettings");
+                final String typePref, fuelPref;
+                typePref = data.get("prefFuelType").toString();
+                fuelPref = data.get("prefFuel").toString();
 
-                    for(QueryDocumentSnapshot query : queryDocumentSnapshots)
-                    {
-                        double lat = Double.parseDouble(query.get("lat").toString());
-                        double lon = Double.parseDouble(query.get("lon").toString());
-                        //int R = 6371;    //meters
-                       // double distance = Math.sqrt(Math.pow(userLocalization.latitude-lat,2) + Math.pow(userLocalization.longitude-lon,2));
-                        //System.out.println("rad "+radius);
-                        //System.out.println("dis " +distance*R);
-                        Location location1 = new Location("");
-                        location1.setLatitude(lat);
-                        location1.setLongitude(lon);
-                        Location location2 = new Location("");
-                        location2.setLatitude(userLocalization.latitude);
-                        location2.setLongitude(userLocalization.longitude);
-                        double distance = location1.distanceTo(location2);
-
-                        if(distance <= radius*4)
-                        {
-                            Petrol petrol = SnapshotToPetrol(query);
-//                            MarkerOptions markerOptions = new MarkerOptions();
-//                            markerOptions.title(petrol.getName()+"," + petrol.getAddress());
-//                            markerOptions.position(new LatLng(petrol.getLat(),petrol.getLon()));
-
-                            final MyCluster newClusterMarker = new MyCluster(
-                                    new LatLng(lat,lon),
-                                    "",
-                                    "",
-                                    R.drawable.pb95,
-                                    "9.20",
-                                    petrol
+                petrolsList = new LinkedList<>();
+                final CollectionReference mRef = fireStore.collection("petrol_stations");
+                mRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots != null) {
+                            final MarkerManager markerManager = new MarkerManager(mMap);
+                            final ClusterManager<MyCluster> manager = new ClusterManager<MyCluster>(context, mMap, markerManager);
+                            final ClusterManager<MyCluster> manager_note_text = new ClusterManager<MyCluster>(context, mMap, markerManager);
+                            MyClusterManagerRenderer managerRenderer = new MyClusterManagerRenderer(
+                                    context,
+                                    mMap,
+                                    manager
                             );
-                            manager.addItem(newClusterMarker);
+                            MyClusterManagerRenderer managerRenderer2 = new MyClusterManagerRenderer(
+                                    context,
+                                    mMap,
+                                    manager_note_text,
+                                    true
+                            );
+                            manager.setRenderer(managerRenderer);
+                            manager_note_text.setRenderer(managerRenderer2);
+
+                            for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                                final double lat = Double.parseDouble(query.get("lat").toString());
+                                final double lon = Double.parseDouble(query.get("lon").toString());
+                                Location location1 = new Location("");
+                                location1.setLatitude(lat);
+                                location1.setLongitude(lon);
+                                Location location2 = new Location("");
+                                location2.setLatitude(userLocalization.latitude);
+                                location2.setLongitude(userLocalization.longitude);
+                                double distance = location1.distanceTo(location2);
+
+                                if (distance <= radius * 4) {
+                                    final Petrol petrol = SnapshotToPetrol(query);
+
+                                    Fuel fuel = null;
+                                    if (fuelPref.equals("Default")) {
+                                        if (typePref.equals("Default")) {
+                                            for (String name : petrol.getAvailableFuels().keySet()) {
+                                                Boolean value = petrol.getAvailableFuels().get(name);
+                                                if (value) {
+                                                    for (Fuel f : petrol.getFuels()) {
+                                                        if (f.getType().equals(name)) {
+                                                            fuel = f;
+                                                            break;
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            for (Fuel f : petrol.getFuels()) {
+                                                if (f.getType().equals(typePref)) {
+                                                    fuel = f;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        for (Fuel f : petrol.getFuels()) {
+                                            if (f.getName().equals(fuelPref)) {
+                                                fuel = f;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    final Fuel finalFuel = fuel;
+                                    sRef = new MyFirebaseStorage();
+                                    try {
+                                        final File localFile = File.createTempFile("petrol_icon", "png");
+                                        sRef.getPetrolIconRef(petrol.getName()).getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                                Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                                                final MyCluster newClusterMarker;
+                                                if (finalFuel == null || finalFuel.getPrice().equals("0.00")) {
+                                                    newClusterMarker = new MyCluster(
+                                                            new LatLng(lat, lon),
+                                                            "",
+                                                            "",
+                                                            bitmap,
+                                                            null,
+                                                            petrol
+                                                    );
+                                                    manager_note_text.addItem(newClusterMarker);
+                                                } else {
+                                                    newClusterMarker = new MyCluster(
+                                                            new LatLng(lat, lon),
+                                                            "",
+                                                            "",
+                                                            bitmap,
+                                                            finalFuel.getPrice(),
+                                                            petrol
+                                                    );
+                                                    manager.addItem(newClusterMarker);
+                                                }
+                                                mMap.setOnMarkerClickListener(markerManager);
+                                                manager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<MyCluster>() {
+                                                    @Override
+                                                    public boolean onClusterItemClick(MyCluster item) {
+                                                        Intent intent = new Intent(activity, PetrolPopUpActivity.class);
+                                                        intent.putExtra("latitude", item.getPosition().latitude);
+                                                        intent.putExtra("longitude", item.getPosition().longitude);
+                                                        activity.startActivity(intent);
+                                                        return true;
+                                                    }
+                                                });
+                                                manager_note_text.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<MyCluster>() {
+                                                    @Override
+                                                    public boolean onClusterItemClick(MyCluster item) {
+                                                        Intent intent = new Intent(activity, PetrolPopUpActivity.class);
+                                                        intent.putExtra("latitude", item.getPosition().latitude);
+                                                        intent.putExtra("longitude", item.getPosition().longitude);
+                                                        activity.startActivity(intent);
+                                                        return true;
+                                                    }
+                                                });
+                                                MarkerManager.Collection collection = manager.getMarkerManager().newCollection();
+//                                                markerManager.newCollection().setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+//                                                    @Override
+//                                                    public boolean onMarkerClick(Marker marker) {
+//                                                        Intent intent = new Intent(activity, PetrolPopUpActivity.class);
+//                                                        intent.putExtra("latitude", marker.getPosition().latitude);
+//                                                        intent.putExtra("longitude", marker.getPosition().longitude);
+//                                                        activity.startActivity(intent);
+//                                                        return true;
+//                                                    }
+//                                                });
+                                                manager.cluster();
+                                                manager_note_text.cluster();
+                                            }
+                                        });
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                            }
+
                         }
                     }
-                    mMap.setOnMarkerClickListener(manager);
-//                    manager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<MyCluster>() {
-//                        @Override
-//                        public boolean onClusterClick(Cluster<MyCluster> cluster) {
-//                            System.out.println("HALKO " + activity);
-//                            System.out.println("asdasd");
-////                            Intent intent = new Intent(activity, PetrolPopUpActivity.class);
-////                            intent.putExtra("latitude", cluster.getPosition().latitude);
-////                            intent.putExtra("longitude", cluster.getPosition().longitude);
-////                            activity.startActivity(intent);
-//                            return false;
-//                        }
-//                    });
-                    manager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<MyCluster>() {
-                        @Override
-                        public boolean onClusterItemClick(MyCluster item) {
-                            Intent intent = new Intent(activity, PetrolPopUpActivity.class);
-                            intent.putExtra("latitude", item.getPosition().latitude);
-                            intent.putExtra("longitude", item.getPosition().longitude);
-                            activity.startActivity(intent);
-                            return true;
-                        }
-                    });
-
-
-                    manager.cluster();
-                }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                e.getMessage();
             }
         });
     }
 
-    //NEEDS DATABASE RESTRUCTURE
-    public Petrol SnapshotToPetrol(QueryDocumentSnapshot query)
-    {
+    public Petrol SnapshotToPetrol(QueryDocumentSnapshot query) {
         Petrol petrol = new Petrol(
                 query.get("name").toString(),
                 Double.parseDouble(query.get("lat").toString()),
                 Double.parseDouble(query.get("lon").toString()),
                 query.get("address").toString()
         );
-        HashMap<String, Boolean> map = (HashMap<String, Boolean>)query.get("availableFuels");
+        HashMap<String, Boolean> map = (HashMap<String, Boolean>) query.get("availableFuels");
         petrol.setAvailableFuels(map);
 
         List<HashMap<String, Object>> lista = (List<HashMap<String, Object>>) query.get("fuels");
         List<Fuel> fuels = new LinkedList<>();
 
-        for(HashMap<String, Object> item : lista) {
+        for (HashMap<String, Object> item : lista) {
             fuels.add(new Fuel(
                     Integer.parseInt(item.get("icon").toString()),
                     item.get("price").toString(),

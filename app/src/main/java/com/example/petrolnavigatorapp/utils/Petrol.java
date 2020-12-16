@@ -31,7 +31,7 @@ public class Petrol implements Serializable {
 
         this.fuels = new LinkedList<>();
 
-        String [] names = {"Pb98", "Pb95", "ON", "ON_Ultimate", "LPG", "CNG", "Elektryczny", "Etanol"};
+        String [] names = {"Pb98", "Pb95", "ON", "ON_Ultimate", "LPG", "CNG", "Elektryczny", "E85"};
         String[] types = {"Benzyna", "Benzyna", "Diesel", "Diesel", "LPG", "CNG","Elektryczny", "Etanol"};
         int [] icons = {R.drawable.pb98, R.drawable.pb95,R.drawable.on, R.drawable.on_ult,R.drawable.lpg2, R.drawable.cng2,R.drawable.ener,R.drawable.e85};
 

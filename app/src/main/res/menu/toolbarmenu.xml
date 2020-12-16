@@ -5,7 +5,7 @@
     <item
         app:showAsAction="always"
         android:title="filter"
-        android:id="@+id/menuitem_filter"
+        android:id="@+id/menu_item_filter"
         android:icon="@drawable/ic_baseline_filter_alt_24"
         >
     </item>
