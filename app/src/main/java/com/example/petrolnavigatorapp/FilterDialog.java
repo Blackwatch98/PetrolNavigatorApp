@@ -51,30 +51,7 @@ public class FilterDialog extends AppCompatDialogFragment {
         typeSpinnerAdapter = ArrayAdapter.createFromResource(getContext(), R.array.fuelTypes, android.R.layout.simple_spinner_item);
         typeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         fuelTypeSpinner.setAdapter(typeSpinnerAdapter);
-        fuelTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                if(adapterView.getItemAtPosition(position).equals("Benzyna"))
-                    fillSubspinner(fuelTypesResource[0], false);
-                else if(adapterView.getItemAtPosition(position).equals("Diesel"))
-                    fillSubspinner(fuelTypesResource[1], false);
-                else if(adapterView.getItemAtPosition(position).equals("LPG"))
-                    fillSubspinner(fuelTypesResource[2], false);
-                else if(adapterView.getItemAtPosition(position).equals("Etanol"))
-                    fillSubspinner(fuelTypesResource[3], false);
-                else if(adapterView.getItemAtPosition(position).equals("Elektryczny"))
-                    fillSubspinner(fuelTypesResource[4], false);
-                else if(adapterView.getItemAtPosition(position).equals("CNG"))
-                    fillSubspinner(fuelTypesResource[5], false);
-                else if(adapterView.getItemAtPosition(position).equals("Wszystko"))
-                    fillSubspinner(0, true);
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
 
         builder.setView(view)
                 .setTitle("Filtruj")
@@ -178,6 +155,31 @@ public class FilterDialog extends AppCompatDialogFragment {
                     }
                     fuelTypeSpinner.setSelection(typeSpinnerAdapter.getPosition(prefType));
                     isAlreadyWorking = true;
+
+                    fuelTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                            if(adapterView.getItemAtPosition(position).equals("Benzyna"))
+                                fillSubspinner(fuelTypesResource[0], false);
+                            else if(adapterView.getItemAtPosition(position).equals("Diesel"))
+                                fillSubspinner(fuelTypesResource[1], false);
+                            else if(adapterView.getItemAtPosition(position).equals("LPG"))
+                                fillSubspinner(fuelTypesResource[2], false);
+                            else if(adapterView.getItemAtPosition(position).equals("Etanol"))
+                                fillSubspinner(fuelTypesResource[3], false);
+                            else if(adapterView.getItemAtPosition(position).equals("Elektryczny"))
+                                fillSubspinner(fuelTypesResource[4], false);
+                            else if(adapterView.getItemAtPosition(position).equals("CNG"))
+                                fillSubspinner(fuelTypesResource[5], false);
+                            else if(adapterView.getItemAtPosition(position).equals("Wszystko"))
+                                fillSubspinner(0, true);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+
+                        }
+                    });
                 }
             }
         });
