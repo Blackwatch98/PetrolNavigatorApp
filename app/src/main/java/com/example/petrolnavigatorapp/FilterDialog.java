@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,9 +16,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class FilterDialog extends AppCompatDialogFragment {
 
@@ -26,6 +35,9 @@ public class FilterDialog extends AppCompatDialogFragment {
     private List<String> subcategories = new ArrayList<>();
     private int [] fuelTypesResource = {R.array.Benzyna,R.array.Diesel,R.array.LPG,R.array.Etanol,R.array.Elektryczny,R.array.CNG};
     private FilterDialogListener listener;
+    private ArrayAdapter typeSpinnerAdapter, fuelSpinnerAdapter;
+    boolean isAlreadyWorking = false;
+    private String prefType, prefFuel;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -36,9 +48,9 @@ public class FilterDialog extends AppCompatDialogFragment {
 
         fuelTypeSpinner = view.findViewById(R.id.spinner);
         fuelSpinner = view.findViewById(R.id.spinner2);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.fuelTypes, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        fuelTypeSpinner.setAdapter(adapter);
+        typeSpinnerAdapter = ArrayAdapter.createFromResource(getContext(), R.array.fuelTypes, android.R.layout.simple_spinner_item);
+        typeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        fuelTypeSpinner.setAdapter(typeSpinnerAdapter);
         fuelTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
@@ -80,6 +92,9 @@ public class FilterDialog extends AppCompatDialogFragment {
                         listener.changeUserPreferences(fuelType,fuel);
                     }
                 });
+
+        setLastPreferences();
+
         return builder.create();
     }
 
@@ -103,19 +118,68 @@ public class FilterDialog extends AppCompatDialogFragment {
                 for(String item : row)
                     fuels.add(item);
             }
-            ArrayAdapter<String> adapter2 = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, fuels);
-            adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            fuelSpinner.setAdapter(adapter2);
+            fuelSpinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, fuels);
+            fuelSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            fuelSpinner.setAdapter(fuelSpinnerAdapter);
         }
         else
         {
-            ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(getContext(), resource, android.R.layout.simple_spinner_item);
-            adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            fuelSpinner.setAdapter(adapter2);
+            fuelSpinnerAdapter = ArrayAdapter.createFromResource(getContext(), resource, android.R.layout.simple_spinner_item);
+            fuelSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            fuelSpinner.setAdapter(fuelSpinnerAdapter);
+        }
+
+        if(isAlreadyWorking)
+        {
+            fuelSpinner.setSelection(fuelSpinnerAdapter.getPosition(prefFuel));
+            isAlreadyWorking = false;
         }
     }
 
     public interface FilterDialogListener{
         void changeUserPreferences(String prefType, String prefFuel);
+    }
+
+    private void setLastPreferences()
+    {
+        FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        DocumentReference userDocument = fireStore.collection("users").document(mAuth.getCurrentUser().getUid());
+        userDocument.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot.exists())
+                {
+                    prefType = documentSnapshot.get("userSettings.prefFuelType").toString();
+                    prefFuel = documentSnapshot.get("userSettings.prefFuel").toString();
+
+                    if(prefType.equals("Wszystko")) {
+                        List<String> fuels = new ArrayList<>();
+                        for (int res : fuelTypesResource) {
+                            String[] row = getResources().getStringArray(res);
+                            for (String item : row)
+                                fuels.add(item);
+                        }
+                        fuelSpinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, fuels);
+                        fuelSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        fuelSpinner.setAdapter(fuelSpinnerAdapter);
+                    }
+                    else
+                    {
+                        int id = getResources().getIdentifier(prefType, "array", getActivity().getPackageName());
+                        String [] array = getResources().getStringArray(id);
+                        List<String> fuels = new ArrayList<>();
+                        for (String item : array)
+                            fuels.add(item);
+
+                        fuelSpinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, fuels);
+                        fuelSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        fuelSpinner.setAdapter(fuelSpinnerAdapter);
+                    }
+                    fuelTypeSpinner.setSelection(typeSpinnerAdapter.getPosition(prefType));
+                    isAlreadyWorking = true;
+                }
+            }
+        });
     }
 }
