@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.petrolnavigatorapp.utils.Petrol;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,11 +26,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-        FilterDialog.FilterDialogListener, FindPetrolsListener {
+        FilterDialog.FilterDialogListener, FindPetrolsListener, MapsFragment.UserLocalizationListener {
 
     private DrawerLayout drawer;
     private Toolbar current_toolbar, map_toolbar, list_toolbar, settings_toolbar, vehicles_toolbar;
     private List<Petrol> foundPetrols;
+    private String prefFuel, prefType;
+    private LatLng userLocalization;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +112,10 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 petrols.addAll(foundPetrols);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("petrols", petrols);
+                bundle.putDouble("lat", userLocalization.latitude);
+                bundle.putDouble("lon", userLocalization.longitude);
+                bundle.putString("prefFuel", prefFuel);
+                bundle.putString("prefType", prefType);
                 PetrolsListFragment fragobj = new PetrolsListFragment();
                 fragobj.setArguments(bundle);
 
@@ -181,9 +188,16 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
     @Override
     public void getPetrolsList(List<Petrol> petrols) {
         foundPetrols = petrols;
-        for(Petrol petrol : foundPetrols)
-            System.out.println(petrol.getName());
+    }
 
-        System.out.println("XXXXXXXXXXXXXXXXXX");
+    @Override
+    public void getUserPrefs(String prefType, String prefFuel) {
+        this.prefType = prefType;
+        this.prefFuel = prefFuel;
+    }
+
+    @Override
+    public void getUserLocalization(LatLng latLng) {
+        userLocalization = latLng;
     }
 }

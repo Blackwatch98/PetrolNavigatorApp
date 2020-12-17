@@ -60,6 +60,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private FirebaseAuth mAuth;
     private DocumentReference userDocument;
     private Toolbar toolbar;
+    private UserLocalizationListener listener;
 
 
     private LocationCallback mLocationCallback = new LocationCallback() {
@@ -70,6 +71,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
             for (Location location : locationResult.getLocations()) {
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
+                listener.getUserLocalization(currentLocation);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
             }
@@ -118,6 +120,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_maps, container, false);
 
+        listener = (UserLocalizationListener)getContext();
         toolbar = view.findViewById(R.id.map_nav_toolbar);
 
         return view;
@@ -171,6 +174,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                     @Override
                     public void onMapLongClick(LatLng latLng2) {
                         currentLocation = latLng2;
+                        listener.getUserLocalization(currentLocation);
                         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
                             mMap.setMyLocationEnabled(false);
                         mMap.setMyLocationEnabled(true);
@@ -281,10 +285,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     @Override
     public void onLocationChanged(@NonNull Location location) {
         currentLocation = new LatLng(location.getLatitude(),location.getLongitude());
-        System.out.println("Current Location: " + currentLocation);
     }
 
     public interface UserLocalizationListener {
-        //void getUserLocalization(LatLng )
+        void getUserLocalization(LatLng latLng);
     }
 }

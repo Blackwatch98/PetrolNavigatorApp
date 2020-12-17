@@ -70,6 +70,7 @@ public class FirestorePetrolsDB {
                 final String typePref, fuelPref;
                 typePref = data.get("prefFuelType").toString();
                 fuelPref = data.get("prefFuel").toString();
+                listener.getUserPrefs(typePref, fuelPref);
 
                 petrolsList = new LinkedList<>();
                 final CollectionReference mRef = fireStore.collection("petrol_stations");
@@ -110,8 +111,8 @@ public class FirestorePetrolsDB {
                                     petrolsList.add(petrol);
 
                                     Fuel fuel = null;
-                                    if (fuelPref.equals("Default")) {
-                                        if (typePref.equals("Default")) {
+                                    if (fuelPref.equals("Wszystko")) {
+                                        if (typePref.equals("Wszystko")) {
                                             for (String name : petrol.getAvailableFuels().keySet()) {
                                                 Boolean value = petrol.getAvailableFuels().get(name);
                                                 if (value) {
@@ -212,8 +213,6 @@ public class FirestorePetrolsDB {
                                 }
 
                             }
-                            for(Petrol petrol : petrolsList)
-                                System.out.println(petrol.getName());
                             listener.getPetrolsList(petrolsList);
                         }
                     }

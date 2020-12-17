@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.example.petrolnavigatorapp.adapters.PetrolsRecyclerViewAdapter;
 import com.example.petrolnavigatorapp.utils.Petrol;
+import com.google.type.LatLng;
 
 import java.util.List;
 
@@ -28,6 +29,8 @@ public class PetrolsListFragment extends Fragment {
     private int mColumnCount = 1;
 
     private List<Petrol> petrols;
+    private double lat, lon;
+    private String prefFuel, prefType;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -43,6 +46,10 @@ public class PetrolsListFragment extends Fragment {
         if (getArguments() != null) {
             //mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
             petrols = (List<Petrol>) getArguments().getSerializable("petrols");
+            lat = getArguments().getDouble("lat");
+            lon = getArguments().getDouble("lon");
+            prefFuel = getArguments().getString("prefFuel");
+            prefType = getArguments().getString("prefType");
         }
     }
 
@@ -58,13 +65,11 @@ public class PetrolsListFragment extends Fragment {
 
             //recyclerView.setAdapter(new PetrolsRecyclerViewAdapter(DummyContent.ITEMS));
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
+            PetrolsRecyclerViewAdapter adapter = new PetrolsRecyclerViewAdapter(petrols, lat, lon, prefType, prefFuel, context);
 
-            PetrolsRecyclerViewAdapter adapter = new PetrolsRecyclerViewAdapter(petrols,context);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.setAdapter(adapter);
             recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-
         }
         return view;
     }
