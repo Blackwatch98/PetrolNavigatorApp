@@ -14,6 +14,7 @@ public class Petrol implements Serializable {
     private String address;
     private HashMap<String,Boolean> availableFuels;
     private List<Fuel> fuels;
+    private String prefFuel, prefType;
 
     Petrol(){}
 

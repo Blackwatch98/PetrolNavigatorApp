@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,34 +12,28 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.petrolnavigatorapp.adapters.MyFuelRecyclerViewAdapter;
-import com.example.petrolnavigatorapp.dummy.DummyContent;
+import com.example.petrolnavigatorapp.adapters.PetrolsRecyclerViewAdapter;
+import com.example.petrolnavigatorapp.utils.Petrol;
+
+import java.util.List;
 
 /**
  * A fragment representing a list of Items.
  */
-public class FuelListFragment extends Fragment {
+public class PetrolsListFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
     private int mColumnCount = 1;
 
+    private List<Petrol> petrols;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public FuelListFragment() {
-    }
-
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static FuelListFragment newInstance(int columnCount) {
-        FuelListFragment fragment = new FuelListFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
-        fragment.setArguments(args);
-        return fragment;
+    public PetrolsListFragment() {
     }
 
     @Override
@@ -47,25 +41,30 @@ public class FuelListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
+            //mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
+            petrols = (List<Petrol>) getArguments().getSerializable("petrols");
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_fuel_list_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_petrols_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new MyFuelRecyclerViewAdapter(DummyContent.ITEMS));
+
+            //recyclerView.setAdapter(new PetrolsRecyclerViewAdapter(DummyContent.ITEMS));
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
+
+            PetrolsRecyclerViewAdapter adapter = new PetrolsRecyclerViewAdapter(petrols,context);
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setAdapter(adapter);
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+
         }
         return view;
     }

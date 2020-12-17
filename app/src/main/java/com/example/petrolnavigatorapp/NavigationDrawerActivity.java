@@ -14,16 +14,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.petrolnavigatorapp.utils.Petrol;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FilterDialog.FilterDialogListener {
+import java.util.ArrayList;
+import java.util.List;
+
+public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+        FilterDialog.FilterDialogListener, FindPetrolsListener {
 
     private DrawerLayout drawer;
     private Toolbar current_toolbar, map_toolbar, list_toolbar, settings_toolbar, vehicles_toolbar;
+    private List<Petrol> foundPetrols;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,8 +105,15 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 current_toolbar = map_toolbar;
                 break;
             case R.id.list:
+                ArrayList<Petrol> petrols = new ArrayList<>(foundPetrols.size());
+                petrols.addAll(foundPetrols);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("petrols", petrols);
+                PetrolsListFragment fragobj = new PetrolsListFragment();
+                fragobj.setArguments(bundle);
+
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new FuelListFragment()).commit();
+                        fragobj).commit();
                 current_toolbar = list_toolbar;
                 break;
             case R.id.vehicles:
@@ -163,5 +176,14 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                         new MapsFragment()).commit();
             }
         });
+    }
+
+    @Override
+    public void getPetrolsList(List<Petrol> petrols) {
+        foundPetrols = petrols;
+        for(Petrol petrol : foundPetrols)
+            System.out.println(petrol.getName());
+
+        System.out.println("XXXXXXXXXXXXXXXXXX");
     }
 }
