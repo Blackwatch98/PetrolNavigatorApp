@@ -63,18 +63,14 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 R.string.navigation_drawer_open,R.string.navigation_drawer_close);
         ActionBarDrawerToggle toggle2 = new ActionBarDrawerToggle(this,drawer,settings_toolbar,
                 R.string.navigation_drawer_open,R.string.navigation_drawer_close);
-        ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this,drawer,list_toolbar,
-                R.string.navigation_drawer_open,R.string.navigation_drawer_close);
         ActionBarDrawerToggle toggle4 = new ActionBarDrawerToggle(this,drawer,vehicles_toolbar,
                 R.string.navigation_drawer_open,R.string.navigation_drawer_close);
 
         drawer.addDrawerListener(toggle);
         drawer.addDrawerListener(toggle2);
-        drawer.addDrawerListener(toggle3);
         drawer.addDrawerListener(toggle4);
         toggle.syncState();
         toggle2.syncState();
-        toggle3.syncState();
         toggle4.syncState();
 
         if(savedInstanceState == null) {
@@ -122,6 +118,11 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         fragobj).commit();
                 current_toolbar = list_toolbar;
+                setSupportActionBar(current_toolbar);
+                ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this,drawer,list_toolbar,
+                        R.string.navigation_drawer_open,R.string.navigation_drawer_close);
+                drawer.addDrawerListener(toggle3);
+                toggle3.syncState();
                 break;
             case R.id.vehicles:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -148,7 +149,13 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         getMenuInflater().inflate(R.menu.toolbarmenu, menu);
+        if(current_toolbar.equals(list_toolbar))
+        {
+            menu.findItem(R.id.list_filter_icon).setVisible(true);
+            menu.findItem(R.id.menu_item_filter).setVisible(false);
+        }
         return true;
     }
 
@@ -161,6 +168,9 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 FilterDialog filterDialog = new FilterDialog();
                 filterDialog.show(getSupportFragmentManager(), "dialog");
                 break;
+            case R.id.list_filter_icon:
+                ListFilterDialog filterDialog2 = new ListFilterDialog();
+                filterDialog2.show(getSupportFragmentManager(), "dialog");
             default:
                break;
         }
