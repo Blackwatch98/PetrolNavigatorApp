@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.ListFragment;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-        FilterDialog.FilterDialogListener, FindPetrolsListener, MapsFragment.UserLocalizationListener {
+        FilterDialog.FilterDialogListener, FindPetrolsListener, MapsFragment.UserLocalizationListener, ListFilterDialog.OrderPrefListener {
 
     private DrawerLayout drawer;
     private Toolbar current_toolbar, map_toolbar, list_toolbar, settings_toolbar, vehicles_toolbar;
@@ -195,6 +196,7 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
         });
     }
 
+
     @Override
     public void getPetrolsList(List<Petrol> petrols) {
         foundPetrols = petrols;
@@ -209,5 +211,21 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
     @Override
     public void getUserLocalization(LatLng latLng) {
         userLocalization = latLng;
+    }
+
+    @Override
+    public void refreshList() {
+        ArrayList<Petrol> petrols = new ArrayList<>(foundPetrols.size());
+        petrols.addAll(foundPetrols);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("petrols", petrols);
+        bundle.putDouble("lat", userLocalization.latitude);
+        bundle.putDouble("lon", userLocalization.longitude);
+        bundle.putString("prefFuel", prefFuel);
+        bundle.putString("prefType", prefType);
+        PetrolsListFragment fragobj = new PetrolsListFragment();
+        fragobj.setArguments(bundle);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragobj).commit();
     }
 }

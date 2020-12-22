@@ -1,6 +1,7 @@
 package com.example.petrolnavigatorapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -16,26 +17,21 @@ import com.example.petrolnavigatorapp.adapters.PetrolsRecyclerViewAdapter;
 import com.example.petrolnavigatorapp.utils.Petrol;
 import com.google.type.LatLng;
 
+import java.util.LinkedList;
 import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A fragment representing a list of Items.
  */
 public class PetrolsListFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
-    private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
-    private int mColumnCount = 1;
-
     private List<Petrol> petrols;
     private double lat, lon;
     private String prefFuel, prefType;
+    private Context context;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
     public PetrolsListFragment() {
     }
 
@@ -44,7 +40,6 @@ public class PetrolsListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            //mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
             petrols = (List<Petrol>) getArguments().getSerializable("petrols");
             lat = getArguments().getDouble("lat");
             lon = getArguments().getDouble("lon");
@@ -58,19 +53,53 @@ public class PetrolsListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_petrols_list, container, false);
 
-        // Set the adapter
         if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            context = view.getContext();
 
-            //recyclerView.setAdapter(new PetrolsRecyclerViewAdapter(DummyContent.ITEMS));
-            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
-            PetrolsRecyclerViewAdapter adapter = new PetrolsRecyclerViewAdapter(petrols, lat, lon, prefType, prefFuel, context);
+            SharedPreferences shared = getActivity().getPreferences(Context.MODE_PRIVATE);
+            String orderPrefs = shared.getString("orderPrefs", "");
 
-            recyclerView.setLayoutManager(layoutManager);
-            recyclerView.setAdapter(adapter);
-            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            if(orderPrefs != null)
+            {
+                List<Petrol> newOrderList = getOrderPref(orderPrefs);
+                RecyclerView recyclerView = (RecyclerView) view;
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
+                PetrolsRecyclerViewAdapter adapter = new PetrolsRecyclerViewAdapter(newOrderList, lat, lon, prefType, prefFuel, context);
+
+                recyclerView.setLayoutManager(layoutManager);
+                recyclerView.setAdapter(adapter);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+            }
+            else
+            {
+                RecyclerView recyclerView = (RecyclerView) view;
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
+                PetrolsRecyclerViewAdapter adapter = new PetrolsRecyclerViewAdapter(petrols, lat, lon, prefType, prefFuel, context);
+                recyclerView.setLayoutManager(layoutManager);
+                recyclerView.setAdapter(adapter);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+            }
         }
         return view;
+    }
+
+    public List<Petrol> getOrderPref(String orderPref) {
+        QuickSort sort = new QuickSort();
+        List<Petrol> newOrderList;
+
+        if (orderPref.equals("Distance"))
+        {
+            newOrderList = sort.getSortedByDistance(petrols, lat, lon);
+        }
+        else if(orderPref.equals("Price"))
+        {
+            newOrderList = petrols;
+        }
+        else
+        {
+            newOrderList = petrols;
+        }
+
+        return  newOrderList;
     }
 }

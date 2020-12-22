@@ -13,28 +13,34 @@
         android:layout_marginStart="10dp"
         android:textColor="#000"/>
 
-    <RadioButton
-        android:id="@+id/radioButton"
+    <RadioGroup
+        android:id="@+id/prefsRadioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_below="@id/sortTitle"
-        android:text="Odległość" />
+        android:layout_below="@id/sortTitle">
 
-    <RadioButton
-        android:id="@+id/radioButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/radioButton"
-        android:text="Ceny paliwa" />
+        <RadioButton
+            android:id="@+id/radioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Odległość"/>
 
-    <RadioButton
-        android:id="@+id/radioButton3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/radioButton2"
-        android:text="Data aktualizacji" />
+        <RadioButton
+            android:id="@+id/radioButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Ceny paliwa" />
+
+        <RadioButton
+            android:id="@+id/radioButton3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Data aktualizacji" />
+
+    </RadioGroup>
 
 </RelativeLayout>
