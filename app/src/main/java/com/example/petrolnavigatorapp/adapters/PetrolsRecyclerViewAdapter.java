@@ -17,7 +17,6 @@ import com.example.petrolnavigatorapp.ChangePriceActivity;
 import com.example.petrolnavigatorapp.NavigationDrawerActivity;
 import com.example.petrolnavigatorapp.PetrolPopUpActivity;
 import com.example.petrolnavigatorapp.R;
-import com.example.petrolnavigatorapp.dummy.DummyContent.DummyItem;
 import com.example.petrolnavigatorapp.firebase_utils.MyFirebaseStorage;
 import com.example.petrolnavigatorapp.utils.Fuel;
 import com.example.petrolnavigatorapp.utils.Petrol;

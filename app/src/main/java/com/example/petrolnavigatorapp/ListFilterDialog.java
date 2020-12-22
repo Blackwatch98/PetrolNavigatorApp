@@ -60,7 +60,7 @@ public class ListFilterDialog extends AppCompatDialogFragment {
         try {
             listener = (OrderPrefListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()+" must implements FilterDialogListener");
+            throw new ClassCastException(context.toString()+" must implements OrderPrefListener");
         }
     }
 
@@ -77,11 +77,6 @@ public class ListFilterDialog extends AppCompatDialogFragment {
 
         editor.apply();
         listener.refreshList();
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        System.out.println("LETS TRY IT AGAIN");
     }
 
     public interface OrderPrefListener{

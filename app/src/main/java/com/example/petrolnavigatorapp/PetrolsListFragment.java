@@ -93,7 +93,7 @@ public class PetrolsListFragment extends Fragment {
         }
         else if(orderPref.equals("Price"))
         {
-            newOrderList = petrols;
+            newOrderList = sort.getSortedByPrice(petrols, prefFuel, prefType);
         }
         else
         {
