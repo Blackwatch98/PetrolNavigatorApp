@@ -5,6 +5,11 @@ import android.location.Location;
 import com.example.petrolnavigatorapp.utils.Fuel;
 import com.example.petrolnavigatorapp.utils.Petrol;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,31 +38,107 @@ public class QuickSort {
             Petrol p = list.get(map.get(distanceArray[j]));
             sortedList.add(p);
         }
-
         return sortedList;
     }
 
     public LinkedList<Petrol> getSortedByPrice(List<Petrol> list, String prefFuel, String prefType) {
         LinkedList<Petrol> sortedList = new LinkedList<>();
+        LinkedList<Petrol> unknownDateList = new LinkedList<>();
         Map<Double, Integer> map = new HashMap<>();
         double[] priceArray = new double[list.size()];
         int i = 0;
 
         for (Petrol p : list) {
-            double price = getPrice(p,prefFuel,prefType);
-            if(price == -1 || price == 0)
-                price = 999+i;
+            Fuel f = getPrefFuel(p, prefFuel, prefType);
+            if (f == null) {
+                unknownDateList.add(p);
+                continue;
+            }
+            double price = Double.parseDouble(f.getPrice());
+            if (price == -1 || price == 0)
+                price = 999 + i;
 
             priceArray[i] = price;
             map.put(price, i);
             i++;
         }
+
+        boolean noData = false;
+        for (int j = 0; j < priceArray.length; j++) {
+            if (priceArray[j] != 0.0) {
+                noData = true;
+                break;
+            }
+
+        }
+        if (priceArray.length == 0 || priceArray.equals(null) || !noData) {
+            LinkedList<Petrol> covertedList = new LinkedList<>();
+            covertedList.addAll(list);
+            return covertedList;
+        }
+
         sort(priceArray, 0, priceArray.length - 1);
 
         for (int j = 0; j < priceArray.length; j++) {
             Petrol p = list.get(map.get(priceArray[j]));
             sortedList.add(p);
         }
+
+        sortedList.addAll(unknownDateList);
+
+        return sortedList;
+    }
+
+    public LinkedList<Petrol> getSortedByLastReportDate(List<Petrol> list, String prefFuel, String prefType) {
+        LinkedList<Petrol> sortedList = new LinkedList<>();
+        LinkedList<Petrol> unknownDateList = new LinkedList<>();
+        Map<Date, Integer> map = new HashMap<>();
+        Date[] arrayOfDates = new Date[list.size()];
+        int i = 0;
+
+        for (Petrol p : list) {
+            Fuel f = getPrefFuel(p, prefFuel, prefType);
+            if (f == null) {
+                unknownDateList.add(p);
+                continue;
+            }
+            String dateString = f.getLastReportDate();
+            if (dateString == null) {
+                unknownDateList.add(p);
+                continue;
+            }
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            try {
+                Date date = dateFormat.parse(dateString);
+                arrayOfDates[i] = date;
+                map.put(date, i);
+            } catch (ParseException e) {
+                e.getLocalizedMessage();
+            }
+            i++;
+        }
+
+        boolean noData = false;
+        for (int j = 0; j < arrayOfDates.length; j++) {
+            if (arrayOfDates[i] == null) {
+                noData = true;
+                break;
+            }
+        }
+        if (arrayOfDates.length == 0 || arrayOfDates.equals(null) || noData) {
+            LinkedList<Petrol> covertedList = new LinkedList<>();
+            covertedList.addAll(list);
+            return covertedList;
+        }
+
+        Arrays.sort(arrayOfDates);
+
+        for (int j = 0; j < arrayOfDates.length; j++) {
+            Petrol p = list.get(map.get(arrayOfDates[j]));
+            sortedList.add(p);
+        }
+
+        sortedList.addAll(unknownDateList);
 
         return sortedList;
     }
@@ -73,39 +154,35 @@ public class QuickSort {
         return location1.distanceTo(location2);
     }
 
-    private double getPrice(Petrol petrol, String prefFuel, String prefType)
-    {
+    private Fuel getPrefFuel(Petrol petrol, String prefFuel, String prefType) {
         HashMap<String, Boolean> types = petrol.getAvailableFuels();
         List<Fuel> fuels = petrol.getFuels();
 
-        if(prefFuel.equals("Wszystko"))
-        {
-            if(prefType.equals("Wszystko"))
-            {
+        if (prefFuel.equals("Wszystko")) {
+            if (prefType.equals("Wszystko")) {
                 String availableType = null;
-                for(String name : types.keySet())
-                    if(types.get(name)){
+                for (String name : types.keySet())
+                    if (types.get(name)) {
                         availableType = name;
                         break;
                     }
-                for(Fuel f : fuels)
-                    if(f.getType().equals(availableType))
-                        return Double.parseDouble(f.getPrice());
+                for (Fuel f : fuels)
+                    if (f.getType().equals(availableType))
+                        return f;
+            } else {
+                for (Fuel f : fuels)
+                    if (f.getType().equals(prefType))
+                        return f;
             }
-            else {
-                for(Fuel f : fuels)
-                    if(f.getType().equals(prefType))
-                        return Double.parseDouble(f.getPrice());
-            }
+        } else {
+            for (Fuel f : fuels)
+                if (f.getName().equals(prefFuel))
+                    return f;
         }
-        else
-            for(Fuel f : fuels)
-                if(f.getName().equals(prefFuel))
-                    return Double.parseDouble(f.getPrice());
-        return -1;
+        return null;
     }
 
-    private int partition(double [] array, int low, int high) {
+    private int partition(double[] array, int low, int high) {
         double pivot = array[high];
         int i = (low - 1);
         for (int j = low; j < high; j++) {
@@ -123,7 +200,7 @@ public class QuickSort {
         return i + 1;
     }
 
-    public void sort(double [] array, int low, int high) {
+    public void sort(double[] array, int low, int high) {
         if (low < high) {
             int pi = partition(array, low, high);
 

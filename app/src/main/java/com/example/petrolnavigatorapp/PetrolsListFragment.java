@@ -88,17 +88,11 @@ public class PetrolsListFragment extends Fragment {
         List<Petrol> newOrderList;
 
         if (orderPref.equals("Distance"))
-        {
             newOrderList = sort.getSortedByDistance(petrols, lat, lon);
-        }
         else if(orderPref.equals("Price"))
-        {
             newOrderList = sort.getSortedByPrice(petrols, prefFuel, prefType);
-        }
         else
-        {
-            newOrderList = petrols;
-        }
+            newOrderList = sort.getSortedByLastReportDate(petrols, prefFuel, prefType);
 
         return  newOrderList;
     }
