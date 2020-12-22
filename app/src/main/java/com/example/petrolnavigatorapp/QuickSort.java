@@ -9,6 +9,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -120,7 +122,7 @@ public class QuickSort {
 
         boolean noData = false;
         for (int j = 0; j < arrayOfDates.length; j++) {
-            if (arrayOfDates[i] == null) {
+            if (arrayOfDates[j] == null) {
                 noData = true;
                 break;
             }
@@ -131,7 +133,7 @@ public class QuickSort {
             return covertedList;
         }
 
-        Arrays.sort(arrayOfDates);
+        Arrays.sort(arrayOfDates, Collections.reverseOrder());
 
         for (int j = 0; j < arrayOfDates.length; j++) {
             Petrol p = list.get(map.get(arrayOfDates[j]));

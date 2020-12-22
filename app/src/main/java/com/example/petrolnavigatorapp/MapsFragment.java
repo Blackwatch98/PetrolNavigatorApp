@@ -176,7 +176,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
                             mMap.setMyLocationEnabled(false);
                         mMap.setMyLocationEnabled(true);
-                        System.out.println("Test2: " + currentLocation);
                     }
                 });
                 mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
@@ -225,8 +224,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                 checkLocationPermission();
             }
         }
-
-    System.out.println("Lokacja: " + currentLocation);
     }
 
     private void checkLocationPermission() {

@@ -161,7 +161,7 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
         {
             e.getMessage();
         }
-        System.out.println("RÓŻNICA = " +difference);
+
         return difference;
     }
 
