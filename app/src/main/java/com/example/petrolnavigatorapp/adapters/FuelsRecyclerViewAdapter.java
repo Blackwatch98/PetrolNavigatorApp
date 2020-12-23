@@ -25,14 +25,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecyclerViewAdapter.PetrolRecyclerViewHolder> {
+public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecyclerViewAdapter.FuelRecyclerViewHolder> {
 
     private List<Fuel> fuelsList;
     private Context context;
     private LinkedList<Button> changeButtonsList;
     private String petrolId;
 
-    public PetrolRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId)
+    public FuelsRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId)
     {
         fuelsList = fuels;
         context = con;
@@ -42,13 +42,13 @@ public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecycl
 
     @NonNull
     @Override
-    public PetrolRecyclerViewAdapter.PetrolRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.petrol_list_row,parent,false);
-        return new PetrolRecyclerViewAdapter.PetrolRecyclerViewHolder(itemView);
+    public FuelsRecyclerViewAdapter.FuelRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
+        View itemView = LayoutInflater.from(context).inflate(R.layout.fuel_list_row,parent,false);
+        return new FuelsRecyclerViewAdapter.FuelRecyclerViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(PetrolRecyclerViewAdapter.PetrolRecyclerViewHolder holder, final int position) {
+    public void onBindViewHolder(FuelsRecyclerViewAdapter.FuelRecyclerViewHolder holder, final int position) {
         holder.fuelIcon.setImageResource(fuelsList.get(position).getIcon());
         holder.dateText.setText(fuelsList.get(position).getName());
         holder.priceText.setText(fuelsList.get(position).getPrice() +"zł");
@@ -92,13 +92,13 @@ public class PetrolRecyclerViewAdapter extends RecyclerView.Adapter<PetrolRecycl
         return fuelsList.size();
     }
 
-    public class PetrolRecyclerViewHolder extends RecyclerView.ViewHolder {
+    public class FuelRecyclerViewHolder extends RecyclerView.ViewHolder {
        ImageView fuelIcon;
        EditText priceText;
        TextView dateText, reportText;
        Button changeButton;
 
-       PetrolRecyclerViewHolder(View view)
+       FuelRecyclerViewHolder(View view)
        {
            super(view);
            fuelIcon = view.findViewById(R.id.imageView);

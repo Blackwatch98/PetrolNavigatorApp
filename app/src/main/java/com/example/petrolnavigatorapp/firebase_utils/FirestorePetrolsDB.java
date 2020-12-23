@@ -9,6 +9,7 @@ import android.location.Location;
 
 import androidx.annotation.NonNull;
 
+import com.example.petrolnavigatorapp.FindPetrolsListener;
 import com.example.petrolnavigatorapp.MyClusterManagerRenderer;
 import com.example.petrolnavigatorapp.PetrolPopUpActivity;
 import com.example.petrolnavigatorapp.utils.Fuel;
@@ -45,6 +46,7 @@ public class FirestorePetrolsDB {
     private MyFirebaseStorage sRef;
     private List<Petrol> petrolsList;
     private Activity activity;
+    private FindPetrolsListener listener;
 
     public FirestorePetrolsDB() {
 
@@ -55,6 +57,7 @@ public class FirestorePetrolsDB {
         this.mMap = mMap;
         this.context = context;
         this.activity = activity;
+        listener = (FindPetrolsListener)context;
     }
 
     public void findNearbyPetrols(final float radius) {
@@ -67,6 +70,7 @@ public class FirestorePetrolsDB {
                 final String typePref, fuelPref;
                 typePref = data.get("prefFuelType").toString();
                 fuelPref = data.get("prefFuel").toString();
+                listener.getUserPrefs(typePref, fuelPref);
 
                 petrolsList = new LinkedList<>();
                 final CollectionReference mRef = fireStore.collection("petrol_stations");
@@ -102,12 +106,13 @@ public class FirestorePetrolsDB {
                                 location2.setLongitude(userLocalization.longitude);
                                 double distance = location1.distanceTo(location2);
 
-                                if (distance <= radius * 4) {
+                                if (distance <= radius) {
                                     final Petrol petrol = SnapshotToPetrol(query);
+                                    petrolsList.add(petrol);
 
                                     Fuel fuel = null;
-                                    if (fuelPref.equals("Default")) {
-                                        if (typePref.equals("Default")) {
+                                    if (fuelPref.equals("Wszystko")) {
+                                        if (typePref.equals("Wszystko")) {
                                             for (String name : petrol.getAvailableFuels().keySet()) {
                                                 Boolean value = petrol.getAvailableFuels().get(name);
                                                 if (value) {
@@ -208,7 +213,7 @@ public class FirestorePetrolsDB {
                                 }
 
                             }
-
+                            listener.getPetrolsList(petrolsList);
                         }
                     }
                 });

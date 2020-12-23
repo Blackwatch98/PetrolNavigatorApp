@@ -9,4 +9,12 @@
         android:icon="@drawable/ic_baseline_filter_alt_24"
         >
     </item>
+    <item
+        app:showAsAction="always"
+        android:title="filter2"
+        android:id="@+id/list_filter_icon"
+        android:icon="@drawable/ic_baseline_filter_alt_24"
+        android:visible="false"
+        >
+    </item>
 </menu>

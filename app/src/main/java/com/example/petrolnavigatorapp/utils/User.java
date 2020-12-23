@@ -12,7 +12,7 @@ public class User {
     {
         this.userId = userId;
         this.userName = userName;
-        this.userSettings =  new UserSettings("Default", "Default", 1);
+        this.userSettings =  new UserSettings("Wszystko", "Wszystko", 1);
     }
 
     public String getUserId() {

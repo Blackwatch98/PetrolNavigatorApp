@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.ListFragment;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,16 +15,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.petrolnavigatorapp.utils.Petrol;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FilterDialog.FilterDialogListener {
+import java.util.ArrayList;
+import java.util.List;
+
+public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+        FilterDialog.FilterDialogListener, FindPetrolsListener, MapsFragment.UserLocalizationListener, ListFilterDialog.OrderPrefListener {
 
     private DrawerLayout drawer;
     private Toolbar current_toolbar, map_toolbar, list_toolbar, settings_toolbar, vehicles_toolbar;
+    private List<Petrol> foundPetrols;
+    private String prefFuel, prefType;
+    private LatLng userLocalization;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,18 +64,14 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 R.string.navigation_drawer_open,R.string.navigation_drawer_close);
         ActionBarDrawerToggle toggle2 = new ActionBarDrawerToggle(this,drawer,settings_toolbar,
                 R.string.navigation_drawer_open,R.string.navigation_drawer_close);
-        ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this,drawer,list_toolbar,
-                R.string.navigation_drawer_open,R.string.navigation_drawer_close);
         ActionBarDrawerToggle toggle4 = new ActionBarDrawerToggle(this,drawer,vehicles_toolbar,
                 R.string.navigation_drawer_open,R.string.navigation_drawer_close);
 
         drawer.addDrawerListener(toggle);
         drawer.addDrawerListener(toggle2);
-        drawer.addDrawerListener(toggle3);
         drawer.addDrawerListener(toggle4);
         toggle.syncState();
         toggle2.syncState();
-        toggle3.syncState();
         toggle4.syncState();
 
         if(savedInstanceState == null) {
@@ -99,9 +105,25 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 current_toolbar = map_toolbar;
                 break;
             case R.id.list:
+                ArrayList<Petrol> petrols = new ArrayList<>(foundPetrols.size());
+                petrols.addAll(foundPetrols);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("petrols", petrols);
+                bundle.putDouble("lat", userLocalization.latitude);
+                bundle.putDouble("lon", userLocalization.longitude);
+                bundle.putString("prefFuel", prefFuel);
+                bundle.putString("prefType", prefType);
+                PetrolsListFragment fragobj = new PetrolsListFragment();
+                fragobj.setArguments(bundle);
+
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new FuelListFragment()).commit();
+                        fragobj).commit();
                 current_toolbar = list_toolbar;
+                setSupportActionBar(current_toolbar);
+                ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this,drawer,list_toolbar,
+                        R.string.navigation_drawer_open,R.string.navigation_drawer_close);
+                drawer.addDrawerListener(toggle3);
+                toggle3.syncState();
                 break;
             case R.id.vehicles:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -128,7 +150,13 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         getMenuInflater().inflate(R.menu.toolbarmenu, menu);
+        if(current_toolbar.equals(list_toolbar))
+        {
+            menu.findItem(R.id.list_filter_icon).setVisible(true);
+            menu.findItem(R.id.menu_item_filter).setVisible(false);
+        }
         return true;
     }
 
@@ -141,6 +169,9 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 FilterDialog filterDialog = new FilterDialog();
                 filterDialog.show(getSupportFragmentManager(), "dialog");
                 break;
+            case R.id.list_filter_icon:
+                ListFilterDialog filterDialog2 = new ListFilterDialog();
+                filterDialog2.show(getSupportFragmentManager(), "dialog");
             default:
                break;
         }
@@ -163,5 +194,38 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                         new MapsFragment()).commit();
             }
         });
+    }
+
+
+    @Override
+    public void getPetrolsList(List<Petrol> petrols) {
+        foundPetrols = petrols;
+    }
+
+    @Override
+    public void getUserPrefs(String prefType, String prefFuel) {
+        this.prefType = prefType;
+        this.prefFuel = prefFuel;
+    }
+
+    @Override
+    public void getUserLocalization(LatLng latLng) {
+        userLocalization = latLng;
+    }
+
+    @Override
+    public void refreshList() {
+        ArrayList<Petrol> petrols = new ArrayList<>(foundPetrols.size());
+        petrols.addAll(foundPetrols);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("petrols", petrols);
+        bundle.putDouble("lat", userLocalization.latitude);
+        bundle.putDouble("lon", userLocalization.longitude);
+        bundle.putString("prefFuel", prefFuel);
+        bundle.putString("prefType", prefType);
+        PetrolsListFragment fragobj = new PetrolsListFragment();
+        fragobj.setArguments(bundle);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragobj).commit();
     }
 }

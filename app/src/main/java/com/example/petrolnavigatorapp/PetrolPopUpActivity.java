@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.petrolnavigatorapp.adapters.PetrolRecyclerViewAdapter;
+import com.example.petrolnavigatorapp.adapters.FuelsRecyclerViewAdapter;
 import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.example.petrolnavigatorapp.firebase_utils.MyFirebaseStorage;
 import com.example.petrolnavigatorapp.utils.Fuel;
@@ -52,7 +52,7 @@ public class PetrolPopUpActivity extends Activity {
     private MyFirebaseStorage sRef;
     private double latitude, longitude;
     private Context context;
-    private PetrolRecyclerViewAdapter petrolRecyclerViewAdapter;
+    private FuelsRecyclerViewAdapter petrolRecyclerViewAdapter;
     private LinearLayout availableFuelsLayout;
     private Animation scale_up, scale_down;
     private Petrol popedPetrol;
@@ -120,7 +120,7 @@ public class PetrolPopUpActivity extends Activity {
                     RecyclerView recyclerView = findViewById(R.id.recyclerPetrolView);
                     RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
-                    petrolRecyclerViewAdapter = new PetrolRecyclerViewAdapter(fuelList, context, petrolId);
+                    petrolRecyclerViewAdapter = new FuelsRecyclerViewAdapter(fuelList, context, petrolId);
                     recyclerView.setLayoutManager(layoutManager);
                     recyclerView.setAdapter(petrolRecyclerViewAdapter);
                     recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -167,7 +167,7 @@ public class PetrolPopUpActivity extends Activity {
                                     RecyclerView recyclerView = findViewById(R.id.recyclerPetrolView);
                                     RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
 
-                                    petrolRecyclerViewAdapter = new PetrolRecyclerViewAdapter(fuelList, context, petrolId);
+                                    petrolRecyclerViewAdapter = new FuelsRecyclerViewAdapter(fuelList, context, petrolId);
                                     recyclerView.setLayoutManager(layoutManager);
                                     recyclerView.setAdapter(petrolRecyclerViewAdapter);
                                     recyclerView.setItemAnimator(new DefaultItemAnimator());

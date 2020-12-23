@@ -1,10 +1,11 @@
 package com.example.petrolnavigatorapp.utils;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Fuel {
+public class Fuel implements Serializable {
     private int icon;
     private String name;
     private String type;

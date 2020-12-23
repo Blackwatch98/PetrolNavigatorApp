@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="10dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/fab"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="5dp"
+            android:shape="ring"
+            card_view:cardCornerRadius="25dp"
+            card_view:cardPreventCornerOverlap = "false"
+            card_view:contentPadding="8dp"
+            card_view:cardElevation="2dp">
+
+            <ImageView
+                android:id="@+id/petrol_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@mipmap/ic_launcher_round" />
+        </androidx.cardview.widget.CardView>
+
+
+        <LinearLayout
+            android:id="@+id/linear"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@id/fab"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/list_petrol_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Nieznana"
+                android:maxLines="2"
+                android:textColor="#000"
+                android:textSize="16dp" />
+
+            <TextView
+                android:id="@+id/list_distance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Nieznany"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/linear"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/list_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:text="Brak"
+                android:textColor="#000"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/list_reportDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="15dp"
+                android:text="Brak"
+                android:textSize="10sp" />
+
+        </LinearLayout>
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>
