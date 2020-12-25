@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.petrolnavigatorapp.utils.UserReport;
+import com.example.petrolnavigatorapp.utils.UsersReportService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -34,6 +35,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -129,49 +132,10 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
                         newAvailableFuels.put(sw.getText().toString(), false);
                 }
 
-                if (!availableFuels.equals(newAvailableFuels)) {
-                    mRef.collection("usersTypeReports").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                            HashMap<String, Boolean> differences = new HashMap<>();
-                            for (String name : availableFuels.keySet()) {
-                                if (!availableFuels.get(name).equals(newAvailableFuels.get(name))) {
-                                    differences.put(name, newAvailableFuels.get(name));
-                                    System.out.println(name + " " + differences.get(name));
-                                }
-                            }
-                            for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
-                                UserReport report = new UserReport(
-                                        query.get("targetType").toString(),
-                                        query.get("targetName").toString(),
-                                        (List<String>) query.get("senders"),
-                                        (Boolean) query.get("data"),
-                                        Integer.parseInt(query.get("counter").toString())
-                                );
-                                if (differences.containsKey(report.getTargetName())) {
-                                    if (differences.get(report.getTargetName())) {
-                                        //zmienić datę
-                                        mRef.collection("usersTypeReports").document(query.getId())
-                                                .update("counter", report.getCounter() + 1);
-                                        differences.remove(report.getTargetName());
-                                    }
-                                }
-                            }
-                            for (String name : differences.keySet()) {
-                                List<String> users = new LinkedList<>();
-                                users.add(mAuth.getCurrentUser().getUid());
-                                mRef.collection("usersTypeReports").document().set(new UserReport(
-                                        "availableFuels",
-                                        name,
-                                        users,
-                                        differences.get(name),
-                                        0
-                                ));
-                            }
-                        }
-                    });
-                }
-                mRef.update("availableFuels", availableFuels);
+                //if (!availableFuels.equals(newAvailableFuels)) {
+                UsersReportService usersReportService = new UsersReportService(mRef);
+                usersReportService.sendAvailableFuelsReport(availableFuels, newAvailableFuels);
+                //}
 
                 Intent i = new Intent();
                 setResult(RESULT_OK, i);
@@ -199,12 +163,13 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
         });
 
         cancelBtn = findViewById(R.id.cancelBtn);
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-                                         @Override
-                                         public void onClick(View view) {
-                                             finish();
-                                         }
-                                     }
+        cancelBtn.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        finish();
+                    }
+                }
         );
     }
 
