@@ -135,6 +135,13 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
                 //if (!availableFuels.equals(newAvailableFuels)) {
                 UsersReportService usersReportService = new UsersReportService(mRef);
                 usersReportService.sendAvailableFuelsReport(availableFuels, newAvailableFuels);
+
+                String name = editNameView.getText().toString();
+                if(!name.equals(petrolName) && validatePetrolName(name)){
+                    usersReportService.sendPetrolNameReport(name);
+                    return;
+                }
+
                 //}
 
                 Intent i = new Intent();
@@ -171,6 +178,19 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
                     }
                 }
         );
+    }
+
+    public boolean validatePetrolName(String petrolName) {
+        if(!petrolName.startsWith("Stacja Paliw")){
+            Toast.makeText(getBaseContext(), "Nazwa musi rozpoczynać się od: Stacja Paliw!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(petrolName.length() >= 20) {
+            Toast.makeText(getBaseContext(), "Maksymalna długość nazwy to 20 znaków!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return  true;
     }
 
     @Override

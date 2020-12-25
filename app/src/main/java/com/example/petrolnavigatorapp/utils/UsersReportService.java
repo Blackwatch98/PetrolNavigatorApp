@@ -49,17 +49,16 @@ public class UsersReportService {
                     );
                     // check if report is already in database and if this user hasn't already report it
                     if (differences.containsKey(report.getTargetName()) && !report.getSenders().contains(currentUser.getUid())) {
-                            if (report.getCounter() + 1 >= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES) {
-                                currentPetrolDocument.update("availableFuels." + report.getTargetName(), report.getData(),
-                                        "lastReportDate", sdf.format(new Date()));
-                                currentPetrolDocument.collection("fuelTypeReports").document(query.getId()).delete();
-                                return;
-                            }
-                            currentPetrolDocument.collection("fuelTypeReports").document(query.getId())
-                                    .update("counter", report.getCounter() + 1);
-                            differences.remove(report.getTargetName());
-                    }
-                    else
+                        if (report.getCounter() + 1 >= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES) {
+                            currentPetrolDocument.update("availableFuels." + report.getTargetName(), report.getData(),
+                                    "lastReportDate", sdf.format(new Date()));
+                            currentPetrolDocument.collection("fuelTypeReports").document(query.getId()).delete();
+                            return;
+                        }
+                        currentPetrolDocument.collection("fuelTypeReports").document(query.getId())
+                                .update("counter", report.getCounter() + 1);
+                        differences.remove(report.getTargetName());
+                    } else
                         differences.remove(report.getTargetName());
                     removeOutdatedReport(report, "fuelTypeReports", query.getId());
                 }
@@ -80,7 +79,40 @@ public class UsersReportService {
         });
     }
 
-    private void removeOutdatedReport(UserReport<Boolean> report, String reportsCollection, String queryId) {
+    public void sendPetrolNameReport(final String name) {
+        currentPetrolDocument.collection("petrolNameReports").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                    UserReport<String> report = new UserReport<>(
+                            query.get("targetType").toString(),
+                            query.get("targetName").toString(),
+                            (List<String>) query.get("senders"),
+                            (String) query.get("data"),
+                            query.get("lastReportDate").toString(),
+                            Integer.parseInt(query.get("counter").toString())
+                    );
+                    if(report.getTargetName().equals(name)){
+                        currentPetrolDocument.update("name", report.getTargetName());
+                        currentPetrolDocument.collection("petrolNameReports").document(query.getId()).delete();
+                    }
+                    removeOutdatedReport(report, "petrolNameReports", query.getId());
+                }
+                List<String> users = new LinkedList<>();
+                users.add(currentUser.getUid());
+                currentPetrolDocument.collection("petrolNameReports").document().set(new UserReport(
+                        "petrolName",
+                        name,
+                        users,
+                        sdf.format(new Date()),
+                        1
+                ));
+            }
+        });
+    }
+
+    private void removeOutdatedReport(UserReport report, String reportsCollection, String queryId) {
         String date = report.getLastReportDate();
         long diff = getDaysDifference(date);
         if (diff >= DAYS_UNITL_REPORT_EXPIRES) {
