@@ -132,17 +132,15 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
                         newAvailableFuels.put(sw.getText().toString(), false);
                 }
 
-                //if (!availableFuels.equals(newAvailableFuels)) {
                 UsersReportService usersReportService = new UsersReportService(mRef);
                 usersReportService.sendAvailableFuelsReport(availableFuels, newAvailableFuels);
 
                 String name = editNameView.getText().toString();
-                if(!name.equals(petrolName) && validatePetrolName(name)){
-                    usersReportService.sendPetrolNameReport(name);
-                    return;
-                }
 
-                //}
+                if(!validatePetrolName(name))
+                    return;
+                //zabezpieczyć żeby inny user potwierdził
+                usersReportService.sendPetrolNameReport(name);
 
                 Intent i = new Intent();
                 setResult(RESULT_OK, i);

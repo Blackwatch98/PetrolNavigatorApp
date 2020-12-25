@@ -93,7 +93,7 @@ public class UsersReportService {
                             query.get("lastReportDate").toString(),
                             Integer.parseInt(query.get("counter").toString())
                     );
-                    if(report.getTargetName().equals(name)){
+                    if(report.getTargetName().equals(name) && !report.getSenders().contains(currentUser.getUid())){
                         currentPetrolDocument.update("name", report.getTargetName());
                         currentPetrolDocument.collection("petrolNameReports").document(query.getId()).delete();
                     }
