@@ -20,6 +20,7 @@ public class UsersReportService {
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private DocumentReference currentPetrolDocument;
     private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES = 2;
+    private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_NAME_REPORT = 2;
     private final int DAYS_UNITL_REPORT_EXPIRES = 2;
 
     public UsersReportService(DocumentReference documentReference) {
@@ -55,8 +56,11 @@ public class UsersReportService {
                             currentPetrolDocument.collection("fuelTypeReports").document(query.getId()).delete();
                             return;
                         }
+                        report.getSenders().add(currentUser.getUid());
                         currentPetrolDocument.collection("fuelTypeReports").document(query.getId())
-                                .update("counter", report.getCounter() + 1);
+                                .update("counter", report.getCounter() + 1,
+                                        "senders", report.getSenders(),
+                                        "lastReportDate", sdf.format(new Date()));
                         differences.remove(report.getTargetName());
                     } else
                         differences.remove(report.getTargetName());
@@ -84,6 +88,7 @@ public class UsersReportService {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                boolean isReportExisting = false;
                 for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
                     UserReport<String> report = new UserReport<>(
                             query.get("targetType").toString(),
@@ -93,18 +98,80 @@ public class UsersReportService {
                             query.get("lastReportDate").toString(),
                             Integer.parseInt(query.get("counter").toString())
                     );
-                    if(report.getTargetName().equals(name) && !report.getSenders().contains(currentUser.getUid())){
-                        currentPetrolDocument.update("name", report.getTargetName());
-                        currentPetrolDocument.collection("petrolNameReports").document(query.getId()).delete();
+                    if (report.getData().equals(name)) {
+                        if (!report.getSenders().contains(currentUser.getUid()))
+                            if (report.getCounter() + 1>= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_NAME_REPORT) {
+                                currentPetrolDocument.update("name", report.getTargetName());
+                                currentPetrolDocument.collection("petrolNameReports").document(query.getId()).delete();
+                            } else {
+                                report.getSenders().add(currentUser.getUid());
+                                currentPetrolDocument.collection("petrolNameReports").document(query.getId())
+                                        .update("counter", report.getCounter() + 1,
+                                                "senders", report.getSenders(),
+                                                "lastReportDate", new Date());
+                            }
+                        isReportExisting = true;
                     }
+
                     removeOutdatedReport(report, "petrolNameReports", query.getId());
                 }
+
+                if (isReportExisting)
+                    return;
+
                 List<String> users = new LinkedList<>();
                 users.add(currentUser.getUid());
                 currentPetrolDocument.collection("petrolNameReports").document().set(new UserReport(
                         "petrolName",
-                        name,
+                        "name",
                         users,
+                        name,
+                        sdf.format(new Date()),
+                        1
+                ));
+            }
+        });
+    }
+
+    public void sendPetrolNotExistReport() {
+        currentPetrolDocument.collection("petrolNotExistReports").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                boolean isReportExisting = false;
+                for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                    UserReport<String> report = new UserReport<>(
+                            query.get("targetType").toString(),
+                            (List<String>) query.get("senders"),
+                            (String) query.get("data"),
+                            query.get("lastReportDate").toString(),
+                            Integer.parseInt(query.get("counter").toString())
+                    );
+
+                    if (report.getData().equals(currentPetrolDocument.getId())) {
+                        if (!report.getSenders().contains(currentUser.getUid()))
+                            if (report.getCounter() + 1 >= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES) {
+                                currentPetrolDocument.delete();
+                                currentPetrolDocument.collection("petrolNotExistReports").document(query.getId()).delete();
+                            } else {
+                                report.getSenders().add(currentUser.getUid());
+                                currentPetrolDocument.collection("petrolNotExistReports").document(query.getId())
+                                        .update("counter", report.getCounter() + 1,
+                                                "senders", report.getSenders(),
+                                                "lastReportDate", new Date());
+                            }
+                        isReportExisting = true;
+                    }
+                    removeOutdatedReport(report, "petrolNotExistReports", query.getId());
+                }
+                if (isReportExisting)
+                    return;
+                List<String> users = new LinkedList<>();
+                users.add(currentUser.getUid());
+                currentPetrolDocument.collection("petrolNotExistReports").document().set(new UserReport(
+                        "petrolNotExist",
+                        users,
+                        currentPetrolDocument.getId(),
                         sdf.format(new Date()),
                         1
                 ));

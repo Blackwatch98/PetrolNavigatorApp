@@ -11,10 +11,10 @@ public class UserReport<T> {
     private T data;
     private int counter;
 
-    public UserReport(String targetType, String targetName, List<String> senders, String lastReportDate, int counter){
+    public UserReport(String targetType, List<String> senders, T data, String lastReportDate, int counter){
         this.targetType = targetType;
-        this.targetName = targetName;
         this.senders = senders;
+        this.data = data;
         this.lastReportDate = lastReportDate;
         this.counter = counter;
     }

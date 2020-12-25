@@ -59,6 +59,7 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
 
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
+    private UsersReportService usersReportService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +101,7 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
         editNameView.setText(petrolName);
 
         final DocumentReference mRef = firestore.collection("petrol_stations").document(petrolId);
+        usersReportService = new UsersReportService(mRef);
 
         mRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
@@ -132,7 +134,6 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
                         newAvailableFuels.put(sw.getText().toString(), false);
                 }
 
-                UsersReportService usersReportService = new UsersReportService(mRef);
                 usersReportService.sendAvailableFuelsReport(availableFuels, newAvailableFuels);
 
                 String name = editNameView.getText().toString();
@@ -164,6 +165,14 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
                 }
 
                 return false;
+            }
+        });
+
+        reportNoExist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                usersReportService.sendPetrolNotExistReport();
+                finish();
             }
         });
 
