@@ -10,7 +10,6 @@ public class Fuel implements Serializable {
     private String name;
     private String type;
     private String price;
-    private int reportCounter;
     private String lastReportDate;
 
     public Fuel(int i, String price, String name, String type) {
@@ -18,19 +17,14 @@ public class Fuel implements Serializable {
         this.name = name;
         this.price = price;
         this.type = type;
-        reportCounter = 0;
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-        lastReportDate = dateFormat.format(date);
+        lastReportDate = null;
     }
 
-    public Fuel(int i, String price, String name, String type, int reportCounter, String lastReportDate) {
+    public Fuel(int i, String price, String name, String type, String lastReportDate) {
         this.icon = i;
         this.name = name;
         this.price = price;
         this.type = type;
-        this.reportCounter = reportCounter;
         this.lastReportDate = lastReportDate;
     }
 
@@ -64,14 +58,6 @@ public class Fuel implements Serializable {
 
     public void setIcon(int icon) {
         this.icon = icon;
-    }
-
-    public int getReportCounter() {
-        return reportCounter;
-    }
-
-    public void setReportCounter(int reportCounter) {
-        this.reportCounter = reportCounter;
     }
 
     public String getLastReportDate() {

@@ -51,23 +51,26 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     public void onBindViewHolder(FuelsRecyclerViewAdapter.FuelRecyclerViewHolder holder, final int position) {
         holder.fuelIcon.setImageResource(fuelsList.get(position).getIcon());
         holder.dateText.setText(fuelsList.get(position).getName());
-        holder.priceText.setText(fuelsList.get(position).getPrice() +"zł");
+        if(fuelsList.get(position).getPrice().equals("0.00"))
+            holder.priceText.setText("Brak");
+        else
+            holder.priceText.setText(fuelsList.get(position).getPrice() +"zł");
 
-        try
-        {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-            Date firstDate = sdf.parse(fuelsList.get(position).getLastReportDate());
-            Date secondDate = new Date();
+        if(fuelsList.get(position).getLastReportDate().equals(null))
+            holder.dateText.setText("Brak");
+        else {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                Date firstDate = sdf.parse(fuelsList.get(position).getLastReportDate());
+                Date secondDate = new Date();
 
-            long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
-            long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-            holder.dateText.setText(""+diff+" dni temu");
+                long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
+                long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                holder.dateText.setText("" + diff + " dni temu");
+            } catch (ParseException e) {
+                e.getMessage();
+            }
         }
-        catch (ParseException e)
-        {
-            e.getMessage();
-        }
-        holder.reportText.setText("Zgłoszeń: "+fuelsList.get(position).getReportCounter());
         holder.priceText.setEnabled(false);
         changeButtonsList.add(holder.changeButton);
 
@@ -95,7 +98,7 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     public class FuelRecyclerViewHolder extends RecyclerView.ViewHolder {
        ImageView fuelIcon;
        EditText priceText;
-       TextView dateText, reportText;
+       TextView dateText;
        Button changeButton;
 
        FuelRecyclerViewHolder(View view)
@@ -104,7 +107,6 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
            fuelIcon = view.findViewById(R.id.imageView);
            priceText = view.findViewById(R.id.priceView);
            dateText = view.findViewById(R.id.dateText);
-           reportText = view.findViewById(R.id.reportText);
            changeButton = view.findViewById(R.id.changePriceBtn);
        }
     }

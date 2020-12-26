@@ -88,8 +88,12 @@ public class ChangePriceActivity extends AppCompatActivity {
                     Toast.makeText(getBaseContext(),"Twoje zgłoszenie zbytnio odbiega od aktualnej ceny :C", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
                 UsersReportService usersReportService = new UsersReportService(documentReference);
-                usersReportService.sendNewPriceReport(stringBuilder.toString(), fuelName);
+                if(price == original_price)
+                    usersReportService.sendNewPriceReport(stringBuilder.toString(), fuelName, true);
+                else
+                    usersReportService.sendNewPriceReport(stringBuilder.toString(), fuelName, false);
 
                 Intent i = new Intent();
                 setResult(RESULT_OK,i);
@@ -101,6 +105,8 @@ public class ChangePriceActivity extends AppCompatActivity {
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent i = new Intent();
+                setResult(RESULT_OK,i);
                 Toast.makeText(getBaseContext(),"Anulowano zgłoszenie", Toast.LENGTH_SHORT).show();
                 finish();
             }

@@ -245,7 +245,6 @@ public class FirestorePetrolsDB {
                     item.get("price").toString(),
                     item.get("name").toString(),
                     item.get("type").toString(),
-                    Integer.parseInt(item.get("reportCounter").toString()),
                     item.get("lastReportDate").toString()
             ));
         }

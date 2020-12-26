@@ -180,7 +180,12 @@ public class UsersReportService {
         });
     }
 
-    public void sendNewPriceReport(final String price, final String fuelName) {
+    public void sendNewPriceReport(final String price, final String fuelName, boolean isSameAsCurrent) {
+        if(isSameAsCurrent) {
+            updatePrice(price, fuelName);
+            return;
+        }
+
         currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName+"_Reports")
                 .collection("reports").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -198,7 +203,7 @@ public class UsersReportService {
                                     Integer.parseInt(query.get("counter").toString())
                             );
 
-                            if (report.getData().equals(price)) {
+                            if (report.getData().equals(price) && report.getTargetName().equals(fuelName)) {
                                 if (!report.getSenders().contains(currentUser.getUid()))
                                     if (report.getCounter() + 1 >= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES) {
                                         updatePrice(price, fuelName);
