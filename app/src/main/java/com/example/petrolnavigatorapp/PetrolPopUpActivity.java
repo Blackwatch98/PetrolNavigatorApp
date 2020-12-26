@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -29,6 +30,7 @@ import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.example.petrolnavigatorapp.firebase_utils.MyFirebaseStorage;
 import com.example.petrolnavigatorapp.utils.Fuel;
 import com.example.petrolnavigatorapp.utils.Petrol;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -40,24 +42,28 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
 public class PetrolPopUpActivity extends Activity {
 
-    final int FUELS_IN_LINEAR_ROW = 4;
-    final int X_SCREEN_DIVIDER = 5, Y_SCREEN_DIVIDER = 17;
+    final private int FUELS_IN_LINEAR_ROW = 4;
+    final private int X_SCREEN_DIVIDER = 5, Y_SCREEN_DIVIDER = 17;
+    final private double REQUIRED_MINIMAL_DISTANCE_IN_METERS = 100;
 
     private FirebaseFirestore firestore;
     private MyFirebaseStorage sRef;
     private double latitude, longitude;
     private Context context;
-    private FuelsRecyclerViewAdapter petrolRecyclerViewAdapter;
+    private FuelsRecyclerViewAdapter fuelsRecyclerViewAdapter;
     private LinearLayout availableFuelsLayout;
     private Animation scale_up, scale_down;
     private Petrol popedPetrol;
     private String petrolId;
     private  List<Fuel> fuelList;
+    private double userLat, userLon;
+    private boolean isMinimalDistanceReached = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +78,14 @@ public class PetrolPopUpActivity extends Activity {
         final int height = displayMetrics.heightPixels;
         final int width = displayMetrics.widthPixels;
 
+        userLat = bundle.getDouble("userLat");
+        userLon = bundle.getDouble("userLon");
         latitude = bundle.getDouble("latitude");
         longitude = bundle.getDouble("longitude");
+
+        if(getDistance(userLat,userLon,latitude,longitude) <= REQUIRED_MINIMAL_DISTANCE_IN_METERS) {
+            isMinimalDistanceReached = true;
+        }
 
         CoordinatorLayout coordinatorLayout = findViewById(R.id.popUpBackground);
         coordinatorLayout.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +116,7 @@ public class PetrolPopUpActivity extends Activity {
 
                 }
                 if(popedPetrol == null) {
-                    System.out.println("Uuups. Something gone wrong!");
+                    System.out.println("Stacja nie istnieje!");
                     return;
                 }
 
@@ -120,9 +132,9 @@ public class PetrolPopUpActivity extends Activity {
                     RecyclerView recyclerView = findViewById(R.id.recyclerPetrolView);
                     RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
-                    petrolRecyclerViewAdapter = new FuelsRecyclerViewAdapter(fuelList, context, petrolId);
+                    fuelsRecyclerViewAdapter = new FuelsRecyclerViewAdapter(fuelList, context, petrolId, isMinimalDistanceReached);
                     recyclerView.setLayoutManager(layoutManager);
-                    recyclerView.setAdapter(petrolRecyclerViewAdapter);
+                    recyclerView.setAdapter(fuelsRecyclerViewAdapter);
                     recyclerView.setItemAnimator(new DefaultItemAnimator());
                 }
                 int list_size = map.size();
@@ -167,9 +179,9 @@ public class PetrolPopUpActivity extends Activity {
                                     RecyclerView recyclerView = findViewById(R.id.recyclerPetrolView);
                                     RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
 
-                                    petrolRecyclerViewAdapter = new FuelsRecyclerViewAdapter(fuelList, context, petrolId);
+                                    fuelsRecyclerViewAdapter = new FuelsRecyclerViewAdapter(fuelList, context, petrolId, isMinimalDistanceReached);
                                     recyclerView.setLayoutManager(layoutManager);
-                                    recyclerView.setAdapter(petrolRecyclerViewAdapter);
+                                    recyclerView.setAdapter(fuelsRecyclerViewAdapter);
                                     recyclerView.setItemAnimator(new DefaultItemAnimator());
                                 }
                             });
@@ -206,6 +218,11 @@ public class PetrolPopUpActivity extends Activity {
                 changeTypeBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        if(!isMinimalDistanceReached) {
+                            Toast.makeText(context, "Jesteś zbyt daleko, aby wykonać zgłoszenie!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         if(popedPetrol != null) {
                             Intent intent = new Intent(view.getContext(), ChangeFuelTypesActivity.class);
                             intent.putExtra("latitude",popedPetrol.getLat());
@@ -286,5 +303,18 @@ public class PetrolPopUpActivity extends Activity {
 
         }
         return map;
+    }
+
+    private double getDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        Location location1 = new Location("");
+        location1.setLatitude(lat1);
+        location1.setLongitude(lon1);
+        Location location2 = new Location("");
+        location2.setLatitude(lat2);
+        location2.setLongitude(lon2);
+        double distance = location1.distanceTo(location2);
+
+        return distance;
     }
 }

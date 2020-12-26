@@ -185,6 +185,8 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(context, PetrolPopUpActivity.class);
+                    intent.putExtra("userLat", lat);
+                    intent.putExtra("userLon", lon);
                     intent.putExtra("latitude", petrol.getLat());
                     intent.putExtra("longitude", petrol.getLon());
                     ((NavigationDrawerActivity)context).startActivityForResult(intent, 1);

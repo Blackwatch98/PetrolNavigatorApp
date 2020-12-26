@@ -173,6 +173,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                     public void onMapLongClick(LatLng latLng2) {
                         currentLocation = latLng2;
                         listener.getUserLocalization(currentLocation);
+                        System.out.println("CURRENT LOC " + currentLocation);
                         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
                             mMap.setMyLocationEnabled(false);
                         mMap.setMyLocationEnabled(true);

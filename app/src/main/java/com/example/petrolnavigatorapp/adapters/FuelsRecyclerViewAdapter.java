@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,13 +32,15 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     private Context context;
     private LinkedList<Button> changeButtonsList;
     private String petrolId;
+    private boolean isMinimalDistanceReached;
 
-    public FuelsRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId)
+    public FuelsRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId, Boolean isMinimalDistanceReached)
     {
         fuelsList = fuels;
         context = con;
         this.petrolId = petrolId;
         changeButtonsList = new LinkedList<>();
+        this.isMinimalDistanceReached = isMinimalDistanceReached;
     }
 
     @NonNull
@@ -51,29 +54,36 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     public void onBindViewHolder(FuelsRecyclerViewAdapter.FuelRecyclerViewHolder holder, final int position) {
         holder.fuelIcon.setImageResource(fuelsList.get(position).getIcon());
         holder.dateText.setText(fuelsList.get(position).getName());
-        holder.priceText.setText(fuelsList.get(position).getPrice() +"zł");
+        if(fuelsList.get(position).getPrice().equals("0.00"))
+            holder.priceText.setText("Brak");
+        else
+            holder.priceText.setText(fuelsList.get(position).getPrice() +"zł");
 
-        try
-        {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-            Date firstDate = sdf.parse(fuelsList.get(position).getLastReportDate());
-            Date secondDate = new Date();
+        if(fuelsList.get(position).getLastReportDate().equals(null))
+            holder.dateText.setText("Brak");
+        else {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                Date firstDate = sdf.parse(fuelsList.get(position).getLastReportDate());
+                Date secondDate = new Date();
 
-            long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
-            long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-            holder.dateText.setText(""+diff+" dni temu");
+                long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
+                long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                holder.dateText.setText("" + diff + " dni temu");
+            } catch (ParseException e) {
+                e.getMessage();
+            }
         }
-        catch (ParseException e)
-        {
-            e.getMessage();
-        }
-        holder.reportText.setText("Zgłoszeń: "+fuelsList.get(position).getReportCounter());
         holder.priceText.setEnabled(false);
         changeButtonsList.add(holder.changeButton);
 
         holder.changeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!isMinimalDistanceReached) {
+                    Toast.makeText(context, "Jesteś zbyt daleko, aby wykonać zgłoszenie!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Intent intent = new Intent(context, ChangePriceActivity.class);
                 intent.putExtra("fuelClass", String.valueOf(fuelsList.get(position).getPrice()));
                 intent.putExtra("fuelName", fuelsList.get(position).getName());
@@ -95,7 +105,7 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     public class FuelRecyclerViewHolder extends RecyclerView.ViewHolder {
        ImageView fuelIcon;
        EditText priceText;
-       TextView dateText, reportText;
+       TextView dateText;
        Button changeButton;
 
        FuelRecyclerViewHolder(View view)
@@ -104,7 +114,6 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
            fuelIcon = view.findViewById(R.id.imageView);
            priceText = view.findViewById(R.id.priceView);
            dateText = view.findViewById(R.id.dateText);
-           reportText = view.findViewById(R.id.reportText);
            changeButton = view.findViewById(R.id.changePriceBtn);
        }
     }
