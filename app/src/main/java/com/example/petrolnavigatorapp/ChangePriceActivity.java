@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.petrolnavigatorapp.utils.UsersReportService;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.firestore.DocumentReference;
@@ -24,6 +25,7 @@ import java.util.List;
 
 public class ChangePriceActivity extends AppCompatActivity {
 
+    private double PRICE_CHANGE_TOLERANCE = 1.5;
     private String fuelName;
     private String petrolId;
     private FirebaseFirestore firestore;
@@ -51,10 +53,9 @@ public class ChangePriceActivity extends AppCompatActivity {
         fotoBtn = findViewById(R.id.fotoBtn);
 
         Bundle bundle = getIntent().getExtras();
-        String values = bundle.getString("fuelClass");
+        final String values = bundle.getString("fuelClass");
         fuelName = bundle.getString("fuelName");
         petrolId = bundle.getString("petrolId");
-
 
         fuelNameTextView.setText(fuelName);
 
@@ -69,6 +70,9 @@ public class ChangePriceActivity extends AppCompatActivity {
         fraction_picker.setValue(Character.getNumericValue((values.charAt(2))));
         fraction_picker2.setValue(Character.getNumericValue((values.charAt(3))));
 
+        firestore = FirebaseFirestore.getInstance();
+        documentReference = firestore.collection("petrol_stations").document(petrolId);
+
         confirmBtn.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -77,31 +81,16 @@ public class ChangePriceActivity extends AppCompatActivity {
                 stringBuilder.append(integer_picker.getValue()).append(".").
                         append(fraction_picker.getValue()).append(fraction_picker2.getValue());
 
-                firestore = FirebaseFirestore.getInstance();
-                documentReference = firestore.collection("petrol_stations").document(petrolId);
-                documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        if(documentSnapshot.exists())
-                        {
-                            //PRZEROBIĆ NA WYSYŁANIE ZGŁOSZEŃ ZAMIAST BEZPOŚREDNIEJ ZMIANY CENY
-                            List<HashMap<String, Object>> lista = (List<HashMap<String, Object>>) documentSnapshot.get("fuels");
+                double price = Double.parseDouble(stringBuilder.toString());
+                double original_price = Double.parseDouble(values);
+                if(original_price != 0.00 && Math.abs(price - original_price) > PRICE_CHANGE_TOLERANCE)
+                {
+                    Toast.makeText(getBaseContext(),"Twoje zgłoszenie zbytnio odbiega od aktualnej ceny :C", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                UsersReportService usersReportService = new UsersReportService(documentReference);
+                usersReportService.sendNewPriceReport(stringBuilder.toString(), fuelName);
 
-                            for(HashMap<String, Object> item : lista) {
-                                if(item.get("name").toString().equals(fuelName))
-                                {
-                                    item.put("price", stringBuilder.toString());
-                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                    item.put("lastReportDate", sdf.format(new Date()));
-                                    int counter = Integer.parseInt(item.get("reportCounter").toString());
-                                    item.put("reportCounter",counter+1);
-                                    break;
-                                }
-                            }
-                            documentReference.update("fuels", lista);
-                        }
-                    }
-                });
                 Intent i = new Intent();
                 setResult(RESULT_OK,i);
                 Toast.makeText(getBaseContext(),"Wysłano zgłoszenie", Toast.LENGTH_SHORT).show();

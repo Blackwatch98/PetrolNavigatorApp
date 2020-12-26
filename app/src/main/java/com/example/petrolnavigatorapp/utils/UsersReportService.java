@@ -4,6 +4,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -100,7 +101,7 @@ public class UsersReportService {
                     );
                     if (report.getData().equals(name)) {
                         if (!report.getSenders().contains(currentUser.getUid()))
-                            if (report.getCounter() + 1>= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_NAME_REPORT) {
+                            if (report.getCounter() + 1 >= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_NAME_REPORT) {
                                 currentPetrolDocument.update("name", report.getTargetName());
                                 currentPetrolDocument.collection("petrolNameReports").document(query.getId()).delete();
                             } else {
@@ -179,11 +180,100 @@ public class UsersReportService {
         });
     }
 
+    public void sendNewPriceReport(final String price, final String fuelName) {
+        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName+"_Reports")
+                .collection("reports").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        boolean isReportExisting = false;
+                        for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                            UserReport<String> report = new UserReport<>(
+                                    query.get("targetType").toString(),
+                                    query.get("targetName").toString(),
+                                    (List<String>) query.get("senders"),
+                                    (String) query.get("data"),
+                                    query.get("lastReportDate").toString(),
+                                    Integer.parseInt(query.get("counter").toString())
+                            );
+
+                            if (report.getData().equals(price)) {
+                                if (!report.getSenders().contains(currentUser.getUid()))
+                                    if (report.getCounter() + 1 >= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES) {
+                                        updatePrice(price, fuelName);
+                                        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName+"_Reports")
+                                                .collection("reports")
+                                                .document(query.getId()).delete();
+                                    } else {
+                                        report.getSenders().add(currentUser.getUid());
+                                        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName+"_Reports")
+                                                .collection("reports")
+                                                .document(query.getId())
+                                                .update("counter", report.getCounter() + 1,
+                                                        "senders", report.getSenders(),
+                                                        "lastReportDate", new Date());
+                                    }
+                                isReportExisting = true;
+                            }
+                            removeOutdatedPriceReport(report, "fuelPriceChangeReports", query.getId(), fuelName);
+                        }
+                        if (isReportExisting)
+                            return;
+
+                        List<String> users = new LinkedList<>();
+                        users.add(currentUser.getUid());
+                        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName+"_Reports")
+                                .collection("reports").document().set(new UserReport(
+                                "petrolNotExist",
+                                fuelName,
+                                users,
+                                price,
+                                sdf.format(new Date()),
+                                1
+                        ));
+                    }
+
+                });
+    }
+
+    private void updatePrice(final String price, final String fuelName) {
+        currentPetrolDocument.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    List<HashMap<String, Object>> lista = (List<HashMap<String, Object>>) documentSnapshot.get("fuels");
+
+                    for (HashMap<String, Object> item : lista) {
+                        if (item.get("name").toString().equals(fuelName)) {
+                            item.put("price", price);
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                            item.put("lastReportDate", sdf.format(new Date()));
+                            int counter = Integer.parseInt(item.get("reportCounter").toString());
+                            item.put("reportCounter", counter + 1);
+                            break;
+                        }
+                    }
+                    currentPetrolDocument.update("fuels", lista);
+                }
+            }
+        });
+    }
+
     private void removeOutdatedReport(UserReport report, String reportsCollection, String queryId) {
         String date = report.getLastReportDate();
         long diff = getDaysDifference(date);
         if (diff >= DAYS_UNITL_REPORT_EXPIRES) {
             currentPetrolDocument.collection(reportsCollection).document(queryId).delete();
+        }
+    }
+
+    private void removeOutdatedPriceReport(UserReport report, String reportsCollection, String queryId, String fuelName) {
+        String date = report.getLastReportDate();
+        long diff = getDaysDifference(date);
+        if (diff >= DAYS_UNITL_REPORT_EXPIRES) {
+            currentPetrolDocument.collection(reportsCollection).document(fuelName+"Reports")
+                    .collection("reports").document(queryId).delete();
         }
     }
 
