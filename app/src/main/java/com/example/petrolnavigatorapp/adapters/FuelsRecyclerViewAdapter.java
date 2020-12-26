@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,13 +32,15 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     private Context context;
     private LinkedList<Button> changeButtonsList;
     private String petrolId;
+    private boolean isMinimalDistanceReached;
 
-    public FuelsRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId)
+    public FuelsRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId, Boolean isMinimalDistanceReached)
     {
         fuelsList = fuels;
         context = con;
         this.petrolId = petrolId;
         changeButtonsList = new LinkedList<>();
+        this.isMinimalDistanceReached = isMinimalDistanceReached;
     }
 
     @NonNull
@@ -77,6 +80,10 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
         holder.changeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!isMinimalDistanceReached) {
+                    Toast.makeText(context, "Jesteś zbyt daleko, aby wykonać zgłoszenie!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Intent intent = new Intent(context, ChangePriceActivity.class);
                 intent.putExtra("fuelClass", String.valueOf(fuelsList.get(position).getPrice()));
                 intent.putExtra("fuelName", fuelsList.get(position).getName());

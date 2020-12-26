@@ -176,6 +176,8 @@ public class FirestorePetrolsDB {
                                                     @Override
                                                     public boolean onClusterItemClick(MyCluster item) {
                                                         Intent intent = new Intent(activity, PetrolPopUpActivity.class);
+                                                        intent.putExtra("userLat", userLocalization.latitude);
+                                                        intent.putExtra("userLon", userLocalization.longitude);
                                                         intent.putExtra("latitude", item.getPosition().latitude);
                                                         intent.putExtra("longitude", item.getPosition().longitude);
                                                         activity.startActivity(intent);
@@ -186,6 +188,8 @@ public class FirestorePetrolsDB {
                                                     @Override
                                                     public boolean onClusterItemClick(MyCluster item) {
                                                         Intent intent = new Intent(activity, PetrolPopUpActivity.class);
+                                                        intent.putExtra("userLat", userLocalization.latitude);
+                                                        intent.putExtra("userLon", userLocalization.longitude);
                                                         intent.putExtra("latitude", item.getPosition().latitude);
                                                         intent.putExtra("longitude", item.getPosition().longitude);
                                                         activity.startActivity(intent);

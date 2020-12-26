@@ -172,6 +172,8 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
             @Override
             public void onClick(View view) {
                 usersReportService.sendPetrolNotExistReport();
+                Intent i = new Intent();
+                setResult(RESULT_OK, i);
                 finish();
             }
         });
@@ -181,6 +183,8 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        Intent i = new Intent();
+                        setResult(RESULT_OK, i);
                         finish();
                     }
                 }
