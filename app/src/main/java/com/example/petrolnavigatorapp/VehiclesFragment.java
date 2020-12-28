@@ -1,5 +1,6 @@
 package com.example.petrolnavigatorapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,6 +8,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class VehiclesFragment extends Fragment {
 
@@ -18,6 +21,8 @@ public class VehiclesFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private FloatingActionButton addVehicleButton;
 
     public VehiclesFragment() {
         // Required empty public constructor
@@ -45,6 +50,16 @@ public class VehiclesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_vehicles, container, false);
+        View view = inflater.inflate(R.layout.fragment_vehicles, container, false);
+
+        addVehicleButton = view.findViewById(R.id.add_vehicle_button);
+        addVehicleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), ConfigureAddVehicleActivity.class);
+                getActivity().startActivity(intent);
+            }
+        });
+        return view;
     }
 }
