@@ -23,8 +23,16 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
-
-    Benzyna", "Diesel", "LPG", "Etanol", "Elektryczny", "CNG"
+    <string-array name="fractions">
+        <item>1/8</item>
+        <item>2/8</item>
+        <item>3/8</item>
+        <item>4/8</item>
+        <item>5/8</item>
+        <item>6/8</item>
+        <item>7/8</item>
+        <item>8/8</item>
+    </string-array>
     <string-array name="fuelTypes">
         <item>Wszystko</item>
         <item>Benzyna</item>
