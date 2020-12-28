@@ -5,10 +5,6 @@
 
     <group android:checkableBehavior="single">
     <item
-        android:id="@+id/db"
-        android:title="@string/main_page"
-        android:icon="@drawable/ic_baseline_home_24"/>
-    <item
         android:id="@+id/maps"
         android:title="@string/station_map"
         android:icon="@drawable/ic_baseline_map_24"/>
@@ -16,6 +12,10 @@
         android:id="@+id/list"
         android:title="@string/station_list"
         android:icon="@drawable/ic_baseline_arrow_drop_down_circle_24"/>
+    <item
+        android:id="@+id/plan_route"
+        android:title="Zaplanuj trasę"
+        android:icon="@drawable/ic_baseline_alt_route_24"/>
     <item
         android:id="@+id/vehicles"
         android:title="@string/vehicles"

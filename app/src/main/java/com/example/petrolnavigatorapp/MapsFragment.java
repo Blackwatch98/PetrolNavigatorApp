@@ -78,21 +78,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     };
 
     public void findNearbyPetrols() {
-        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        stringBuilder.append("location=" + currentLocation.latitude + "," + currentLocation.longitude);
-        //System.out.println("promien wyszukiwania: " + radius);
-        stringBuilder.append("&radius=" + radius);
-        stringBuilder.append("&keyword=" + "petrol");
-        ////
-        stringBuilder.append("&key=" + getResources().getString(R.string.google_places_key));
-
-        String url = stringBuilder.toString();
-
-        Object[] dataTransfer = new Object[4];
-        dataTransfer[0] = mMap;
-        dataTransfer[1] = url;
-        dataTransfer[2] = getActivity();
-        dataTransfer[3] = this;
+//        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+//        stringBuilder.append("location=" + currentLocation.latitude + "," + currentLocation.longitude);
+//        stringBuilder.append("&radius=" + radius);
+//        stringBuilder.append("&keyword=" + "petrol");
+//        stringBuilder.append("&key=" + getResources().getString(R.string.google_places_key));
+//
+//        String url = stringBuilder.toString();
+//
+//        Object[] dataTransfer = new Object[4];
+//        dataTransfer[0] = mMap;
+//        dataTransfer[1] = url;
+//        dataTransfer[2] = getActivity();
+//        dataTransfer[3] = this;
 
         FirestorePetrolsDB test = new FirestorePetrolsDB(currentLocation, mMap, getContext(), getActivity());
         test.findNearbyPetrols(radius);
@@ -173,7 +171,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                     public void onMapLongClick(LatLng latLng2) {
                         currentLocation = latLng2;
                         listener.getUserLocalization(currentLocation);
-                        System.out.println("CURRENT LOC " + currentLocation);
                         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
                             mMap.setMyLocationEnabled(false);
                         mMap.setMyLocationEnabled(true);
