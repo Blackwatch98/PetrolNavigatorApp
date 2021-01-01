@@ -15,20 +15,21 @@
         <ImageView
             android:id="@+id/vehicleImage"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="150dp"
             android:scaleType="fitXY"
-            tools:srcCompat="@tools:sample/avatars" />
+            android:src="@drawable/car_image" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="10dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="10dp">
 
             <TextView
                 android:id="@+id/vehicleName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="#000"
                 android:text="Nazwa pojazdu" />
 
             <TextView
@@ -37,25 +38,46 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/vehicleName"
                 android:layout_marginStart="10dp"
-                android:textSize="12sp"
-                android:text="Średnie spalanie"/>
+                android:layout_marginTop="5dp"
+                android:text="Średnie spalanie"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/vehicleFuelType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/averageConsumption"
-                android:textSize="12sp"
                 android:layout_marginStart="10dp"
-                android:text="Typ paliwa"/>
+                android:text="Typ paliwa"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tankCapacity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="150dp"
+                android:layout_marginTop="5dp"
+                android:layout_below="@id/vehicleName"
+                android:text="Pojemność baku"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/fuelLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="150dp"
+                android:layout_below="@id/tankCapacity"
+                android:text="Stan baku"
+                android:textSize="12sp"/>
+
             <Button
                 android:id="@+id/deleteVehicleButton"
-                android:layout_width="20dp"
+                android:layout_width="25dp"
                 android:layout_height="30dp"
-                android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:background="?android:attr/selectableItemBackground"
-                android:drawableEnd="@drawable/ic_baseline_cancel_24"/>
+                android:drawableEnd="@drawable/ic_baseline_cancel_24" />
 
 
         </RelativeLayout>

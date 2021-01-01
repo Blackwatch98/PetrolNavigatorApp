@@ -46,8 +46,10 @@ public class VehiclesRecyclerViewAdapter extends RecyclerView.Adapter<VehiclesRe
     @Override
     public void onBindViewHolder(VehiclesRecyclerViewAdapter.VehiclesRecyclerViewHolder holder, final int position) {
         holder.vehicleName.setText(vehicleList.get(position).getName());
-        holder.averageFuelConsumption.setText(String.valueOf(vehicleList.get(position).getAverageFuelConsumption()));
-        holder.fuelType.setText(vehicleList.get(position).getFuelType());
+        holder.averageFuelConsumption.setText("Średnie spalanie: " + vehicleList.get(position).getAverageFuelConsumption());
+        holder.fuelType.setText("Paliwo: " + vehicleList.get(position).getFuelType());
+        holder.tankCapacity.setText("Pojemność baku: " + String.valueOf(vehicleList.get(position).getTankCapacity() + "l"));
+        holder.currentFuelLevel.setText("Stan baku: " + ((vehicleList.get(position).getCurrentFuelLevel()+1)/8.0 * vehicleList.get(position).getTankCapacity()) + "l");
     }
 
     @Override
@@ -70,7 +72,9 @@ public class VehiclesRecyclerViewAdapter extends RecyclerView.Adapter<VehiclesRe
             vehicleImage = view.findViewById(R.id.vehicleImage);
             vehicleName = view.findViewById(R.id.vehicleName);
             averageFuelConsumption = view.findViewById(R.id.averageConsumption);
+            tankCapacity = view.findViewById(R.id.tankCapacity);
             fuelType = view.findViewById(R.id.vehicleFuelType);
+            currentFuelLevel = view.findViewById(R.id.fuelLevel);
             deleteButton = view.findViewById(R.id.deleteVehicleButton);
         }
     }
