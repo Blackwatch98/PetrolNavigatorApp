@@ -1,5 +1,6 @@
-package com.example.petrolnavigatorapp.utils;
+package com.example.petrolnavigatorapp.services;
 
+import com.example.petrolnavigatorapp.utils.UserReport;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;

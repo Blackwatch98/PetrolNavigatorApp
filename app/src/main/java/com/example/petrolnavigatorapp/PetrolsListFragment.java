@@ -14,13 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.petrolnavigatorapp.adapters.PetrolsRecyclerViewAdapter;
+import com.example.petrolnavigatorapp.services.QuickSortService;
 import com.example.petrolnavigatorapp.utils.Petrol;
-import com.google.type.LatLng;
 
-import java.util.LinkedList;
 import java.util.List;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A fragment representing a list of Items.
@@ -84,7 +81,7 @@ public class PetrolsListFragment extends Fragment {
     }
 
     public List<Petrol> getOrderPref(String orderPref) {
-        QuickSort sort = new QuickSort();
+        QuickSortService sort = new QuickSortService();
         List<Petrol> newOrderList;
 
         if (orderPref.equals("Distance"))

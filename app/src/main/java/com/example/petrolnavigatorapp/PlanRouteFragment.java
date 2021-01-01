@@ -22,7 +22,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
 
+import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
+import com.example.petrolnavigatorapp.services.PolylineService;
 import com.example.petrolnavigatorapp.utils.PolylineData;
+import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -167,15 +170,13 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
             public void onResult(DirectionsResult result) {
                 //result data
                 System.out.println("dane");
+                System.out.println(result.routes.length + " " + result.routes[0].legs.length);
                 System.out.println(result.routes[0].legs[0].distance+"km");
                 addPolyLines(result);
             }
 
             @Override
             public void onFailure(Throwable e) {
-                e.getStackTrace();
-                e.getLocalizedMessage();
-                e.getMessage();
                 System.out.println("NIE UDAŁO SIE" + e);
             }
         });
@@ -196,7 +197,7 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                     List <com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
                     List<LatLng> newDecodedPath = new ArrayList<>();
                     for(com.google.maps.model.LatLng latLng : decodedPath) {
-                        newDecodedPath.add(new LatLng(latLng.lat,latLng.lng));
+                        newDecodedPath.add(new LatLng(latLng.lat, latLng.lng));
                     }
                     Polyline polyline = mMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
                     polyline.setColor(ContextCompat.getColor(getActivity(),R.color.dark_grey));
@@ -213,6 +214,14 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
             if(polyline.getId().equals(data.getPolyline().getId())) {
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.light_blue));
                 data.getPolyline().setZIndex(1);
+
+                /////WYSZUKAJ PUNKT REZERWY PALIWA
+                Vehicle testVehicle = new Vehicle("BMW", 50, 7, "Diesel", 10);
+                PolylineService service = new PolylineService(testVehicle, data.getPolyline());
+                LatLng firstPoint = service.getFuelReservePointOnRoute();
+                mMap.addMarker(new MarkerOptions().position(firstPoint).title("Brak paliwa"));
+                FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(firstPoint, mMap, getContext(), getActivity());
+                petrolsDB.findNearbyPetrols(2);
             }
             else {
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.dark_grey));
