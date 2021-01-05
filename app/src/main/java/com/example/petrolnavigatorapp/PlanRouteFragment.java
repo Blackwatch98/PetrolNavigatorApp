@@ -207,8 +207,6 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
 
     @Override
     public void onPolylineClick(Polyline polyline) {
-
-
         for(PolylineData data : polylineDataList) {
             if(polyline.getId().equals(data.getPolyline().getId())) {
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.light_blue));
@@ -220,19 +218,12 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 mMap.addMarker(new MarkerOptions().position(firstPoint).title("Brak paliwa"));
                 //FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(firstPoint, mMap, getContext(), getActivity());
                 //petrolsDB.findNearbyPetrols(5000);
-                int counter = 0;
-                List <LatLng> latLngs = new LinkedList<>();
-                for(LatLng latLng : data.getPolyline().getPoints()) {
-                    if(counter % 10 == 0)
-                        latLngs.add(latLng);
-                    counter++;
-                }
 
                 FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(
                         mMap, getContext(), getActivity());
-                        petrolsDB.getPetrolsOnRoute(latLngs, firstPoint,
+                        petrolsDB.getPetrolsOnRoute(data.getPolyline().getPoints(), firstPoint,
                         data.getPolyline().getPoints().get(0),
-                        data.getPolyline().getPoints().get(data.getPolyline().getPoints().size()-1)
+                        data.getPolyline().getPoints().get(data.getPolyline().getPoints().size()-1), geoApiContext
                         );
             }
             else {
