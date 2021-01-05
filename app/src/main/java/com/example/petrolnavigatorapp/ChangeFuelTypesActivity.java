@@ -127,10 +127,8 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
 
                 String name = editNameView.getText().toString();
 
-                if(!validatePetrolName(name))
-                    return;
-                //zabezpieczyć żeby inny user potwierdził
-                usersReportService.sendPetrolNameReport(name);
+                if(validatePetrolName(name))
+                    usersReportService.sendPetrolNameReport(name);
 
                 Intent i = new Intent();
                 setResult(RESULT_OK, i);
@@ -181,6 +179,9 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
     }
 
     public boolean validatePetrolName(String petrolName) {
+        if (petrolName.equals(this.petrolName))
+            return false;
+
         if(!petrolName.startsWith("Stacja Paliw")){
             Toast.makeText(getBaseContext(), "Nazwa musi rozpoczynać się od: Stacja Paliw!", Toast.LENGTH_SHORT).show();
             return false;

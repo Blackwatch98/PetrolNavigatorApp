@@ -2,6 +2,7 @@ package com.example.petrolnavigatorapp.services;
 
 import android.location.Location;
 
+import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
@@ -20,7 +21,6 @@ public class PolylineService {
 
     public LatLng getFuelReservePointOnRoute() {
         double distanceTillFuelReserve = getFuelReserveDistance();
-        System.out.println("Dystans rezerwy: " + distanceTillFuelReserve +" metrów");
         double route = 0;
 
         LatLng point1 = currentRoute.getPoints().get(0);

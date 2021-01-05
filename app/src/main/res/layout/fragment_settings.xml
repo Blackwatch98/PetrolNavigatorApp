@@ -9,11 +9,6 @@
     android:orientation="vertical"
     tools:context=".SettingsFragment">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/radius_choice" />
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -25,13 +20,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/currentRadius"
+            android:textStyle="bold"
             android:textSize="15sp" />
 
         <TextView
             android:id="@+id/currentRadiusText2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="15dp"
             android:text="0km"
             android:textSize="15sp" />
 
@@ -51,15 +47,6 @@
         android:paddingBottom="10dp"
         android:thumbTint="@android:color/holo_red_light"
         app:tickMark="@drawable/tickmark" />
-
-    <Button
-        android:id="@+id/settingsConfirmButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/custom_change_button"
-        android:text="@string/confirmButton" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -81,5 +68,61 @@
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="15dp" />
     </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:text="Tryb nocny"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/switch2"
+            android:layout_width="101dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="15dp"  />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:text="Język:"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textView22"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Polski"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="20dp"  />
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/settingsConfirmButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/custom_change_button"
+        android:text="@string/confirmButton" />
 
 </LinearLayout>

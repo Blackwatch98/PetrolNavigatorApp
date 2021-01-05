@@ -51,6 +51,7 @@ import com.google.maps.model.DirectionsRoute;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnPolylineClickListener {
@@ -192,7 +193,7 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                     polylineDataList.clear();
                     polylineDataList = new ArrayList<>();
                 }
-                System.out.println("routes = " + result.routes.length);
+
                 for(DirectionsRoute route : result.routes) {
                     List <com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
                     List<LatLng> newDecodedPath = new ArrayList<>();
@@ -210,13 +211,15 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
 
     @Override
     public void onPolylineClick(Polyline polyline) {
+
+
         for(PolylineData data : polylineDataList) {
             if(polyline.getId().equals(data.getPolyline().getId())) {
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.light_blue));
                 data.getPolyline().setZIndex(1);
 
                 /////WYSZUKAJ PUNKT REZERWY PALIWA
-                Vehicle testVehicle = new Vehicle("BMW", 50, 7, "Diesel", 10);
+                Vehicle testVehicle = new Vehicle("BMW", 50, 10, "Diesel", 10);
                 PolylineService service = new PolylineService(testVehicle, data.getPolyline());
                 LatLng firstPoint = service.getFuelReservePointOnRoute();
                 mMap.addMarker(new MarkerOptions().position(firstPoint).title("Brak paliwa"));

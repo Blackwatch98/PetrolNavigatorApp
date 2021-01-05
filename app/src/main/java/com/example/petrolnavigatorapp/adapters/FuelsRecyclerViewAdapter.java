@@ -59,7 +59,7 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
         else
             holder.priceText.setText(fuelsList.get(position).getPrice() +"zł");
 
-        if(fuelsList.get(position).getLastReportDate().equals(null))
+        if(fuelsList.get(position).getLastReportDate() == null)
             holder.dateText.setText("Brak");
         else {
             try {

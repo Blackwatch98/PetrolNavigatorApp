@@ -69,8 +69,15 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
         holder.distanceText.setText(distance);
         holder.petrolName.setText(petrols.get(position).getName());
         if(fuel != null){
-            holder.fuelPrice.setText(fuel.getPrice());
-            holder.reportDate.setText(getDaysDifference(fuel.getLastReportDate()));
+            if(fuel.getPrice().equals("0.00"))
+                holder.fuelPrice.setText("Brak");
+            else
+                holder.fuelPrice.setText(fuel.getPrice());
+
+            if(fuel.getLastReportDate() == null)
+                holder.reportDate.setText("Brak");
+            else
+                holder.reportDate.setText(getDaysDifference(fuel.getLastReportDate()));
         }
 
     }

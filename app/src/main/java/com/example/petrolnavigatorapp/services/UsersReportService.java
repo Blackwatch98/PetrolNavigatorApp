@@ -21,9 +21,9 @@ public class UsersReportService {
 
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private DocumentReference currentPetrolDocument;
-    private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES = 2;
-    private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_NAME_REPORT = 2;
-    private final int DAYS_UNITL_REPORT_EXPIRES = 2;
+    private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES = 2;  //2
+    private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_NAME_REPORT = 2;    //2
+    private final int DAYS_UNITL_REPORT_EXPIRES = 2;    //2
 
     public UsersReportService(DocumentReference documentReference) {
         currentPetrolDocument = documentReference;
@@ -37,8 +37,10 @@ public class UsersReportService {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                 // get differences between report and original data
                 for (String name : availableFuels.keySet()) {
-                    if (!availableFuels.get(name).equals(newAvailableFuels.get(name)))
+                    if (!availableFuels.get(name).equals(newAvailableFuels.get(name))) {
                         differences.put(name, newAvailableFuels.get(name));
+                        System.out.println("Do zmiany: " + name);
+                    }
                 }
                 // looking for report equal to differences
                 for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
@@ -51,12 +53,16 @@ public class UsersReportService {
                             Integer.parseInt(query.get("counter").toString())
                     );
                     // check if report is already in database and if this user hasn't already report it
+                    System.out.println("HAlOOOO");
+                    System.out.println(differences.containsKey(report.getTargetName()) && !report.getSenders().contains(currentUser.getUid()));
                     if (differences.containsKey(report.getTargetName()) && !report.getSenders().contains(currentUser.getUid())) {
+                        System.out.println("DEBUGGER");
                         if (report.getCounter() + 1 >= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES) {
+                            System.out.println("DEBUGGER2");
                             currentPetrolDocument.update("availableFuels." + report.getTargetName(), report.getData(),
                                     "lastReportDate", sdf.format(new Date()));
                             currentPetrolDocument.collection("fuelTypeReports").document(query.getId()).delete();
-                            return;
+                            //return;
                         }
                         report.getSenders().add(currentUser.getUid());
                         currentPetrolDocument.collection("fuelTypeReports").document(query.getId())
@@ -255,8 +261,6 @@ public class UsersReportService {
                             item.put("price", price);
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                             item.put("lastReportDate", sdf.format(new Date()));
-                            int counter = Integer.parseInt(item.get("reportCounter").toString());
-                            item.put("reportCounter", counter + 1);
                             break;
                         }
                     }

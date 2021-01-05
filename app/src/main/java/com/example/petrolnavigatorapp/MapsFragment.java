@@ -105,6 +105,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 //                return false;
 //            }
 //        });
+
 //        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
 //        getNearbyPetrols.execute(dataTransfer);
     }
@@ -116,7 +117,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_maps, container, false);
 
-        listener = (UserLocalizationListener)getContext();
         toolbar = view.findViewById(R.id.map_nav_toolbar);
 
         return view;
@@ -131,6 +131,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         fireStore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        listener = (UserLocalizationListener)getContext();
 
         userDocument = fireStore.collection("users")
                 .document(mAuth.getCurrentUser().getUid());
