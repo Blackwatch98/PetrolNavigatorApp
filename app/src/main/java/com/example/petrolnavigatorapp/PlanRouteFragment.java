@@ -104,9 +104,7 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_plan_route, container, false);
         searchView = view.findViewById(R.id.searchView);
-        System.out.println(searchView);
         searchView = getActivity().findViewById(R.id.searchView);
-        System.out.println(searchView);
         return view;
     }
 
@@ -137,7 +135,6 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
                     Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).title(location));
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11));
-                    System.out.println("DEBUGGER");
                     calculateDirections(marker);
                 }
                 return false;
@@ -161,7 +158,6 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
     }
 
     private void calculateDirections(Marker marker) {
-        System.out.println("marker " + marker.getPosition().latitude + " " + marker.getPosition().longitude);
         com.google.maps.model.LatLng destination = new com.google.maps.model.LatLng (marker.getPosition().latitude, marker.getPosition().longitude);
         DirectionsApiRequest directions = new DirectionsApiRequest(geoApiContext);
         directions.alternatives(true);
@@ -218,13 +214,26 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.light_blue));
                 data.getPolyline().setZIndex(1);
 
-                /////WYSZUKAJ PUNKT REZERWY PALIWA
                 Vehicle testVehicle = new Vehicle("BMW", 50, 10, "Diesel", 10);
                 PolylineService service = new PolylineService(testVehicle, data.getPolyline());
                 LatLng firstPoint = service.getFuelReservePointOnRoute();
                 mMap.addMarker(new MarkerOptions().position(firstPoint).title("Brak paliwa"));
-                FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(firstPoint, mMap, getContext(), getActivity());
-                petrolsDB.findNearbyPetrols(2);
+                //FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(firstPoint, mMap, getContext(), getActivity());
+                //petrolsDB.findNearbyPetrols(5000);
+                int counter = 0;
+                List <LatLng> latLngs = new LinkedList<>();
+                for(LatLng latLng : data.getPolyline().getPoints()) {
+                    if(counter % 10 == 0)
+                        latLngs.add(latLng);
+                    counter++;
+                }
+
+                FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(
+                        mMap, getContext(), getActivity());
+                        petrolsDB.getPetrolsOnRoute(latLngs, firstPoint,
+                        data.getPolyline().getPoints().get(0),
+                        data.getPolyline().getPoints().get(data.getPolyline().getPoints().size()-1)
+                        );
             }
             else {
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.dark_grey));

@@ -61,6 +61,12 @@ public class FirestorePetrolsDB {
         listener = (FindPetrolsListener)context;
     }
 
+    public FirestorePetrolsDB(GoogleMap mMap, Context context, Activity activity) {
+        this.mMap = mMap;
+        this.context = context;
+        this.activity = activity;
+    }
+
     public void findNearbyPetrols(final float radius) {
         if(context != null)
         fireStore.collection("users").document(mAuth.getCurrentUser().getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -279,8 +285,8 @@ public class FirestorePetrolsDB {
                             manager_note_text,
                             true
                     );
-
-                    for()
+                    manager_note_text.setRenderer(managerRenderer2);
+                    final Petrol petrol = closestToStart;
                     sRef = new MyFirebaseStorage();
                     try {
                         final File localFile = File.createTempFile("petrol_icon", "png");
@@ -288,63 +294,37 @@ public class FirestorePetrolsDB {
                             @Override
                             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                                 Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                                System.out.println("DEBUGGER2");
                                 final MyCluster newClusterMarker;
-                                if (finalFuel == null || finalFuel.getPrice().equals("0.00")) {
-                                    newClusterMarker = new MyCluster(
-                                            new LatLng(lat, lon),
-                                            "",
-                                            "",
-                                            bitmap,
-                                            null,
-                                            petrol
-                                    );
-                                    manager_note_text.addItem(newClusterMarker);
-                                } else {
-                                    newClusterMarker = new MyCluster(
-                                            new LatLng(lat, lon),
-                                            "",
-                                            "",
-                                            bitmap,
-                                            finalFuel.getPrice(),
-                                            petrol
-                                    );
-                                    manager.addItem(newClusterMarker);
-                                }
+                                newClusterMarker = new MyCluster(
+                                        new LatLng(petrol.getLat(), petrol.getLon()),
+                                        "",
+                                        "",
+                                        bitmap,
+                                        null,
+                                        petrol
+                                );
+                                manager_note_text.addItem(newClusterMarker);
                                 mMap.setOnMarkerClickListener(markerManager);
-                                manager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<MyCluster>() {
-                                    @Override
-                                    public boolean onClusterItemClick(MyCluster item) {
-                                        Intent intent = new Intent(activity, PetrolPopUpActivity.class);
-                                        intent.putExtra("userLat", userLocalization.latitude);
-                                        intent.putExtra("userLon", userLocalization.longitude);
-                                        intent.putExtra("latitude", item.getPosition().latitude);
-                                        intent.putExtra("longitude", item.getPosition().longitude);
-                                        activity.startActivity(intent);
-                                        return true;
-                                    }
-                                });
                                 manager_note_text.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<MyCluster>() {
                                     @Override
                                     public boolean onClusterItemClick(MyCluster item) {
                                         Intent intent = new Intent(activity, PetrolPopUpActivity.class);
-                                        intent.putExtra("userLat", userLocalization.latitude);
-                                        intent.putExtra("userLon", userLocalization.longitude);
                                         intent.putExtra("latitude", item.getPosition().latitude);
                                         intent.putExtra("longitude", item.getPosition().longitude);
                                         activity.startActivity(intent);
                                         return true;
                                     }
                                 });
-                                MarkerManager.Collection collection = manager.getMarkerManager().newCollection();
-                                manager.cluster();
                                 manager_note_text.cluster();
+                                System.out.println("DEBUGGER3");
                             }
                         });
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    mMap.addMarker(new MarkerOptions().position(new LatLng(closestToStart.getLat(),closestToStart.getLon())).title("start"));
-                    mMap.addMarker(new MarkerOptions().position(new LatLng(closestToEnd.getLat(),closestToEnd.getLon())).title("end"));
+                    //mMap.addMarker(new MarkerOptions().position(new LatLng(closestToStart.getLat(),closestToStart.getLon())).title("start"));
+                    //mMap.addMarker(new MarkerOptions().position(new LatLng(closestToEnd.getLat(),closestToEnd.getLon())).title("end"));
                 }
             });
     }
