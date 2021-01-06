@@ -7,13 +7,15 @@ public class Vehicle {
     private double averageFuelConsumption;
     private String fuelType;
     private double currentFuelLevel;
+    private double reserveFuelLevel;
 
-    public Vehicle(String name, double tankCapacity, double averageFuelConsumption, String fuelType, double currentFuelLevel) {
+    public Vehicle(String name, double tankCapacity, double averageFuelConsumption, String fuelType, double currentFuelLevel, double reserveFuelLevel) {
         this.name = name;
         this.tankCapacity = tankCapacity;
         this.averageFuelConsumption = averageFuelConsumption;
         this.fuelType = fuelType;
         this.currentFuelLevel = currentFuelLevel;
+        this.reserveFuelLevel = reserveFuelLevel;
     }
 
     public String getName() {
@@ -54,5 +56,13 @@ public class Vehicle {
 
     public void setCurrentFuelLevel(double currentFuelLevel) {
         this.currentFuelLevel = currentFuelLevel;
+    }
+
+    public double getReserveFuelLevel() {
+        return reserveFuelLevel;
+    }
+
+    public void setReserveFuelLevel(double reserveFuelLevel) {
+        this.reserveFuelLevel = reserveFuelLevel;
     }
 }

@@ -212,7 +212,7 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.light_blue));
                 data.getPolyline().setZIndex(1);
 
-                Vehicle testVehicle = new Vehicle("BMW", 50, 10, "Diesel", 10);
+                Vehicle testVehicle = new Vehicle("BMW", 50, 10, "Diesel", 20, 10);
                 PolylineService service = new PolylineService(testVehicle, data.getPolyline());
                 LatLng firstPoint = service.getFuelReservePointOnRoute();
                 mMap.addMarker(new MarkerOptions().position(firstPoint).title("Brak paliwa"));
@@ -220,11 +220,11 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 //petrolsDB.findNearbyPetrols(5000);
 
                 FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(
-                        mMap, getContext(), getActivity());
+                        mMap, getContext(), getActivity(), testVehicle);
                         petrolsDB.getPetrolsOnRoute(data.getPolyline().getPoints(), firstPoint,
                         data.getPolyline().getPoints().get(0),
-                        data.getPolyline().getPoints().get(data.getPolyline().getPoints().size()-1), geoApiContext
-                        );
+                        data.getPolyline().getPoints().get(data.getPolyline().getPoints().size()-1),
+                        geoApiContext);
             }
             else {
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.dark_grey));

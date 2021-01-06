@@ -38,8 +38,9 @@ public class PolylineService {
     private double getFuelReserveDistance() {
         double currentFuelLevel = currentVehicle.getCurrentFuelLevel();
         double averageFuelConsumption = currentVehicle.getAverageFuelConsumption();
+        double reserveFuelLevel = currentVehicle.getReserveFuelLevel();
 
-        return currentFuelLevel/averageFuelConsumption * 100 * 1000;
+        return (currentFuelLevel - reserveFuelLevel)/averageFuelConsumption * 100 * 1000;
     }
 
     private double getDistance(double lat1, double lon1, double lat2, double lon2)

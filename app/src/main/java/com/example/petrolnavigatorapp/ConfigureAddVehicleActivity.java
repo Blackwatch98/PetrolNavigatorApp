@@ -66,7 +66,8 @@ public class ConfigureAddVehicleActivity extends AppCompatActivity {
                         Double.parseDouble(tankCapacity.getText().toString()),
                         Double.parseDouble(averageConsumption.getText().toString()),
                         vehicleFuelType.getSelectedItem().toString(),
-                        currentFuelLevel.getSelectedItemId()))
+                        currentFuelLevel.getSelectedItemId(),
+                        10))
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

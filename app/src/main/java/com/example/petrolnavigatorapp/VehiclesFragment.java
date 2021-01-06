@@ -87,7 +87,8 @@ public class VehiclesFragment extends Fragment {
                             query.getDouble("tankCapacity"),
                             query.getDouble("averageFuelConsumption"),
                             query.getString("fuelType"),
-                            query.getDouble("currentFuelLevel")
+                            query.getDouble("currentFuelLevel"),
+                            10
                     );
                     vehicleList.add(vehicle);
                 }
