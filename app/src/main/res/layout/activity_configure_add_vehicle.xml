@@ -109,7 +109,7 @@
                 android:text="Poziom rezerwy" />
 
             <Spinner
-                android:id="@+id/spinner3"
+                android:id="@+id/fuelReserveSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />

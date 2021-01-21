@@ -24,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.example.petrolnavigatorapp.services.PolylineService;
@@ -120,7 +121,6 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
             System.out.println("AUTO " + vehicle.getName());
         }
 
-
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, names);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         carSpinner.setAdapter(adapter);
@@ -145,12 +145,13 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
         carSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                ((TextView) adapterView.getChildAt(0)).setTextColor(getResources().getColor(R.color.white));
                 currentVehicle = userVehicles.get(position);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
+                ((TextView) adapterView.getChildAt(0)).setTextColor(getResources().getColor(R.color.white));
             }
         });
 

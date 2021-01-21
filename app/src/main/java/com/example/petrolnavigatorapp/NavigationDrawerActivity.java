@@ -242,6 +242,22 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                 fragobj).commit();
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode==RESULT_OK)
+        {
+            if(requestCode == 1 )
+            {
+                System.out.println("HALO");
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new VehiclesFragment()).commit();
+            }
+        }
+
+    }
+
 
     @Override
     public void getUserVehicles(List<Vehicle> userVehicles) {

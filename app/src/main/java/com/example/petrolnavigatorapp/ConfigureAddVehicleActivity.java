@@ -19,19 +19,26 @@ import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.lang.ref.Reference;
 
 public class ConfigureAddVehicleActivity extends Activity {
 
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     private Context context;
-
-    private EditText vehicleName, averageConsumption, tankCapacity;
-    private Spinner currentFuelLevel, vehicleFuelType;
+    private Vehicle currentVehicle;
+    private EditText vehicleNameEditText, averageConsumptionEditText, tankCapacityEditText;
+    private Spinner currentFuelLevelSpinner, vehicleFuelTypeSpinner, fuelReserveSpinner;
     private Button confirmButton, cancelButton;
     private CoordinatorLayout coordinatorLayout;
+    private QueryDocumentSnapshot currentVehicleDocument;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +47,12 @@ public class ConfigureAddVehicleActivity extends Activity {
 
         context = this;
 
-        vehicleName = findViewById(R.id.editTextVehicleName);
-        averageConsumption = findViewById(R.id.editTextAverageConsumption);
-        tankCapacity = findViewById(R.id.editTextVehicleCapacity);
-        currentFuelLevel = findViewById(R.id.currentFuelLevelSpinner);
-        vehicleFuelType = findViewById(R.id.vehicleFuelSpinner);
+        vehicleNameEditText = findViewById(R.id.editTextVehicleName);
+        averageConsumptionEditText = findViewById(R.id.editTextAverageConsumption);
+        tankCapacityEditText = findViewById(R.id.editTextVehicleCapacity);
+        currentFuelLevelSpinner = findViewById(R.id.currentFuelLevelSpinner);
+        vehicleFuelTypeSpinner = findViewById(R.id.vehicleFuelSpinner);
+        fuelReserveSpinner = findViewById(R.id.fuelReserveSpinner);
         coordinatorLayout = findViewById(R.id.add_vehicle_background);
         coordinatorLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,46 +60,57 @@ public class ConfigureAddVehicleActivity extends Activity {
                 finish();
             }
         });
+
         ArrayAdapter typeSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.fuelTypes, android.R.layout.simple_spinner_item);
         typeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        vehicleFuelType.setAdapter(typeSpinnerAdapter);
+        vehicleFuelTypeSpinner.setAdapter(typeSpinnerAdapter);
 
         final ArrayAdapter fuelLevelAdapter = ArrayAdapter.createFromResource(this, R.array.fractions, android.R.layout.simple_spinner_item);
         fuelLevelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        currentFuelLevel.setAdapter(fuelLevelAdapter);
+        currentFuelLevelSpinner.setAdapter(fuelLevelAdapter);
+
+        fuelReserveSpinner.setAdapter(fuelLevelAdapter);
 
         confirmButton = findViewById(R.id.confirmButton2);
         cancelButton = findViewById(R.id.cancelButton2);
 
-        final DocumentReference documentReference = firestore.collection("users").document(mAuth.getCurrentUser().getUid())
-                .collection("vehicles").document();
-
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                documentReference.set(new Vehicle(
-                        vehicleName.getText().toString(),
-                        Double.parseDouble(tankCapacity.getText().toString()),
-                        Double.parseDouble(averageConsumption.getText().toString()),
-                        vehicleFuelType.getSelectedItem().toString(),
-                        currentFuelLevel.getSelectedItemId(),
-                        10))
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(context, "Skonfigurowano pomyślnie!", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, "Nie udało się skonfigurować...", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                Intent i = new Intent();
-                setResult(RESULT_OK, i);
-                finish();
+        final CollectionReference collectionReference = firestore.collection("users").document(mAuth.getCurrentUser().getUid())
+                .collection("vehicles");
+        final DocumentReference documentReference = collectionReference.document();
+        Bundle bundle = getIntent().getExtras();
+        if(bundle != null) {
+            String vehicleName = bundle.getString("name");
+            if (vehicleName != null) {
+                loadVehicle(vehicleName, collectionReference);
             }
-        });
+        }
+        else
+            confirmButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    documentReference.set(new Vehicle(
+                            vehicleNameEditText.getText().toString(),
+                            Double.parseDouble(tankCapacityEditText.getText().toString()),
+                            Double.parseDouble(averageConsumptionEditText.getText().toString()),
+                            (int) vehicleFuelTypeSpinner.getSelectedItemId(),
+                            (int) currentFuelLevelSpinner.getSelectedItemId(),
+                            (int) fuelReserveSpinner.getSelectedItemId()))
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(context, "Skonfigurowano pomyślnie!", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(context, "Nie udało się skonfigurować...", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    Intent i = new Intent();
+                    setResult(RESULT_OK, i);
+                    finish();
+                }
+            });
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,6 +118,53 @@ public class ConfigureAddVehicleActivity extends Activity {
                 Intent i = new Intent();
                 setResult(RESULT_OK, i);
                 finish();
+            }
+        });
+    }
+
+    private void loadVehicle(String vehicleName, CollectionReference ref) {
+        ref.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+
+                for(QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                    if(query.getString("name").equals(vehicleName)){
+                        currentVehicle = new Vehicle(
+                                query.getString("name"),
+                                query.getDouble("tankCapacity"),
+                                query.getDouble("averageFuelConsumption"),
+                                Integer.parseInt(query.get("fuelTypeId").toString()),
+                                Integer.parseInt(query.get("currentFuelLevel").toString()),
+                                Integer.parseInt(query.get("reserveFuelLevel").toString())
+                        );
+                        currentVehicleDocument = query;
+                        break;
+                    }
+                }
+                vehicleNameEditText.setText(currentVehicle.getName());
+                tankCapacityEditText.setText(String.valueOf(currentVehicle.getTankCapacity()));
+                averageConsumptionEditText.setText(String.valueOf(currentVehicle.getAverageFuelConsumption()));
+                vehicleFuelTypeSpinner.setSelection(currentVehicle.getFuelTypeId());
+                currentFuelLevelSpinner.setSelection(currentVehicle.getCurrentFuelLevel());
+                fuelReserveSpinner.setSelection(currentVehicle.getReserveFuelLevel());
+
+                confirmButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ref.document(currentVehicleDocument.getId()).update(
+                                "name", vehicleNameEditText.getText().toString(),
+                                "tankCapacity", Double.parseDouble(tankCapacityEditText.getText().toString()),
+                               "averageFuelConsumption" , Double.parseDouble(averageConsumptionEditText.getText().toString()),
+                                "fuelTypeId", (int) vehicleFuelTypeSpinner.getSelectedItemId(),
+                                "currentFuelLevel", (int) currentFuelLevelSpinner.getSelectedItemId(),
+                                "reserveFuelLevel", (int) fuelReserveSpinner.getSelectedItemId()
+                        );
+                        Intent i = new Intent();
+                        setResult(RESULT_OK, i);
+                        finish();
+                    }
+                });
             }
         });
     }

@@ -7,15 +7,15 @@ public class Vehicle implements Serializable {
     private String name;
     private double tankCapacity; //in liters
     private double averageFuelConsumption;
-    private String fuelType;
-    private double currentFuelLevel;
-    private double reserveFuelLevel;
+    private int fuelTypeId;
+    private int currentFuelLevel;
+    private int reserveFuelLevel;
 
-    public Vehicle(String name, double tankCapacity, double averageFuelConsumption, String fuelType, double currentFuelLevel, double reserveFuelLevel) {
+    public Vehicle(String name, double tankCapacity, double averageFuelConsumption, int fuelTypeId, int currentFuelLevel, int reserveFuelLevel) {
         this.name = name;
         this.tankCapacity = tankCapacity;
         this.averageFuelConsumption = averageFuelConsumption;
-        this.fuelType = fuelType;
+        this.fuelTypeId = fuelTypeId;
         this.currentFuelLevel = currentFuelLevel;
         this.reserveFuelLevel = reserveFuelLevel;
     }
@@ -44,27 +44,27 @@ public class Vehicle implements Serializable {
         this.averageFuelConsumption = averageFuelConsumption;
     }
 
-    public String getFuelType() {
-        return fuelType;
+    public int getFuelTypeId() {
+        return fuelTypeId;
     }
 
-    public void setFuelType(String fuelType) {
-        this.fuelType = fuelType;
+    public void setFuelTypeId(int fuelTypeId) {
+        this.fuelTypeId = fuelTypeId;
     }
 
-    public double getCurrentFuelLevel() {
+    public int getCurrentFuelLevel() {
         return currentFuelLevel;
     }
 
-    public void setCurrentFuelLevel(double currentFuelLevel) {
+    public void setCurrentFuelLevel(int currentFuelLevel) {
         this.currentFuelLevel = currentFuelLevel;
     }
 
-    public double getReserveFuelLevel() {
+    public int getReserveFuelLevel() {
         return reserveFuelLevel;
     }
 
-    public void setReserveFuelLevel(double reserveFuelLevel) {
+    public void setReserveFuelLevel(int reserveFuelLevel) {
         this.reserveFuelLevel = reserveFuelLevel;
     }
 }

@@ -65,7 +65,7 @@ public class VehiclesFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), ConfigureAddVehicleActivity.class);
-                getActivity().startActivity(intent);
+                getActivity().startActivityForResult(intent, 1);
             }
         });
         getUserVehicles(view);
@@ -86,9 +86,9 @@ public class VehiclesFragment extends Fragment {
                             query.getString("name"),
                             query.getDouble("tankCapacity"),
                             query.getDouble("averageFuelConsumption"),
-                            query.getString("fuelType"),
-                            query.getDouble("currentFuelLevel"),
-                            10
+                            Integer.parseInt(query.get("fuelTypeId").toString()),
+                            Integer.parseInt(query.get("currentFuelLevel").toString()),
+                            Integer.parseInt(query.get("reserveFuelLevel").toString())
                     );
                     vehicleList.add(vehicle);
                 }
@@ -117,4 +117,6 @@ public class VehiclesFragment extends Fragment {
     public interface VehiclesListener{
         void getUserVehicles(List<Vehicle> userVehicles);
     }
+
+
 }
