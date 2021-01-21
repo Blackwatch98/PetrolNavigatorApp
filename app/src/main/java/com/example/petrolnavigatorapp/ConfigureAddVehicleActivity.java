@@ -2,7 +2,9 @@ package com.example.petrolnavigatorapp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,7 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class ConfigureAddVehicleActivity extends AppCompatActivity {
+public class ConfigureAddVehicleActivity extends Activity {
 
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
@@ -29,6 +31,7 @@ public class ConfigureAddVehicleActivity extends AppCompatActivity {
     private EditText vehicleName, averageConsumption, tankCapacity;
     private Spinner currentFuelLevel, vehicleFuelType;
     private Button confirmButton, cancelButton;
+    private CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +45,13 @@ public class ConfigureAddVehicleActivity extends AppCompatActivity {
         tankCapacity = findViewById(R.id.editTextVehicleCapacity);
         currentFuelLevel = findViewById(R.id.currentFuelLevelSpinner);
         vehicleFuelType = findViewById(R.id.vehicleFuelSpinner);
-
+        coordinatorLayout = findViewById(R.id.add_vehicle_background);
+        coordinatorLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
         ArrayAdapter typeSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.fuelTypes, android.R.layout.simple_spinner_item);
         typeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         vehicleFuelType.setAdapter(typeSpinnerAdapter);

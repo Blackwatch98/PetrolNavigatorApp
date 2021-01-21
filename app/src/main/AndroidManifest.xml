@@ -30,7 +30,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".ConfigureAddVehicleActivity" />
+        <activity
+            android:name=".ConfigureAddVehicleActivity"
+            android:theme="@style/AppTheme.CustomTheme"/>
         <activity
             android:name=".NavigationDrawerActivity"
             android:label="@string/title_activity_maps" />
