@@ -57,7 +57,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private FirebaseFirestore fireStore;
     private FirebaseAuth mAuth;
     private DocumentReference userDocument;
-    private Toolbar toolbar;
     private UserLocalizationListener listener;
 
 
@@ -78,22 +77,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     };
 
     public void findNearbyPetrols() {
-//        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-//        stringBuilder.append("location=" + currentLocation.latitude + "," + currentLocation.longitude);
-//        stringBuilder.append("&radius=" + radius);
-//        stringBuilder.append("&keyword=" + "petrol");
-//        stringBuilder.append("&key=" + getResources().getString(R.string.google_places_key));
-//
-//        String url = stringBuilder.toString();
-//
-//        Object[] dataTransfer = new Object[4];
-//        dataTransfer[0] = mMap;
-//        dataTransfer[1] = url;
-//        dataTransfer[2] = getActivity();
-//        dataTransfer[3] = this;
+        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        stringBuilder.append("location=" + currentLocation.latitude + "," + currentLocation.longitude);
+        stringBuilder.append("&radius=" + radius);
+        stringBuilder.append("&keyword=" + "petrol");
+        stringBuilder.append("&key=" + getResources().getString(R.string.google_places_key));
 
-        FirestorePetrolsDB test = new FirestorePetrolsDB(currentLocation, mMap, getContext(), getActivity());
-        test.findNearbyPetrols(radius);
+        String url = stringBuilder.toString();
+
+        Object[] dataTransfer = new Object[4];
+        dataTransfer[0] = mMap;
+        dataTransfer[1] = url;
+        dataTransfer[2] = getActivity();
+        dataTransfer[3] = this;
+
+//        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
+//        getNearbyPetrols.execute(dataTransfer);
+
+
+        FirestorePetrolsDB firestorePetrolsDB = new FirestorePetrolsDB(currentLocation, mMap, getContext(), getActivity());
+        firestorePetrolsDB.findNearbyPetrols(radius);
 
 //        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 //            @Override
@@ -116,8 +119,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_maps, container, false);
-
-        toolbar = view.findViewById(R.id.map_nav_toolbar);
 
         return view;
     }

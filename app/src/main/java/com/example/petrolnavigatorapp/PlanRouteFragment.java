@@ -20,10 +20,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.SearchView;
+import android.widget.Spinner;
 
 import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.example.petrolnavigatorapp.services.PolylineService;
+import com.example.petrolnavigatorapp.utils.Petrol;
 import com.example.petrolnavigatorapp.utils.PolylineData;
 import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -57,12 +61,15 @@ import java.util.List;
 public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnPolylineClickListener {
 
     private GoogleMap mMap;
+    private ArrayList<Vehicle> userVehicles;
+    private Vehicle currentVehicle;
     private FusedLocationProviderClient mFusedProviderClient;
     protected LocationManager locationManager;
     private LatLng currentLocation;
     private Location mLastLocation;
     private LocationRequest request;
     private SearchView searchView;
+    private Spinner carSpinner;
     private GeoApiContext geoApiContext;
     private List<PolylineData> polylineDataList = new ArrayList<>();
 
@@ -103,8 +110,21 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_plan_route, container, false);
-        searchView = view.findViewById(R.id.searchView);
         searchView = getActivity().findViewById(R.id.searchView);
+        carSpinner = getActivity().findViewById(R.id.carSpinner);
+
+        userVehicles = (ArrayList<Vehicle>) getArguments().getSerializable("userVehicles");
+        ArrayList<String> names = new ArrayList<>();
+        for(Vehicle vehicle : userVehicles) {
+            names.add(vehicle.getName());
+            System.out.println("AUTO " + vehicle.getName());
+        }
+
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, names);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        carSpinner.setAdapter(adapter);
+
         return view;
     }
 
@@ -119,9 +139,25 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                     .build();
         }
 
+        //ArrayAdapter adapter = ArrayAdapter.createFromResource(getContext(), R.array.fuelTypes, android.R.layout.simple_spinner_item);
+
+
+        carSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                currentVehicle = userVehicles.get(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                mMap.clear();
                 String location = searchView.getQuery().toString();
                 List<Address> addressList = null;
                 if(location != null && location != "") {
@@ -145,8 +181,7 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 return false;
             }
         });
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
@@ -212,18 +247,19 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.light_blue));
                 data.getPolyline().setZIndex(1);
 
-                Vehicle testVehicle = new Vehicle("BMW", 50, 10, "Diesel", 20, 10);
-                PolylineService service = new PolylineService(testVehicle, data.getPolyline());
+                //Vehicle testVehicle = new Vehicle("BMW", 50, 10, "Diesel", 20, 10);
+
+                PolylineService service = new PolylineService(currentVehicle, data.getPolyline());
                 LatLng firstPoint = service.getFuelReservePointOnRoute();
-                mMap.addMarker(new MarkerOptions().position(firstPoint).title("Brak paliwa"));
-                //FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(firstPoint, mMap, getContext(), getActivity());
-                //petrolsDB.findNearbyPetrols(5000);
+
+
+                mMap.addMarker(new MarkerOptions().position(firstPoint).title("Rezerwa paliwa"));
 
                 FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(
-                        mMap, getContext(), getActivity(), testVehicle);
-                        petrolsDB.getPetrolsOnRoute(data.getPolyline().getPoints(), firstPoint,
+                        mMap, getContext(), getActivity(), currentVehicle);
+                petrolsDB.getPetrolsOnRoute(data.getPolyline().getPoints(), firstPoint,
                         data.getPolyline().getPoints().get(0),
-                        data.getPolyline().getPoints().get(data.getPolyline().getPoints().size()-1),
+                        data.getPolyline().getPoints().get(data.getPolyline().getPoints().size() - 1),
                         geoApiContext);
             }
             else {

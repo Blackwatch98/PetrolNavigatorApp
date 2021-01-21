@@ -33,16 +33,11 @@ public class VehiclesFragment extends Fragment {
     private Context context;
     private List<Vehicle> vehicleList = new LinkedList<>();
     private FloatingActionButton addVehicleButton;
+    private VehiclesListener listener;
+    private RecyclerView recyclerView;
 
     public VehiclesFragment() {
         // Required empty public constructor
-    }
-
-    public static VehiclesFragment newInstance(String param1, String param2) {
-        VehiclesFragment fragment = new VehiclesFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -60,7 +55,10 @@ public class VehiclesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_vehicles, container, false);
         context = view.getContext();
 
-        getUserVehicles(view);
+        recyclerView = (RecyclerView) view.findViewById(R.id.vehicles_list);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         addVehicleButton = view.findViewById(R.id.add_vehicle_button);
         addVehicleButton.setOnClickListener(new View.OnClickListener() {
@@ -70,8 +68,10 @@ public class VehiclesFragment extends Fragment {
                 getActivity().startActivity(intent);
             }
         });
+        getUserVehicles(view);
         return view;
     }
+
 
     private void getUserVehicles(View view) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
@@ -92,14 +92,29 @@ public class VehiclesFragment extends Fragment {
                     );
                     vehicleList.add(vehicle);
                 }
-                RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.vehicles_list);
-                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
+                listener.getUserVehicles(vehicleList);
+
+
                 VehiclesRecyclerViewAdapter adapter = new VehiclesRecyclerViewAdapter(vehicleList, context);
 
-                recyclerView.setLayoutManager(layoutManager);
+
                 recyclerView.setAdapter(adapter);
-                recyclerView.setItemAnimator(new DefaultItemAnimator());
+
             }
         });
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            listener = (VehiclesFragment.VehiclesListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()+" must implements VehiclesListener");
+        }
+    }
+
+    public interface VehiclesListener{
+        void getUserVehicles(List<Vehicle> userVehicles);
     }
 }

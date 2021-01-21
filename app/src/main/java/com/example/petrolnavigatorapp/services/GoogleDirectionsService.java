@@ -14,27 +14,28 @@ import com.google.maps.PendingResult;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.Distance;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class GoogleDirectionsService {
 
-    private Petrol nearestPetrol;
-    private double minimum;
+    private List<Petrol> nextPetrolsList;
     private GoogleMap mMap;
     private GeoApiContext geoApiContext;
     private Vehicle currentVehicle;
-    private boolean ifAbleToPutMarket = false, isFirstStep = true;
 
     public GoogleDirectionsService(GoogleMap map, GeoApiContext context, Vehicle currentVehicle) {
         mMap = map;
         geoApiContext = context;
         this.currentVehicle = currentVehicle;
+        nextPetrolsList = new LinkedList<>();
     }
 
     public void compareDistanceToPetrols(List<Petrol> onRoutePetrols, LatLng start, Petrol petrolBefore) {
         if(onRoutePetrols.size() == 0) {
-            if(nearestPetrol == null) {
-                Handler handler = new Handler(Looper.getMainLooper());
+            Handler handler = new Handler(Looper.getMainLooper());
+            if(nextPetrolsList == null) {
+
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -43,11 +44,11 @@ public class GoogleDirectionsService {
                 });
             }
             else{
-                Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(nearestPetrol.getLat(), nearestPetrol.getLon())).title(nearestPetrol.getName()));
+                        for(Petrol petrol : nextPetrolsList)
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(petrol.getLat(), petrol.getLon())).title(petrol.getName()));
                     }
                 });
             }
@@ -63,19 +64,15 @@ public class GoogleDirectionsService {
             @Override
             public void onResult(DirectionsResult result) {
                 Distance dis = result.routes[0].legs[0].distance;
-                if(checkIfVehicleCanReach(dis.inMeters)) {
-                    if(isFirstStep || dis.inMeters < minimum) {
-                        minimum = dis.inMeters;
-                        nearestPetrol = petrol;
-                        isFirstStep = false;
-                    }
-                }
+                if(checkIfVehicleCanReach(dis.inMeters))
+                    nextPetrolsList.add(petrol);
+
                 compareDistanceToPetrols(onRoutePetrols,start, petrolBefore);
             }
 
             @Override
             public void onFailure(Throwable e) {
-                System.out.println("Something gone wrong..." + e);
+                System.out.println("Something gone wrong... " + e);
             }
         });
     }
@@ -86,7 +83,7 @@ public class GoogleDirectionsService {
 
         if(remaningFuel / (averageFuelConsumption/100000) >= disInMeters)
             return true;
-        else
-            return false;
+
+        return false;
     }
 }

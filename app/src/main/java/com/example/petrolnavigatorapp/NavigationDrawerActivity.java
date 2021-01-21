@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.ListFragment;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.petrolnavigatorapp.utils.Petrol;
+import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
@@ -27,12 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-        FilterDialog.FilterDialogListener, FindPetrolsListener, MapsFragment.UserLocalizationListener, ListFilterDialog.OrderPrefListener {
+        FilterDialog.FilterDialogListener, FindPetrolsListener, MapsFragment.UserLocalizationListener, ListFilterDialog.OrderPrefListener,
+        VehiclesFragment.VehiclesListener {
 
     private DrawerLayout drawer;
     private Toolbar current_toolbar, map_toolbar, list_toolbar, settings_toolbar, vehicles_toolbar, plan_route_toolbar;
     private List<Petrol> foundPetrols;
     private String prefFuel, prefType;
+    private List<Vehicle> userVehicles;
     private LatLng userLocalization;
 
     @Override
@@ -40,12 +42,6 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation_drawer);
 
-        Bundle bundle = getIntent().getExtras();
-
-        //DEPRECATED GET RADIUS
-        //radius = bundle.getInt("seekBarValue");
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         map_toolbar = findViewById(R.id.map_nav_toolbar);
         list_toolbar = findViewById(R.id.list_nav_toolbar);
         vehicles_toolbar = findViewById(R.id.vehicles_nav_toolbar);
@@ -116,14 +112,20 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                         fragobj).commit();
                 current_toolbar = list_toolbar;
                 setSupportActionBar(current_toolbar);
-                ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this,drawer,list_toolbar,
+                ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this, drawer,list_toolbar,
                         R.string.navigation_drawer_open,R.string.navigation_drawer_close);
                 drawer.addDrawerListener(toggle3);
                 toggle3.syncState();
                 break;
             case R.id.plan_route:
+                Bundle bundle2 = new Bundle();
+                ArrayList<Vehicle> vehicles = new ArrayList<>(userVehicles.size());
+                vehicles.addAll(userVehicles);
+                bundle2.putSerializable("userVehicles", vehicles);
+                PlanRouteFragment planRouteFragment = new PlanRouteFragment();
+                planRouteFragment.setArguments(bundle2);
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new PlanRouteFragment()).commit();
+                        planRouteFragment).commit();
                 current_toolbar = plan_route_toolbar;
                 setSupportActionBar(current_toolbar);
                 ActionBarDrawerToggle toggle4 = new ActionBarDrawerToggle(this,drawer,plan_route_toolbar,
@@ -201,7 +203,7 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
         ).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Toast.makeText(getApplicationContext(), "Zmieniono ustawienia", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Zmieniono ustawienia preferencji...", Toast.LENGTH_SHORT).show();
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         new MapsFragment()).commit();
             }
@@ -239,5 +241,10 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
         fragobj.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                 fragobj).commit();
+    }
+
+    @Override
+    public void getUserVehicles(List<Vehicle> userVehicles) {
+        this.userVehicles = userVehicles;
     }
 }

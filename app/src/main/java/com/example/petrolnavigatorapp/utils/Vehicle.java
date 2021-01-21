@@ -1,6 +1,8 @@
 package com.example.petrolnavigatorapp.utils;
 
-public class Vehicle {
+import java.io.Serializable;
+
+public class Vehicle implements Serializable {
 
     private String name;
     private double tankCapacity; //in liters

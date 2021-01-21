@@ -7,6 +7,8 @@ import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 public class PolylineService {

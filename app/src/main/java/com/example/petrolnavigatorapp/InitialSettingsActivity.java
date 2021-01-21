@@ -43,7 +43,7 @@ public class InitialSettingsActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                currentRadiusText.setText(""+seekBar.getProgress()+1+"km");
+                currentRadiusText.setText(""+(seekBar.getProgress()+1)+"km");
             }
 
             @Override
