@@ -22,41 +22,27 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Map;
 
+/**
+ * Fragment where user can change application settings. For now only petrol stations search radius is available.
+ */
 public class SettingsFragment extends Fragment {
-
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private TextView currentRadiusText;
     private SeekBar seekBar;
     private FirebaseFirestore fireStore;
     private FirebaseAuth mAuth;
+    private Button confirmButton;
 
     private Animation scale_up, scale_down;
 
     public SettingsFragment() {
-        // Required empty public constructor
-    }
-
-    public static SettingsFragment newInstance(String param1, String param2) {
-        SettingsFragment fragment = new SettingsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            //no data passed
         }
     }
 
@@ -67,7 +53,6 @@ public class SettingsFragment extends Fragment {
 
         seekBar = view.findViewById(R.id.seekBar2);
         currentRadiusText = view.findViewById(R.id.currentRadiusText2);
-
 
         mAuth = FirebaseAuth.getInstance();
         fireStore = FirebaseFirestore.getInstance();
@@ -94,21 +79,19 @@ public class SettingsFragment extends Fragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                //nothing to do
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                //nothing to do
             }
         });
-
 
         scale_up = AnimationUtils.loadAnimation(getContext(),R.anim.scale_up);
         scale_down = AnimationUtils.loadAnimation(getContext(),R.anim.scale_down);
 
-
-        final Button confirmButton = view.findViewById(R.id.settingsConfirmButton);
+        confirmButton = view.findViewById(R.id.settingsConfirmButton);
 
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override

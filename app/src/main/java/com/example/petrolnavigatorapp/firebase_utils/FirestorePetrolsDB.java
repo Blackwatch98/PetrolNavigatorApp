@@ -6,12 +6,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
-import android.os.Handler;
-import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
-import com.example.petrolnavigatorapp.FindPetrolsListener;
+import com.example.petrolnavigatorapp.interfaces.FindPetrolsListener;
 import com.example.petrolnavigatorapp.MyClusterManagerRenderer;
 import com.example.petrolnavigatorapp.PetrolPopUpActivity;
 import com.example.petrolnavigatorapp.services.GoogleDirectionsService;
@@ -21,8 +19,6 @@ import com.example.petrolnavigatorapp.utils.Petrol;
 import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,13 +28,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FileDownloadTask;
-import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
-import com.google.maps.PendingResult;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.collections.MarkerManager;
-import com.google.maps.model.DirectionsResult;
-import com.google.maps.model.Distance;
 
 import java.io.File;
 import java.io.IOException;

@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.petrolnavigatorapp.interfaces.FindPetrolsListener;
 import com.example.petrolnavigatorapp.utils.Petrol;
 import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.maps.model.LatLng;
@@ -22,7 +23,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -33,7 +33,7 @@ import java.util.List;
 
 public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         FilterDialog.FilterDialogListener, FindPetrolsListener, MapsFragment.UserLocalizationListener, ListFilterDialog.OrderPrefListener,
-        VehiclesFragment.VehiclesListener {
+        VehiclesListFragment.VehiclesListener {
 
     private DrawerLayout drawer;
     private Toolbar current_toolbar, map_toolbar, list_toolbar, settings_toolbar, vehicles_toolbar, plan_route_toolbar;
@@ -111,7 +111,7 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 bundle.putDouble("lon", userLocalization.longitude);
                 bundle.putString("prefFuel", prefFuel);
                 bundle.putString("prefType", prefType);
-                PetrolsListFragment fragobj = new PetrolsListFragment();
+                PetrolStationsListFragment fragobj = new PetrolStationsListFragment();
                 fragobj.setArguments(bundle);
 
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -144,7 +144,7 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 break;
             case R.id.vehicles:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new VehiclesFragment()).commit();
+                        new VehiclesListFragment()).commit();
                 current_toolbar = vehicles_toolbar;
                 break;
             case R.id.settings:
@@ -246,7 +246,7 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
         bundle.putDouble("lon", userLocalization.longitude);
         bundle.putString("prefFuel", prefFuel);
         bundle.putString("prefType", prefType);
-        PetrolsListFragment fragobj = new PetrolsListFragment();
+        PetrolStationsListFragment fragobj = new PetrolStationsListFragment();
         fragobj.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                 fragobj).commit();
@@ -261,7 +261,7 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
             {
                 System.out.println("HALO");
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new VehiclesFragment()).commit();
+                        new VehiclesListFragment()).commit();
             }
         }
 

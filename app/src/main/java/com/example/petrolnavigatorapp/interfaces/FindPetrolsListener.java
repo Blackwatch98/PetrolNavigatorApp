@@ -1,4 +1,4 @@
-package com.example.petrolnavigatorapp;
+package com.example.petrolnavigatorapp.interfaces;
 
 import com.example.petrolnavigatorapp.utils.Petrol;
 

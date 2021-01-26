@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import com.example.petrolnavigatorapp.NavigationDrawerActivity;
 import com.example.petrolnavigatorapp.utils.Petrol;
 import com.example.petrolnavigatorapp.PetrolPopUpActivity;
-import com.example.petrolnavigatorapp.TaskListener;
+import com.example.petrolnavigatorapp.interfaces.TaskListener;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;

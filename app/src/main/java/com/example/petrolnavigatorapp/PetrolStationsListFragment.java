@@ -20,16 +20,17 @@ import com.example.petrolnavigatorapp.utils.Petrol;
 import java.util.List;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a list of sorted nearby petrol stations.
+ * To present any data it is required to visit MapsFragment first.
  */
-public class PetrolsListFragment extends Fragment {
+public class PetrolStationsListFragment extends Fragment {
 
-    private List<Petrol> petrols;
+    private List<Petrol> petrolStationsList;
     private double lat, lon;
     private String prefFuel, prefType;
     private Context context;
 
-    public PetrolsListFragment() {
+    public PetrolStationsListFragment() {
     }
 
     @Override
@@ -37,7 +38,7 @@ public class PetrolsListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            petrols = (List<Petrol>) getArguments().getSerializable("petrols");
+            petrolStationsList = (List<Petrol>) getArguments().getSerializable("petrols");
             lat = getArguments().getDouble("lat");
             lon = getArguments().getDouble("lon");
             prefFuel = getArguments().getString("prefFuel");
@@ -55,42 +56,43 @@ public class PetrolsListFragment extends Fragment {
 
             SharedPreferences shared = getActivity().getPreferences(Context.MODE_PRIVATE);
             String orderPrefs = shared.getString("orderPrefs", "");
+            RecyclerView recyclerView = (RecyclerView) view;
+            PetrolsRecyclerViewAdapter adapter;
+            RecyclerView.LayoutManager layoutManager;
 
-            if(orderPrefs != null)
-            {
+            if (orderPrefs != null) {
                 List<Petrol> newOrderList = getOrderPref(orderPrefs);
-                RecyclerView recyclerView = (RecyclerView) view;
-                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
-                PetrolsRecyclerViewAdapter adapter = new PetrolsRecyclerViewAdapter(newOrderList, lat, lon, prefType, prefFuel, context);
-
+                layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+                adapter = new PetrolsRecyclerViewAdapter(newOrderList, lat, lon, prefType, prefFuel, context);
                 recyclerView.setLayoutManager(layoutManager);
-                recyclerView.setAdapter(adapter);
-                recyclerView.setItemAnimator(new DefaultItemAnimator());
+            } else {
+                layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+                adapter = new PetrolsRecyclerViewAdapter(petrolStationsList, lat, lon, prefType, prefFuel, context);
             }
-            else
-            {
-                RecyclerView recyclerView = (RecyclerView) view;
-                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.VERTICAL,false);
-                PetrolsRecyclerViewAdapter adapter = new PetrolsRecyclerViewAdapter(petrols, lat, lon, prefType, prefFuel, context);
-                recyclerView.setLayoutManager(layoutManager);
-                recyclerView.setAdapter(adapter);
-                recyclerView.setItemAnimator(new DefaultItemAnimator());
-            }
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setAdapter(adapter);
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
         }
         return view;
     }
 
+    /**
+     * Returns list of petrol stations in order requested by user.
+     *
+     * @param orderPref Preference of list's elements order type. Available: Distance, Price, LastReportDate
+     * @return sorted list of found petrol stations.
+     */
     public List<Petrol> getOrderPref(String orderPref) {
         QuickSortService sort = new QuickSortService();
         List<Petrol> newOrderList;
 
         if (orderPref.equals("Distance"))
-            newOrderList = sort.getSortedByDistance(petrols, lat, lon);
-        else if(orderPref.equals("Price"))
-            newOrderList = sort.getSortedByPrice(petrols, prefFuel, prefType);
+            newOrderList = sort.getSortedByDistance(petrolStationsList, lat, lon);
+        else if (orderPref.equals("Price"))
+            newOrderList = sort.getSortedByPrice(petrolStationsList, prefFuel, prefType);
         else
-            newOrderList = sort.getSortedByLastReportDate(petrols, prefFuel, prefType);
+            newOrderList = sort.getSortedByLastReportDate(petrolStationsList, prefFuel, prefType);
 
-        return  newOrderList;
+        return newOrderList;
     }
 }
