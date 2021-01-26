@@ -183,6 +183,7 @@ public class PetrolPopUpActivity extends Activity {
 
     /**
      * This function creates responsive fuel types list that's size depends of screen resolution and orientation.
+     *
      * @param availableFuelTypesHashMap HashMap of fuel types available on poped petrol station.
      */
     private void setFuelTypesResponsiveList(HashMap<String, Integer> availableFuelTypesHashMap) {
@@ -250,6 +251,7 @@ public class PetrolPopUpActivity extends Activity {
 
     /**
      * Sets list for fuels data.
+     *
      * @param availableFuelTypesHashMap HashMap of fuel types available on poped petrol station.
      */
     private void setFuelsList(HashMap<String, Integer> availableFuelTypesHashMap) {
@@ -299,6 +301,7 @@ public class PetrolPopUpActivity extends Activity {
 
     /**
      * Gets fuel types icons from database.
+     *
      * @param availableFuelTypesHashMap HashMap of fuel types available on poped petrol station.
      * @return Map of fuel type and assigned image icon.
      */

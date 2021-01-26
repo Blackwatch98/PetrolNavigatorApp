@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -23,16 +21,17 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
-import static android.content.Context.MODE_PRIVATE;
-
+/**
+ * Dialog window for changing fuel preference in MapsFragment.
+ * Used only in MapsFragment.
+ */
 public class FilterDialog extends AppCompatDialogFragment {
 
     private Spinner fuelTypeSpinner;
     private Spinner fuelSpinner;
-    final private int [] fuelTypesResource = {R.array.Benzyna,R.array.Diesel,R.array.LPG,R.array.Etanol,R.array.Elektryczny,R.array.CNG};
+    final private int[] fuelTypesResource = {R.array.Benzyna, R.array.Diesel, R.array.LPG, R.array.Etanol, R.array.Elektryczny, R.array.CNG};
     private FilterDialogListener listener;
     private ArrayAdapter typeSpinnerAdapter, fuelSpinnerAdapter;
     boolean isAlreadyWorking = false;
@@ -64,12 +63,11 @@ public class FilterDialog extends AppCompatDialogFragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String fuelType = fuelTypeSpinner.getSelectedItem().toString();
                         String fuel = fuelSpinner.getSelectedItem().toString();
-                        listener.changeUserPreferences(fuelType,fuel);
+                        listener.changeUserPreferences(fuelType, fuel);
                     }
                 });
 
         setLastPreferences();
-
         return builder.create();
     }
 
@@ -79,67 +77,69 @@ public class FilterDialog extends AppCompatDialogFragment {
         try {
             listener = (FilterDialogListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()+" must implements FilterDialogListener");
+            throw new ClassCastException(context.toString() + " must implements FilterDialogListener");
         }
     }
 
+    /**
+     * Sets correct fuel spinner available fuels depending on selected fuel type in main spinner.
+     * @param resource Index of element in arrays resource.
+     * @param isEverything Flag that tells if option Everything is selected.
+     */
     private void fillSubspinner(int resource, boolean isEverything) {
-        if(isEverything)
-        {
+        if (isEverything) {
             List<String> fuels = new ArrayList<>();
-            for(int res : fuelTypesResource)
-            {
+            for (int res : fuelTypesResource) {
                 String[] row = getResources().getStringArray(res);
-                for(String item : row)
+                for (String item : row)
                     fuels.add(item);
             }
             fuelSpinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, fuels);
             fuelSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             fuelSpinner.setAdapter(fuelSpinnerAdapter);
-        }
-        else
-        {
+        } else {
             fuelSpinnerAdapter = ArrayAdapter.createFromResource(getContext(), resource, android.R.layout.simple_spinner_item);
             fuelSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             fuelSpinner.setAdapter(fuelSpinnerAdapter);
         }
 
-        if(isAlreadyWorking)
-        {
+        if (isAlreadyWorking) {
             fuelSpinner.setSelection(fuelSpinnerAdapter.getPosition(prefFuel));
             isAlreadyWorking = false;
         }
     }
 
-    public interface FilterDialogListener{
+    /**
+     * Interface that passes preferences data to MapsFragment.
+     */
+    public interface FilterDialogListener {
         void changeUserPreferences(String prefType, String prefFuel);
     }
 
-    private void setLastPreferences()
-    {
+    /**
+     * Sets lastly chosen user's preferences on spinners.
+     */
+    private void setLastPreferences() {
         FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         DocumentReference userDocument = fireStore.collection("users").document(mAuth.getCurrentUser().getUid());
         userDocument.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if(documentSnapshot.exists())
-                {
+                if (documentSnapshot.exists()) {
                     prefType = documentSnapshot.get("userSettings.prefFuelType").toString();
                     prefFuel = documentSnapshot.get("userSettings.prefFuel").toString();
                     List<String> fuels = new ArrayList<>();
-                    if(prefType.equals("Wszystko")) {
+                    if (prefType.equals("Wszystko")) {
 
                         for (int res : fuelTypesResource) {
                             String[] row = getResources().getStringArray(res);
                             for (String item : row)
                                 fuels.add(item);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         int id = getResources().getIdentifier(prefType, "array", getActivity().getPackageName());
-                        String [] array = getResources().getStringArray(id);
+                        String[] array = getResources().getStringArray(id);
                         for (String item : array)
                             fuels.add(item);
                     }
@@ -152,25 +152,25 @@ public class FilterDialog extends AppCompatDialogFragment {
                 fuelTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                        if(adapterView.getItemAtPosition(position).equals("Benzyna"))
+                        if (adapterView.getItemAtPosition(position).equals("Benzyna"))
                             fillSubspinner(fuelTypesResource[0], false);
-                        else if(adapterView.getItemAtPosition(position).equals("Diesel"))
+                        else if (adapterView.getItemAtPosition(position).equals("Diesel"))
                             fillSubspinner(fuelTypesResource[1], false);
-                        else if(adapterView.getItemAtPosition(position).equals("LPG"))
+                        else if (adapterView.getItemAtPosition(position).equals("LPG"))
                             fillSubspinner(fuelTypesResource[2], false);
-                        else if(adapterView.getItemAtPosition(position).equals("Etanol"))
+                        else if (adapterView.getItemAtPosition(position).equals("Etanol"))
                             fillSubspinner(fuelTypesResource[3], false);
-                        else if(adapterView.getItemAtPosition(position).equals("Elektryczny"))
+                        else if (adapterView.getItemAtPosition(position).equals("Elektryczny"))
                             fillSubspinner(fuelTypesResource[4], false);
-                        else if(adapterView.getItemAtPosition(position).equals("CNG"))
+                        else if (adapterView.getItemAtPosition(position).equals("CNG"))
                             fillSubspinner(fuelTypesResource[5], false);
-                        else if(adapterView.getItemAtPosition(position).equals("Wszystko"))
+                        else if (adapterView.getItemAtPosition(position).equals("Wszystko"))
                             fillSubspinner(0, true);
                     }
 
                     @Override
                     public void onNothingSelected(AdapterView<?> adapterView) {
-
+                        //do nothing
                     }
                 });
             }

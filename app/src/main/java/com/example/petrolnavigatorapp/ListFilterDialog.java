@@ -10,16 +10,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+/**
+ * Dialog window for changing petrol station list sorting category.
+ * Used only in PetrolStationsListFragment.
+ */
 public class ListFilterDialog extends AppCompatDialogFragment {
 
     private OrderPrefListener listener;
     private RadioGroup prefsRadioGroup;
     private RadioButton radioButton;
-
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -37,40 +40,38 @@ public class ListFilterDialog extends AppCompatDialogFragment {
             }
         });
 
-        String orderPrefs;
         SharedPreferences shared = getActivity().getPreferences(Context.MODE_PRIVATE);
-        orderPrefs = shared.getString("orderPrefs", "");
-        if(orderPrefs.equals("Distance") || orderPrefs == null)
+        String orderPrefs = shared.getString("orderPrefs", "");
+        if (orderPrefs.equals("Distance") || orderPrefs == null)
             radioButton = view.findViewById(R.id.radioButton);
-        else if(orderPrefs.equals("Price"))
+        else if (orderPrefs.equals("Price"))
             radioButton = view.findViewById(R.id.radioButton2);
         else
             radioButton = view.findViewById(R.id.radioButton3);
 
         radioButton.setChecked(true);
-
         builder.setView(view);
 
         return builder.create();
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
             listener = (OrderPrefListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()+" must implements OrderPrefListener");
+            throw new ClassCastException(context.toString() + " must implements OrderPrefListener");
         }
     }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
+    public void onCancel(@NonNull DialogInterface dialog) {
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        if(radioButton.getText().equals("Odległość"))
+        if (radioButton.getText().equals("Odległość"))
             editor.putString("orderPrefs", "Distance");
-        else if(radioButton.getText().equals("Ceny paliwa"))
+        else if (radioButton.getText().equals("Ceny paliwa"))
             editor.putString("orderPrefs", "Price");
         else
             editor.putString("orderPrefs", "Date");
@@ -79,7 +80,7 @@ public class ListFilterDialog extends AppCompatDialogFragment {
         listener.refreshList();
     }
 
-    public interface OrderPrefListener{
+    public interface OrderPrefListener {
         void refreshList();
     }
 }
