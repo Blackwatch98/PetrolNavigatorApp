@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">Petrol Navigator App</string>
+    <string name="app_name">PetrolNavigatorApp</string>
     <string name="main_page">Strona główna</string>
     <string name="station_map">Mapa stacji</string>
     <string name="station_list">Lista stacji</string>
     <string name="vehicles">Moje pojazdy</string>
-    <string name="setting">Ustawienia</string>
+    <string name="setting">Ustawienia wstępne</string>
     <string name="radius_choice">Wybierz promień wyszukiwania stacji paliw.</string>
     <string name="currentRadius">Promień wyszukiwania:</string>
     <string name="confirmButton">Potwierdź</string>

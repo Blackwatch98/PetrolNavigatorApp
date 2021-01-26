@@ -248,16 +248,16 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.light_blue));
                 data.getPolyline().setZIndex(1);
 
-                //Vehicle testVehicle = new Vehicle("BMW", 50, 10, "Diesel", 20, 10);
+                Vehicle testVehicle = new Vehicle("BMW", 50, 10, 1, 20, 10);
 
-                PolylineService service = new PolylineService(currentVehicle, data.getPolyline());
+                PolylineService service = new PolylineService(testVehicle, data.getPolyline());
                 LatLng firstPoint = service.getFuelReservePointOnRoute();
 
 
                 mMap.addMarker(new MarkerOptions().position(firstPoint).title("Rezerwa paliwa"));
 
                 FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(
-                        mMap, getContext(), getActivity(), currentVehicle);
+                        mMap, getContext(), getActivity(), testVehicle);
                 petrolsDB.getPetrolsOnRoute(data.getPolyline().getPoints(), firstPoint,
                         data.getPolyline().getPoints().get(0),
                         data.getPolyline().getPoints().get(data.getPolyline().getPoints().size() - 1),
