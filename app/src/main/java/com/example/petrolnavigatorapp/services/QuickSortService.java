@@ -1,4 +1,4 @@
-package com.example.petrolnavigatorapp;
+package com.example.petrolnavigatorapp.services;
 
 import android.location.Location;
 
@@ -17,9 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class QuickSort {
+public class QuickSortService {
 
-    QuickSort() {
+    public QuickSortService() {
     }
 
     public LinkedList<Petrol> getSortedByDistance(List<Petrol> list, double lat, double lon) {

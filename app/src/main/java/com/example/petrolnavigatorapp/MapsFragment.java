@@ -57,7 +57,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     private FirebaseFirestore fireStore;
     private FirebaseAuth mAuth;
     private DocumentReference userDocument;
-    private Toolbar toolbar;
     private UserLocalizationListener listener;
 
 
@@ -78,24 +77,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     };
 
     public void findNearbyPetrols() {
-        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        stringBuilder.append("location=" + currentLocation.latitude + "," + currentLocation.longitude);
-        //System.out.println("promien wyszukiwania: " + radius);
-        stringBuilder.append("&radius=" + radius);
-        stringBuilder.append("&keyword=" + "petrol");
-        ////
-        stringBuilder.append("&key=" + getResources().getString(R.string.google_places_key));
+//        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+//        stringBuilder.append("location=" + currentLocation.latitude + "," + currentLocation.longitude);
+//        stringBuilder.append("&radius=" + radius);
+//        stringBuilder.append("&keyword=" + "petrol");
+//        stringBuilder.append("&key=" + getResources().getString(R.string.google_places_key));
 
-        String url = stringBuilder.toString();
+//        String url = stringBuilder.toString();
 
-        Object[] dataTransfer = new Object[4];
-        dataTransfer[0] = mMap;
-        dataTransfer[1] = url;
-        dataTransfer[2] = getActivity();
-        dataTransfer[3] = this;
+//        Object[] dataTransfer = new Object[4];
+//        dataTransfer[0] = mMap;
+//        dataTransfer[1] = url;
+//        dataTransfer[2] = getActivity();
+//        dataTransfer[3] = this;
 
-        FirestorePetrolsDB test = new FirestorePetrolsDB(currentLocation, mMap, getContext(), getActivity());
-        test.findNearbyPetrols(radius);
+//        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
+//        getNearbyPetrols.execute(dataTransfer);
+
+
+        FirestorePetrolsDB firestorePetrolsDB = new FirestorePetrolsDB(currentLocation, mMap, getContext(), getActivity());
+        firestorePetrolsDB.findNearbyPetrols(radius);
 
 //        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 //            @Override
@@ -107,6 +108,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 //                return false;
 //            }
 //        });
+
 //        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
 //        getNearbyPetrols.execute(dataTransfer);
     }
@@ -117,9 +119,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_maps, container, false);
-
-        listener = (UserLocalizationListener)getContext();
-        toolbar = view.findViewById(R.id.map_nav_toolbar);
 
         return view;
     }
@@ -133,6 +132,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
 
         fireStore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        listener = (UserLocalizationListener)getContext();
 
         userDocument = fireStore.collection("users")
                 .document(mAuth.getCurrentUser().getUid());
@@ -173,7 +173,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
                     public void onMapLongClick(LatLng latLng2) {
                         currentLocation = latLng2;
                         listener.getUserLocalization(currentLocation);
-                        System.out.println("CURRENT LOC " + currentLocation);
                         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
                             mMap.setMyLocationEnabled(false);
                         mMap.setMyLocationEnabled(true);

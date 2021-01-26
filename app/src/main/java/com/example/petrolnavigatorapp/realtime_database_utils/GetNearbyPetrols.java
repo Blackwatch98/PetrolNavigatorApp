@@ -1,4 +1,4 @@
-package com.example.petrolnavigatorapp.RealtimeDatabase_utils;
+package com.example.petrolnavigatorapp.realtime_database_utils;
 
 
 import android.content.Intent;

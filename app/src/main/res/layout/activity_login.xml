@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/rounded_layout"
+    android:background="@color/dark_grey"
     android:padding="10dp"
     tools:context=".LoginActivity">
 
@@ -12,8 +12,10 @@
         android:id="@+id/textView7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Menu Autoryzacji"
-        android:textSize="26sp"
+        android:text="Logowanie"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -26,6 +28,8 @@
         android:layout_height="wrap_content"
         android:text="Login"
         android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.04"
@@ -37,12 +41,14 @@
         android:id="@+id/loginTextEmailAddress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@drawable/rounded_layout_low"
+        android:padding="10dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:ems="10"
         android:inputType="textEmailAddress"
-        android:hint="np. janek@kowalski@gmail.com"
+        android:hint="np. jan@kowalski@gmail.com"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -55,6 +61,7 @@
         android:layout_marginTop="10dp"
         android:text="Hasło"
         android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.03"
@@ -66,6 +73,8 @@
         android:id="@+id/loginTextPassword"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@drawable/rounded_layout_low"
+        android:padding="10dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
@@ -80,8 +89,11 @@
         android:id="@+id/loginConfirmBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/rounded_button"
+        android:padding="10dp"
         android:layout_marginTop="30dp"
         android:text="Potwierdź"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -104,6 +116,8 @@
             android:id="@+id/registerReferenceText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textColor="#000"
             android:text="Nie posiadasz konta? Załóż je tutaj." />
 
         <ImageView
@@ -129,5 +143,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
         android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="90dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_baseline_login_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
