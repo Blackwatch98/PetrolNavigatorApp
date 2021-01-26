@@ -93,8 +93,8 @@ public class ConfigureAddVehicleActivity extends Activity {
                             Double.parseDouble(tankCapacityEditText.getText().toString()),
                             Double.parseDouble(averageConsumptionEditText.getText().toString()),
                             (int) vehicleFuelTypeSpinner.getSelectedItemId(),
-                            (int) currentFuelLevelSpinner.getSelectedItemId(),
-                            (int) fuelReserveSpinner.getSelectedItemId()))
+                            currentFuelLevelSpinner.getSelectedItemId()*Double.parseDouble(tankCapacityEditText.getText().toString())/8,
+                            fuelReserveSpinner.getSelectedItemId()*Double.parseDouble(tankCapacityEditText.getText().toString())/8))
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
@@ -126,8 +126,6 @@ public class ConfigureAddVehicleActivity extends Activity {
         ref.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-
                 for(QueryDocumentSnapshot query : queryDocumentSnapshots) {
                     if(query.getString("name").equals(vehicleName)){
                         currentVehicle = new Vehicle(
@@ -135,19 +133,21 @@ public class ConfigureAddVehicleActivity extends Activity {
                                 query.getDouble("tankCapacity"),
                                 query.getDouble("averageFuelConsumption"),
                                 Integer.parseInt(query.get("fuelTypeId").toString()),
-                                Integer.parseInt(query.get("currentFuelLevel").toString()),
-                                Integer.parseInt(query.get("reserveFuelLevel").toString())
+                                Double.parseDouble(query.get("currentFuelLevel").toString()),
+                                Double.parseDouble(query.get("reserveFuelLevel").toString())
                         );
                         currentVehicleDocument = query;
                         break;
                     }
                 }
+                double tankCapacity = currentVehicle.getTankCapacity();
+
                 vehicleNameEditText.setText(currentVehicle.getName());
-                tankCapacityEditText.setText(String.valueOf(currentVehicle.getTankCapacity()));
+                tankCapacityEditText.setText(String.valueOf(tankCapacity));
                 averageConsumptionEditText.setText(String.valueOf(currentVehicle.getAverageFuelConsumption()));
                 vehicleFuelTypeSpinner.setSelection(currentVehicle.getFuelTypeId());
-                currentFuelLevelSpinner.setSelection(currentVehicle.getCurrentFuelLevel());
-                fuelReserveSpinner.setSelection(currentVehicle.getReserveFuelLevel());
+                currentFuelLevelSpinner.setSelection((int)(currentVehicle.getCurrentFuelLevel()/tankCapacity*8));
+                fuelReserveSpinner.setSelection((int)(currentVehicle.getReserveFuelLevel()/tankCapacity*8));
 
                 confirmButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -157,8 +157,8 @@ public class ConfigureAddVehicleActivity extends Activity {
                                 "tankCapacity", Double.parseDouble(tankCapacityEditText.getText().toString()),
                                "averageFuelConsumption" , Double.parseDouble(averageConsumptionEditText.getText().toString()),
                                 "fuelTypeId", (int) vehicleFuelTypeSpinner.getSelectedItemId(),
-                                "currentFuelLevel", (int) currentFuelLevelSpinner.getSelectedItemId(),
-                                "reserveFuelLevel", (int) fuelReserveSpinner.getSelectedItemId()
+                                "currentFuelLevel", currentFuelLevelSpinner.getSelectedItemId()*tankCapacity/8,
+                                "reserveFuelLevel", fuelReserveSpinner.getSelectedItemId()*tankCapacity/8
                         );
                         Intent i = new Intent();
                         setResult(RESULT_OK, i);

@@ -21,20 +21,24 @@ public class PolylineService {
         this.currentRoute = polyline;
     }
 
-    public LatLng getFuelReservePointOnRoute() {
+    public LinkedList<LatLng> getFuelReservePointOnRoute() {
         double distanceTillFuelReserve = getFuelReserveDistance();
         double route = 0;
+        LinkedList<LatLng> allReservePoints = new LinkedList();
 
         LatLng point1 = currentRoute.getPoints().get(0);
         for(LatLng point2 : currentRoute.getPoints()) {
             route += getDistance(point1.latitude, point1.longitude, point2.latitude, point2.longitude);
             if(route >= distanceTillFuelReserve) {
-                return point2;
+                allReservePoints.add(point2);
+                currentVehicle.setCurrentFuelLevel(currentVehicle.getTankCapacity());
+                distanceTillFuelReserve = getFuelReserveDistance();
+                route = 0;
             }
             point1 = point2;
         }
 
-        return point1;
+        return allReservePoints;
     }
 
     private double getFuelReserveDistance() {

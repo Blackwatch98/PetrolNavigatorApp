@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -25,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.example.petrolnavigatorapp.services.PolylineService;
@@ -115,16 +117,17 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
         carSpinner = getActivity().findViewById(R.id.carSpinner);
 
         userVehicles = (ArrayList<Vehicle>) getArguments().getSerializable("userVehicles");
-        ArrayList<String> names = new ArrayList<>();
-        for(Vehicle vehicle : userVehicles) {
-            names.add(vehicle.getName());
-            System.out.println("AUTO " + vehicle.getName());
+        if(userVehicles != null) {
+            ArrayList<String> names = new ArrayList<>();
+            for (Vehicle vehicle : userVehicles) {
+                names.add(vehicle.getName());
+                System.out.println("AUTO " + vehicle.getName());
+            }
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, names);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            carSpinner.setAdapter(adapter);
         }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, names);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        carSpinner.setAdapter(adapter);
-
         return view;
     }
 
@@ -162,6 +165,10 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 String location = searchView.getQuery().toString();
                 List<Address> addressList = null;
                 if(location != null && location != "") {
+                    if(userVehicles == null) {
+                        Toast.makeText(getContext(), "Musisz najpierw miec wybrany samochód!", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
                     Geocoder geocoder = new Geocoder(view.getContext());
                     try {
                         addressList = geocoder.getFromLocationName(location, 1);
@@ -170,9 +177,22 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                     }
                     Address address = addressList.get(0);
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+                    final Marker targetMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+                    mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                        @Override
+                        public boolean onMarkerClick(Marker marker) {
+                            if(!marker.getTitle().equals("Rezerwa paliwa") && !marker.getTitle().equals(targetMarker.getTitle())) {
+                                Intent intent = new Intent(getContext(), PetrolPopUpActivity.class);
+                                intent.putExtra("latitude", marker.getPosition().latitude);
+                                intent.putExtra("longitude", marker.getPosition().longitude);
+                                getContext().startActivity(intent);
+                            }
+                            return false;
+                        }
+                    });
+
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11));
-                    calculateDirections(marker);
+                    calculateDirections(targetMarker);
                 }
                 return false;
             }
@@ -248,26 +268,29 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.light_blue));
                 data.getPolyline().setZIndex(1);
 
-                Vehicle testVehicle = new Vehicle("BMW", 50, 10, 1, 20, 10);
+                //Vehicle testVehicle = new Vehicle("BMW", 50, 10, 1, 20, 10);
 
-                PolylineService service = new PolylineService(testVehicle, data.getPolyline());
-                LatLng firstPoint = service.getFuelReservePointOnRoute();
-
-
-                mMap.addMarker(new MarkerOptions().position(firstPoint).title("Rezerwa paliwa"));
+                //System.out.println(currentVehicle.getName() + " " +currentVehicle.getAverageFuelConsumption() + " " + currentVehicle.getCurrentFuelLevel() +
+                 //       " " + currentVehicle.getReserveFuelLevel());
+                PolylineService service = new PolylineService(currentVehicle, data.getPolyline());
+                LinkedList<LatLng> allPoints = service.getFuelReservePointOnRoute();
 
                 FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(
-                        mMap, getContext(), getActivity(), testVehicle);
-                petrolsDB.getPetrolsOnRoute(data.getPolyline().getPoints(), firstPoint,
-                        data.getPolyline().getPoints().get(0),
-                        data.getPolyline().getPoints().get(data.getPolyline().getPoints().size() - 1),
-                        geoApiContext);
+                        mMap, getContext(), getActivity(), currentVehicle);
+
+                for(LatLng firstPoint : allPoints) {
+                    mMap.addMarker(new MarkerOptions().position(firstPoint).title("Rezerwa paliwa"));
+
+                    petrolsDB.getPetrolsOnRoute(data.getPolyline().getPoints(), firstPoint,
+                            data.getPolyline().getPoints().get(0),
+                            data.getPolyline().getPoints().get(data.getPolyline().getPoints().size() - 1),
+                            geoApiContext);
+                }
             }
             else {
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.dark_grey));
                 data.getPolyline().setZIndex(0);
             }
         }
-
     }
 }

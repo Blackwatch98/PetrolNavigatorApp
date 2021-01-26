@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPersonName"
-            android:text="Nazwa pojazdu" />
+            android:hint="Nazwa pojazdu" />
 
         <LinearLayout
             android:layout_width="match_parent"

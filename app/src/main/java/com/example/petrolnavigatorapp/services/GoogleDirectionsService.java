@@ -1,12 +1,16 @@
 package com.example.petrolnavigatorapp.services;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.example.petrolnavigatorapp.PetrolPopUpActivity;
 import com.example.petrolnavigatorapp.utils.Petrol;
 import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
@@ -23,10 +27,12 @@ public class GoogleDirectionsService {
     private GoogleMap mMap;
     private GeoApiContext geoApiContext;
     private Vehicle currentVehicle;
+    private Context context;
 
-    public GoogleDirectionsService(GoogleMap map, GeoApiContext context, Vehicle currentVehicle) {
+    public GoogleDirectionsService(GoogleMap map, GeoApiContext geoContext, Vehicle currentVehicle, Context context) {
         mMap = map;
-        geoApiContext = context;
+        geoApiContext = geoContext;
+        this.context = context;
         this.currentVehicle = currentVehicle;
         nextPetrolsList = new LinkedList<>();
     }

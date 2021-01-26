@@ -77,19 +77,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Locati
     };
 
     public void findNearbyPetrols() {
-        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        stringBuilder.append("location=" + currentLocation.latitude + "," + currentLocation.longitude);
-        stringBuilder.append("&radius=" + radius);
-        stringBuilder.append("&keyword=" + "petrol");
-        stringBuilder.append("&key=" + getResources().getString(R.string.google_places_key));
+//        StringBuilder stringBuilder = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+//        stringBuilder.append("location=" + currentLocation.latitude + "," + currentLocation.longitude);
+//        stringBuilder.append("&radius=" + radius);
+//        stringBuilder.append("&keyword=" + "petrol");
+//        stringBuilder.append("&key=" + getResources().getString(R.string.google_places_key));
 
-        String url = stringBuilder.toString();
+//        String url = stringBuilder.toString();
 
-        Object[] dataTransfer = new Object[4];
-        dataTransfer[0] = mMap;
-        dataTransfer[1] = url;
-        dataTransfer[2] = getActivity();
-        dataTransfer[3] = this;
+//        Object[] dataTransfer = new Object[4];
+//        dataTransfer[0] = mMap;
+//        dataTransfer[1] = url;
+//        dataTransfer[2] = getActivity();
+//        dataTransfer[3] = this;
 
 //        GetNearbyPetrols2 getNearbyPetrols = new GetNearbyPetrols2();
 //        getNearbyPetrols.execute(dataTransfer);

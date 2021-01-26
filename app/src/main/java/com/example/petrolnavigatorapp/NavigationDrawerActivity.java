@@ -20,10 +20,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
@@ -56,6 +61,7 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         //navigationView.bringToFront();
+        onStartGetUserVehicles();
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,drawer,map_toolbar,
                 R.string.navigation_drawer_open,R.string.navigation_drawer_close);
@@ -119,9 +125,12 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 break;
             case R.id.plan_route:
                 Bundle bundle2 = new Bundle();
-                ArrayList<Vehicle> vehicles = new ArrayList<>(userVehicles.size());
-                vehicles.addAll(userVehicles);
-                bundle2.putSerializable("userVehicles", vehicles);
+
+                if(userVehicles != null) {
+                    ArrayList<Vehicle> vehicles = new ArrayList<>(userVehicles.size());
+                    vehicles.addAll(userVehicles);
+                    bundle2.putSerializable("userVehicles", vehicles);
+                }
                 PlanRouteFragment planRouteFragment = new PlanRouteFragment();
                 planRouteFragment.setArguments(bundle2);
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -258,6 +267,29 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
 
     }
 
+    private void onStartGetUserVehicles() {
+        FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        this.userVehicles = new LinkedList<>();
+
+        CollectionReference userVehiclesCollection = fireStore.collection("users").document(mAuth.getCurrentUser().getUid())
+                .collection("vehicles");
+        userVehiclesCollection.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                 for(QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                     userVehicles.add(new Vehicle(
+                             query.getString("name"),
+                             query.getDouble("tankCapacity"),
+                             query.getDouble("averageFuelConsumption"),
+                             Integer.parseInt(query.get("fuelTypeId").toString()),
+                             Double.parseDouble(query.get("currentFuelLevel").toString()),
+                             Double.parseDouble(query.get("reserveFuelLevel").toString())
+                     ));
+                 }
+            }
+        });
+    }
 
     @Override
     public void getUserVehicles(List<Vehicle> userVehicles) {

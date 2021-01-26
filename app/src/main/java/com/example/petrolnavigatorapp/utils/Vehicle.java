@@ -8,10 +8,10 @@ public class Vehicle implements Serializable {
     private double tankCapacity; //in liters
     private double averageFuelConsumption;
     private int fuelTypeId;
-    private int currentFuelLevel;
-    private int reserveFuelLevel;
+    private double currentFuelLevel;
+    private double reserveFuelLevel;
 
-    public Vehicle(String name, double tankCapacity, double averageFuelConsumption, int fuelTypeId, int currentFuelLevel, int reserveFuelLevel) {
+    public Vehicle(String name, double tankCapacity, double averageFuelConsumption, int fuelTypeId, double currentFuelLevel, double reserveFuelLevel) {
         this.name = name;
         this.tankCapacity = tankCapacity;
         this.averageFuelConsumption = averageFuelConsumption;
@@ -52,19 +52,19 @@ public class Vehicle implements Serializable {
         this.fuelTypeId = fuelTypeId;
     }
 
-    public int getCurrentFuelLevel() {
+    public double getCurrentFuelLevel() {
         return currentFuelLevel;
     }
 
-    public void setCurrentFuelLevel(int currentFuelLevel) {
+    public void setCurrentFuelLevel(double currentFuelLevel) {
         this.currentFuelLevel = currentFuelLevel;
     }
 
-    public int getReserveFuelLevel() {
+    public double getReserveFuelLevel() {
         return reserveFuelLevel;
     }
 
-    public void setReserveFuelLevel(int reserveFuelLevel) {
+    public void setReserveFuelLevel(double reserveFuelLevel) {
         this.reserveFuelLevel = reserveFuelLevel;
     }
 }

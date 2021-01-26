@@ -52,7 +52,7 @@ public class VehiclesRecyclerViewAdapter extends RecyclerView.Adapter<VehiclesRe
         holder.averageFuelConsumption.setText("Średnie spalanie: " + vehicleList.get(position).getAverageFuelConsumption());
         holder.fuelType.setText("Paliwo: " + vehicleList.get(position).getFuelTypeId());
         holder.tankCapacity.setText("Pojemność baku: " + String.valueOf(vehicleList.get(position).getTankCapacity() + "l"));
-        holder.currentFuelLevel.setText("Stan baku: " + ((vehicleList.get(position).getCurrentFuelLevel()+1)/8.0 * vehicleList.get(position).getTankCapacity()) + "l");
+        holder.currentFuelLevel.setText("Stan baku: " + vehicleList.get(position).getCurrentFuelLevel() + "l");
         holder.vehicleCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
