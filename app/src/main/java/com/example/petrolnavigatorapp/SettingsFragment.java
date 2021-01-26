@@ -63,9 +63,8 @@ public class SettingsFragment extends Fragment {
         documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if(documentSnapshot.exists())
-                {
-                    Map<String, Object> map = (Map<String,Object>)documentSnapshot.get("userSettings");
+                if (documentSnapshot.exists()) {
+                    Map<String, Object> map = (Map<String, Object>) documentSnapshot.get("userSettings");
                     seekBar.setProgress(Integer.parseInt(map.get("searchRadius").toString()));
                 }
             }
@@ -74,7 +73,7 @@ public class SettingsFragment extends Fragment {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                currentRadiusText.setText(""+(seekBar.getProgress()+1)+"km");
+                currentRadiusText.setText("" + (seekBar.getProgress() + 1) + "km");
             }
 
             @Override
@@ -88,15 +87,15 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        scale_up = AnimationUtils.loadAnimation(getContext(),R.anim.scale_up);
-        scale_down = AnimationUtils.loadAnimation(getContext(),R.anim.scale_down);
+        scale_up = AnimationUtils.loadAnimation(getContext(), R.anim.scale_up);
+        scale_down = AnimationUtils.loadAnimation(getContext(), R.anim.scale_down);
 
         confirmButton = view.findViewById(R.id.settingsConfirmButton);
 
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int value = seekBar.getProgress()+1;
+                int value = seekBar.getProgress() + 1;
                 DocumentReference documentReference = fireStore.collection("users").document(mAuth.getCurrentUser().getUid());
                 documentReference.update("userSettings.searchRadius", value);
             }
@@ -105,13 +104,10 @@ public class SettingsFragment extends Fragment {
         confirmButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction()==MotionEvent.ACTION_DOWN)
-                {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     scale_up.setStartTime(0);
                     confirmButton.startAnimation(scale_up);
-                }
-                else if(motionEvent.getAction()==MotionEvent.ACTION_UP)
-                {
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     scale_up.setStartTime(0);
                     confirmButton.startAnimation(scale_down);
                 }
