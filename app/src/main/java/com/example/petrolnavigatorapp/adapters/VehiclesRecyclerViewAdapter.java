@@ -16,7 +16,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.petrolnavigatorapp.ConfigureAddVehicleActivity;
 import com.example.petrolnavigatorapp.NavigationDrawerActivity;
 import com.example.petrolnavigatorapp.R;
+import com.example.petrolnavigatorapp.VehiclesListFragment;
 import com.example.petrolnavigatorapp.utils.Vehicle;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
 
@@ -53,6 +59,28 @@ public class VehiclesRecyclerViewAdapter extends RecyclerView.Adapter<VehiclesRe
                 Intent intent = new Intent(context, ConfigureAddVehicleActivity.class);
                 intent.putExtra("name", vehicleList.get(position).getName());
                 ((NavigationDrawerActivity) context).startActivityForResult(intent, 1);
+            }
+        });
+        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
+                FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                fireStore.collection("users").document(mAuth.getCurrentUser().getUid()).collection("vehicles")
+                        .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                            if (query.getString("name").equals(holder.vehicleName.getText())) {
+                                fireStore.collection("users").document(mAuth.getCurrentUser().getUid())
+                                        .collection("vehicles").document(query.getId()).delete();
+                                break;
+                            }
+                        }
+                        ((NavigationDrawerActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                new VehiclesListFragment()).commit();
+                    }
+                });
             }
         });
     }

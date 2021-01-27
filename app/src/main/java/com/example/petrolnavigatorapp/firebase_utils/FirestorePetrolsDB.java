@@ -38,6 +38,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * This class biggest operations with database.
+ * 1. Placing custom markers with petrol station logo and fuel price.
+ * 2. Finding all the petrol on the specified route.
+ */
 public class FirestorePetrolsDB {
 
     private LatLng userLocalization;

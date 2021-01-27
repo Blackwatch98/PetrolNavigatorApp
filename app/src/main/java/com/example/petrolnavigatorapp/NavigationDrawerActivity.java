@@ -83,23 +83,16 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         ActionBarDrawerToggle toggle2 = new ActionBarDrawerToggle(this, drawer, settings_toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this, drawer, list_toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         ActionBarDrawerToggle toggle4 = new ActionBarDrawerToggle(this, drawer, vehicles_toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        ActionBarDrawerToggle toggle5 = new ActionBarDrawerToggle(this, drawer, plan_route_toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
 
         drawer.addDrawerListener(toggle);
-        drawer.addDrawerListener(toggle2);
-        drawer.addDrawerListener(toggle3);
-        drawer.addDrawerListener(toggle4);
-        drawer.addDrawerListener(toggle5);
         toggle.syncState();
+        drawer.addDrawerListener(toggle2);
         toggle2.syncState();
-        toggle3.syncState();
+        drawer.addDrawerListener(toggle4);
         toggle4.syncState();
-        toggle5.syncState();
     }
 
     @Override
@@ -140,6 +133,10 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                         fragment).commit();
                 current_toolbar = list_toolbar;
                 setSupportActionBar(current_toolbar);
+                ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this, drawer, list_toolbar,
+                        R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                drawer.addDrawerListener(toggle3);
+                toggle3.syncState();
                 break;
             case R.id.plan_route:
                 Bundle bundle2 = new Bundle();
@@ -154,6 +151,10 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                         fragment2).commit();
                 current_toolbar = plan_route_toolbar;
                 setSupportActionBar(current_toolbar);
+                ActionBarDrawerToggle toggle5 = new ActionBarDrawerToggle(this, drawer, plan_route_toolbar,
+                        R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                drawer.addDrawerListener(toggle5);
+                toggle5.syncState();
                 break;
             case R.id.vehicles:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
