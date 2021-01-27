@@ -1,10 +1,11 @@
 package com.example.petrolnavigatorapp.utils;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
+/**
+ * Class that represents data about particular fuel.
+ * Contains information about fuel name, price, last report date etc.
+ */
 public class Fuel implements Serializable {
     private int icon;
     private String name;

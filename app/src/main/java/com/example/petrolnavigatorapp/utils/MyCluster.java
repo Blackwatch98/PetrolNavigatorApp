@@ -8,10 +8,13 @@ import androidx.annotation.Nullable;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
+/**
+ * Class that represents clusters - custom markers that contains data
+ * about station logo and preferred price.
+ */
 public class MyCluster implements ClusterItem {
 
     private final LatLng position;
-    //private final int imageIcon;
     private final Bitmap imageIcon;
     private final String price;
     private String title;
@@ -52,4 +55,6 @@ public class MyCluster implements ClusterItem {
     public String getPrice() {
         return price;
     }
+
+
 }

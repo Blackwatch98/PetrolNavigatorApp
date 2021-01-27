@@ -2,6 +2,11 @@ package com.example.petrolnavigatorapp.utils;
 
 import java.util.List;
 
+/**
+ * Class that represents user's report.
+ * Contains data like: report's target name, list of senders or new value of data that it concerns.
+ * @param <T> Data types can be only number or string for now.
+ */
 public class UserReport<T> {
 
     private String targetType;
@@ -11,7 +16,7 @@ public class UserReport<T> {
     private T data;
     private int counter;
 
-    public UserReport(String targetType, List<String> senders, T data, String lastReportDate, int counter){
+    public UserReport(String targetType, List<String> senders, T data, String lastReportDate, int counter) {
         this.targetType = targetType;
         this.senders = senders;
         this.data = data;
@@ -19,7 +24,7 @@ public class UserReport<T> {
         this.counter = counter;
     }
 
-    public UserReport(String targetType, String targetName, List<String> senders, T data, String lastReportDate, int counter){
+    public UserReport(String targetType, String targetName, List<String> senders, T data, String lastReportDate, int counter) {
         this.targetType = targetType;
         this.targetName = targetName;
         this.senders = senders;

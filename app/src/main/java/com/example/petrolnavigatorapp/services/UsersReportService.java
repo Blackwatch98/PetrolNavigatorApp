@@ -17,18 +17,32 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This call holds whole reports service.
+ * It validates all of them and change data about
+ * petrol station or fuel if enough reports has been gathered.
+ * When something reported also database is searched for outdated reports and these are being deleted.
+ */
 public class UsersReportService {
 
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private DocumentReference currentPetrolDocument;
-    private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES = 2;  //2
-    private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_NAME_REPORT = 2;    //2
-    private final int DAYS_UNITL_REPORT_EXPIRES = 2;    //2
+    private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES = 2;
+    private final int MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_NAME_REPORT = 2;
+    private final int DAYS_UNITL_REPORT_EXPIRES = 2;
 
     public UsersReportService(DocumentReference documentReference) {
         currentPetrolDocument = documentReference;
     }
 
+    /**
+     * Validates reports that concern available on particular petrol station fuel types.
+     * It looks for differences between current available fuel types and reported ones.
+     * It also changes data if enough reports gathered.
+     *
+     * @param availableFuels    Old fuel types HashMap.
+     * @param newAvailableFuels New fuel types HashMap.
+     */
     public void sendAvailableFuelsReport(final HashMap<String, Boolean> availableFuels, final HashMap<String, Boolean> newAvailableFuels) {
         currentPetrolDocument.collection("fuelTypeReports").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -39,7 +53,6 @@ public class UsersReportService {
                 for (String name : availableFuels.keySet()) {
                     if (!availableFuels.get(name).equals(newAvailableFuels.get(name))) {
                         differences.put(name, newAvailableFuels.get(name));
-                        System.out.println("Do zmiany: " + name);
                     }
                 }
                 // looking for report equal to differences
@@ -53,16 +66,11 @@ public class UsersReportService {
                             Integer.parseInt(query.get("counter").toString())
                     );
                     // check if report is already in database and if this user hasn't already report it
-                    System.out.println("HAlOOOO");
-                    System.out.println(differences.containsKey(report.getTargetName()) && !report.getSenders().contains(currentUser.getUid()));
                     if (differences.containsKey(report.getTargetName()) && !report.getSenders().contains(currentUser.getUid())) {
-                        System.out.println("DEBUGGER");
                         if (report.getCounter() + 1 >= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES) {
-                            System.out.println("DEBUGGER2");
                             currentPetrolDocument.update("availableFuels." + report.getTargetName(), report.getData(),
                                     "lastReportDate", sdf.format(new Date()));
                             currentPetrolDocument.collection("fuelTypeReports").document(query.getId()).delete();
-                            //return;
                         }
                         report.getSenders().add(currentUser.getUid());
                         currentPetrolDocument.collection("fuelTypeReports").document(query.getId())
@@ -91,6 +99,12 @@ public class UsersReportService {
         });
     }
 
+    /**
+     * Validates reports that concern name of particular petrol station.
+     * Also changes data if enough reports gathered.
+     *
+     * @param name New petrol station name as string.
+     */
     public void sendPetrolNameReport(final String name) {
         currentPetrolDocument.collection("petrolNameReports").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -120,7 +134,6 @@ public class UsersReportService {
                             }
                         isReportExisting = true;
                     }
-
                     removeOutdatedReport(report, "petrolNameReports", query.getId());
                 }
 
@@ -141,6 +154,10 @@ public class UsersReportService {
         });
     }
 
+    /**
+     * Validated reports that particular petrol station does not exist.
+     * When enough reports gathered, the petrol station is being removed from database.
+     */
     public void sendPetrolNotExistReport() {
         currentPetrolDocument.collection("petrolNotExistReports").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -187,13 +204,21 @@ public class UsersReportService {
         });
     }
 
+    /**
+     * Validates reports about new prices of fuels.
+     * If somebody reports the same price as current only last report date is updated.
+     *
+     * @param price           New reported fuel price.
+     * @param fuelName        Name of the fuel that report is concerned about.
+     * @param isSameAsCurrent Flag that tells is the price same as current.
+     */
     public void sendNewPriceReport(final String price, final String fuelName, boolean isSameAsCurrent) {
-        if(isSameAsCurrent) {
+        if (isSameAsCurrent) {
             updatePrice(price, fuelName);
             return;
         }
 
-        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName+"_Reports")
+        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName + "_Reports")
                 .collection("reports").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
@@ -214,12 +239,12 @@ public class UsersReportService {
                                 if (!report.getSenders().contains(currentUser.getUid()))
                                     if (report.getCounter() + 1 >= MINIMAL_CONFIRMATION_NUMBER_TO_ACCEPT_REPORT_VALUES) {
                                         updatePrice(price, fuelName);
-                                        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName+"_Reports")
+                                        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName + "_Reports")
                                                 .collection("reports")
                                                 .document(query.getId()).delete();
                                     } else {
                                         report.getSenders().add(currentUser.getUid());
-                                        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName+"_Reports")
+                                        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName + "_Reports")
                                                 .collection("reports")
                                                 .document(query.getId())
                                                 .update("counter", report.getCounter() + 1,
@@ -235,7 +260,7 @@ public class UsersReportService {
 
                         List<String> users = new LinkedList<>();
                         users.add(currentUser.getUid());
-                        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName+"_Reports")
+                        currentPetrolDocument.collection("fuelPriceChangeReports").document(fuelName + "_Reports")
                                 .collection("reports").document().set(new UserReport(
                                 "petrolNotExist",
                                 fuelName,
@@ -249,6 +274,13 @@ public class UsersReportService {
                 });
     }
 
+    /**
+     * It is called update price because it also do it.
+     * But mainly is focused on correct new date.
+     *
+     * @param price    Price of the fuel.
+     * @param fuelName Fuel name.
+     */
     private void updatePrice(final String price, final String fuelName) {
         currentPetrolDocument.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
@@ -270,6 +302,13 @@ public class UsersReportService {
         });
     }
 
+    /**
+     * Removes outdated reports from database.
+     *
+     * @param report            Class that represents particular report.
+     * @param reportsCollection Name of the collections that report is part of. Examples: fuelReports, petrolNameReports etc.
+     * @param queryId           Id of report's document.
+     */
     private void removeOutdatedReport(UserReport report, String reportsCollection, String queryId) {
         String date = report.getLastReportDate();
         long diff = getDaysDifference(date);
@@ -278,15 +317,29 @@ public class UsersReportService {
         }
     }
 
+    /**
+     * Removes outdated reports from database that concerns about particular fuel price like Pb95.
+     *
+     * @param report            Class that represents particular report.
+     * @param reportsCollection Name of the collections that report is part of. Examples: Pb95Reports etc.
+     * @param queryId           Id of report's document.
+     * @param fuelName          Name of the fuel.
+     */
     private void removeOutdatedPriceReport(UserReport report, String reportsCollection, String queryId, String fuelName) {
         String date = report.getLastReportDate();
         long diff = getDaysDifference(date);
         if (diff >= DAYS_UNITL_REPORT_EXPIRES) {
-            currentPetrolDocument.collection(reportsCollection).document(fuelName+"Reports")
+            currentPetrolDocument.collection(reportsCollection).document(fuelName + "Reports")
                     .collection("reports").document(queryId).delete();
         }
     }
 
+    /**
+     * Counts difference between one date and current in days number.
+     *
+     * @param date Date that difference between it and today should be checked.
+     * @return Difference in days numbers.
+     */
     private long getDaysDifference(String date) {
         long diff = -1;
         try {

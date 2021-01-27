@@ -280,7 +280,7 @@ public class FirestorePetrolsDB {
                         }
                     }
 
-                    GoogleDirectionsService service = new GoogleDirectionsService(mMap, geoApiContext, currentVehicle,context);
+                    GoogleDirectionsService service = new GoogleDirectionsService(mMap, geoApiContext, currentVehicle);
                     service.compareDistanceToPetrols(closestToEnd, reserveFuelPoint, closestToStart);
                 }
             });
