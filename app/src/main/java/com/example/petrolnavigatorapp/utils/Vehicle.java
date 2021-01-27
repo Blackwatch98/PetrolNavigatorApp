@@ -2,10 +2,15 @@ package com.example.petrolnavigatorapp.utils;
 
 import java.io.Serializable;
 
+/**
+ * Class that represents user's vehicle.
+ * Contains data about name, tank capacity, average fuel consumption etc.
+ * Not all of them are used for now.
+ */
 public class Vehicle implements Serializable {
 
     private String name;
-    private double tankCapacity; //in liters
+    private double tankCapacity;
     private double averageFuelConsumption;
     private int fuelTypeId;
     private double currentFuelLevel;

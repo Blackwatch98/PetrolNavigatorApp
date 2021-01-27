@@ -10,7 +10,6 @@
 //
 //public class Petrol implements Serializable {
 //    private String name;
-//    //private LatLng coordinates;
 //    private double lat, lon;
 //    private String address;
 //    private HashMap<String,Boolean> availableFuels;
@@ -21,7 +20,6 @@
 //    public Petrol(String name, double lat, double lon, String address)
 //    {
 //        this.name = name;
-////        this.coordinates = coordinates;
 //        this.lat = lat;
 //        this.lon = lon;
 //        this.address = address;

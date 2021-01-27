@@ -28,8 +28,8 @@
 //import androidx.recyclerview.widget.RecyclerView;
 //
 //import com.example.petrolnavigatorapp.ChangeFuelTypesActivity;
+//import com.example.petrolnavigatorapp.adapters.PetrolsRecyclerViewAdapter;
 //import com.example.petrolnavigatorapp.utils.Fuel;
-//import com.example.petrolnavigatorapp.adapters.PetrolRecyclerViewAdapter;
 //import com.example.petrolnavigatorapp.R;
 //import com.example.petrolnavigatorapp.firebase_utils.MyFirebaseStorage;
 //import com.google.android.gms.tasks.OnSuccessListener;
@@ -57,7 +57,7 @@
 //    private double lat, lon;
 //    private Context context;
 //    private DataSnapshot popedPetrol;
-//    private PetrolRecyclerViewAdapter petrolRecyclerViewAdapter;
+//    private PetrolsRecyclerViewAdapter petrolRecyclerViewAdapter;
 //    private Animation scale_up, scale_down;
 //
 //    private String[] imgNames = {"Elektryczny", "Benzyna", "LPG", "Etanol", "Diesel", "CNG"};

@@ -13,14 +13,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.petrolnavigatorapp.ChangePriceActivity;
 import com.example.petrolnavigatorapp.NavigationDrawerActivity;
 import com.example.petrolnavigatorapp.PetrolPopUpActivity;
 import com.example.petrolnavigatorapp.R;
 import com.example.petrolnavigatorapp.firebase_utils.MyFirebaseStorage;
+import com.example.petrolnavigatorapp.services.MathService;
 import com.example.petrolnavigatorapp.utils.Fuel;
 import com.example.petrolnavigatorapp.utils.Petrol;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 
@@ -34,6 +33,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Adapter for petrol stations list in PetrolStationsListFragment.
+ */
 public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecyclerViewAdapter.PetrolRecyclerViewHolder> {
 
     private final List<Petrol> petrols;
@@ -53,7 +55,7 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
 
     @Override
     public PetrolRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.petrols_list_row,parent,false);
+        View itemView = LayoutInflater.from(context).inflate(R.layout.petrols_list_row, parent, false);
         return new PetrolsRecyclerViewAdapter.PetrolRecyclerViewHolder(itemView);
     }
 
@@ -62,19 +64,19 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
         holder.petrol = petrols.get(position);
         storage.getPetrolIconRef(holder.petrol.getName());
 
-        String distance = getDistance(lat,lon,holder.petrol.getLat(),holder.petrol.getLon())+ "m";
+        String distance = getDistance(lat, lon, holder.petrol.getLat(), holder.petrol.getLon()) + "m";
         Fuel fuel = getPrefFuel(holder.petrol, prefType, prefFuel);
 
         getFuelIcon(holder);
         holder.distanceText.setText(distance);
         holder.petrolName.setText(petrols.get(position).getName());
-        if(fuel != null){
-            if(fuel.getPrice().equals("0.00"))
+        if (fuel != null) {
+            if (fuel.getPrice().equals("0.00"))
                 holder.fuelPrice.setText("Brak");
             else
                 holder.fuelPrice.setText(fuel.getPrice());
 
-            if(fuel.getLastReportDate() == null)
+            if (fuel.getLastReportDate() == null)
                 holder.reportDate.setText("Brak");
             else
                 holder.reportDate.setText(getDaysDifference(fuel.getLastReportDate()));
@@ -83,9 +85,8 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
     }
 
     private void getFuelIcon(final PetrolRecyclerViewHolder holder) {
-        try
-        {
-            final File localFile = File.createTempFile("petrol_icon","png");
+        try {
+            final File localFile = File.createTempFile("petrol_icon", "png");
             storage.getPetrolIconRef(holder.petrol.getName()).getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
@@ -93,9 +94,7 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
                     holder.petrolIcon.setImageBitmap(bitmap);
                 }
             });
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -104,29 +103,25 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
         HashMap<String, Boolean> types = petrol.getAvailableFuels();
         List<Fuel> fuels = petrol.getFuels();
 
-        if(fuelName.equals("Wszystko"))
-        {
-            if(typeName.equals("Wszystko"))
-            {
+        if (fuelName.equals("Wszystko")) {
+            if (typeName.equals("Wszystko")) {
                 String availableType = null;
-                for(String name : types.keySet())
-                    if(types.get(name)){
+                for (String name : types.keySet())
+                    if (types.get(name)) {
                         availableType = name;
                         break;
                     }
-                for(Fuel f : fuels)
-                    if(f.getType().equals(availableType))
+                for (Fuel f : fuels)
+                    if (f.getType().equals(availableType))
+                        return f;
+            } else {
+                for (Fuel f : fuels)
+                    if (f.getType().equals(typeName))
                         return f;
             }
-            else {
-                for(Fuel f : fuels)
-                    if(f.getType().equals(typeName))
-                        return f;
-            }
-        }
-        else
-            for(Fuel f : fuels)
-                if(f.getName().equals(fuelName))
+        } else
+            for (Fuel f : fuels)
+                if (f.getName().equals(fuelName))
                     return f;
 
         return null;
@@ -137,35 +132,24 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
         return petrols.size();
     }
 
-    private String getDistance(double lat1, double lon1, double lat2, double lon2)
-    {
-        Location location1 = new Location("");
-        location1.setLatitude(lat1);
-        location1.setLongitude(lon1);
-        Location location2 = new Location("");
-        location2.setLatitude(lat2);
-        location2.setLongitude(lon2);
-        double distance = location1.distanceTo(location2);
-
+    private String getDistance(double lat1, double lon1, double lat2, double lon2) {
+        MathService mathService = new MathService();
+        double distance = mathService.getDistanceBetweenTwoPoints(lat1, lon1, lat2, lon2);
         return String.format(Locale.ENGLISH, "%.1f", distance);
     }
 
-    private String getDaysDifference(String date)
-    {
+    private String getDaysDifference(String date) {
         String difference = null;
-        try
-        {
+        try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date firstDate = sdf.parse(date);
             Date secondDate = new Date();
 
             long diffInMillies = Math.abs(secondDate.getTime() - firstDate.getTime());
             long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-            difference = ""+diff+" dni temu";
+            difference = "" + diff + " dni temu";
 
-        }
-        catch (ParseException e)
-        {
+        } catch (ParseException e) {
             e.getMessage();
         }
 
@@ -196,7 +180,7 @@ public class PetrolsRecyclerViewAdapter extends RecyclerView.Adapter<PetrolsRecy
                     intent.putExtra("userLon", lon);
                     intent.putExtra("latitude", petrol.getLat());
                     intent.putExtra("longitude", petrol.getLon());
-                    ((NavigationDrawerActivity)context).startActivityForResult(intent, 1);
+                    ((NavigationDrawerActivity) context).startActivityForResult(intent, 1);
                 }
             });
         }
