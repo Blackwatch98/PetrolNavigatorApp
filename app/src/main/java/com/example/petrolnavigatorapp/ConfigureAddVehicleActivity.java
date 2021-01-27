@@ -1,7 +1,6 @@
 package com.example.petrolnavigatorapp;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import android.app.Activity;
@@ -21,13 +20,13 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.ref.Reference;
-
+/**
+ * Create and edit vehicle menu.
+ */
 public class ConfigureAddVehicleActivity extends Activity {
 
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -46,7 +45,6 @@ public class ConfigureAddVehicleActivity extends Activity {
         setContentView(R.layout.activity_configure_add_vehicle);
 
         context = this;
-
         vehicleNameEditText = findViewById(R.id.editTextVehicleName);
         averageConsumptionEditText = findViewById(R.id.editTextAverageConsumption);
         tankCapacityEditText = findViewById(R.id.editTextVehicleCapacity);
@@ -60,6 +58,8 @@ public class ConfigureAddVehicleActivity extends Activity {
                 finish();
             }
         });
+        confirmButton = findViewById(R.id.confirmButton2);
+        cancelButton = findViewById(R.id.cancelButton2);
 
         ArrayAdapter typeSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.fuelTypes, android.R.layout.simple_spinner_item);
         typeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -67,24 +67,20 @@ public class ConfigureAddVehicleActivity extends Activity {
 
         final ArrayAdapter fuelLevelAdapter = ArrayAdapter.createFromResource(this, R.array.fractions, android.R.layout.simple_spinner_item);
         fuelLevelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         currentFuelLevelSpinner.setAdapter(fuelLevelAdapter);
-
         fuelReserveSpinner.setAdapter(fuelLevelAdapter);
-
-        confirmButton = findViewById(R.id.confirmButton2);
-        cancelButton = findViewById(R.id.cancelButton2);
 
         final CollectionReference collectionReference = firestore.collection("users").document(mAuth.getCurrentUser().getUid())
                 .collection("vehicles");
         final DocumentReference documentReference = collectionReference.document();
         Bundle bundle = getIntent().getExtras();
-        if(bundle != null) {
+        if (bundle != null) {
             String vehicleName = bundle.getString("name");
             if (vehicleName != null) {
                 loadVehicle(vehicleName, collectionReference);
             }
-        }
-        else
+        } else
             confirmButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -93,14 +89,14 @@ public class ConfigureAddVehicleActivity extends Activity {
                             Double.parseDouble(tankCapacityEditText.getText().toString()),
                             Double.parseDouble(averageConsumptionEditText.getText().toString()),
                             (int) vehicleFuelTypeSpinner.getSelectedItemId(),
-                            currentFuelLevelSpinner.getSelectedItemId()*Double.parseDouble(tankCapacityEditText.getText().toString())/8,
-                            fuelReserveSpinner.getSelectedItemId()*Double.parseDouble(tankCapacityEditText.getText().toString())/8))
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(context, "Skonfigurowano pomyślnie!", Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
+                            currentFuelLevelSpinner.getSelectedItemId() * Double.parseDouble(tankCapacityEditText.getText().toString()) / 8,
+                            fuelReserveSpinner.getSelectedItemId() * Double.parseDouble(tankCapacityEditText.getText().toString()) / 8))
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Toast.makeText(context, "Skonfigurowano pomyślnie!", Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(context, "Nie udało się skonfigurować...", Toast.LENGTH_SHORT).show();
@@ -122,12 +118,18 @@ public class ConfigureAddVehicleActivity extends Activity {
         });
     }
 
+    /**
+     * Loads selected from VehiclesListFragment vehicle data to inputs.
+     *
+     * @param vehicleName Name of the vehicle.
+     * @param ref         Reference to current user's vehicles collections in database.
+     */
     private void loadVehicle(String vehicleName, CollectionReference ref) {
         ref.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                for(QueryDocumentSnapshot query : queryDocumentSnapshots) {
-                    if(query.getString("name").equals(vehicleName)){
+                for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                    if (query.getString("name").equals(vehicleName)) {
                         currentVehicle = new Vehicle(
                                 query.getString("name"),
                                 query.getDouble("tankCapacity"),
@@ -146,8 +148,8 @@ public class ConfigureAddVehicleActivity extends Activity {
                 tankCapacityEditText.setText(String.valueOf(tankCapacity));
                 averageConsumptionEditText.setText(String.valueOf(currentVehicle.getAverageFuelConsumption()));
                 vehicleFuelTypeSpinner.setSelection(currentVehicle.getFuelTypeId());
-                currentFuelLevelSpinner.setSelection((int)(currentVehicle.getCurrentFuelLevel()/tankCapacity*8));
-                fuelReserveSpinner.setSelection((int)(currentVehicle.getReserveFuelLevel()/tankCapacity*8));
+                currentFuelLevelSpinner.setSelection((int) (currentVehicle.getCurrentFuelLevel() / tankCapacity * 8));
+                fuelReserveSpinner.setSelection((int) (currentVehicle.getReserveFuelLevel() / tankCapacity * 8));
 
                 confirmButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -155,10 +157,10 @@ public class ConfigureAddVehicleActivity extends Activity {
                         ref.document(currentVehicleDocument.getId()).update(
                                 "name", vehicleNameEditText.getText().toString(),
                                 "tankCapacity", Double.parseDouble(tankCapacityEditText.getText().toString()),
-                               "averageFuelConsumption" , Double.parseDouble(averageConsumptionEditText.getText().toString()),
+                                "averageFuelConsumption", Double.parseDouble(averageConsumptionEditText.getText().toString()),
                                 "fuelTypeId", (int) vehicleFuelTypeSpinner.getSelectedItemId(),
-                                "currentFuelLevel", currentFuelLevelSpinner.getSelectedItemId()*tankCapacity/8,
-                                "reserveFuelLevel", fuelReserveSpinner.getSelectedItemId()*tankCapacity/8
+                                "currentFuelLevel", currentFuelLevelSpinner.getSelectedItemId() * tankCapacity / 8,
+                                "reserveFuelLevel", fuelReserveSpinner.getSelectedItemId() * tankCapacity / 8
                         );
                         Intent i = new Intent();
                         setResult(RESULT_OK, i);
