@@ -21,7 +21,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -32,6 +31,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Activity that holds sending reports that concern fuel types and station name.
+ * Name is changed by EditText and fuel types using switches.
+ */
 public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private HashMap<String, Boolean> availableFuels;
@@ -42,12 +45,11 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
     private TextView editNameView;
     private Animation scale_up, scale_down;
 
-    private String petrolName;
-    private String petrolId;
-    private LatLng coor;
+    private String stationName;
+    private String stationId;
+    private LatLng stationCoordinates;
 
-    private FirebaseFirestore firestore;
-    private FirebaseAuth mAuth;
+    private FirebaseFirestore fireStore;
     private UsersReportService usersReportService;
 
     @Override
@@ -55,41 +57,21 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_fuel_types);
 
-        mAuth = FirebaseAuth.getInstance();
-
-        benzSwitch = findViewById(R.id.benzSwitch);
-        dieselSwitch = findViewById(R.id.dieselSwitch);
-        lpgSwitch = findViewById(R.id.lpgSwitch);
-        etaSwitch = findViewById(R.id.etaSwitch);
-        elecSwitch = findViewById(R.id.elecSwitch);
-        cngSwitch = findViewById(R.id.cngSwitch);
-        confirmBtn = findViewById(R.id.confirmBtn2);
-        editNameView = findViewById(R.id.editTextPetrolName);
-        reportNoExist = findViewById(R.id.notExistBtn);
-
+        initSwitches();
         mapView = findViewById(R.id.petrolMapView);
         mapView.getMapAsync(this);
         mapView.onCreate(savedInstanceState);
-
-        switches = new LinkedList<>();
-        switches.add(benzSwitch);
-        switches.add(dieselSwitch);
-        switches.add(lpgSwitch);
-        switches.add(etaSwitch);
-        switches.add(elecSwitch);
-        switches.add(cngSwitch);
-
-        firestore = FirebaseFirestore.getInstance();
+        fireStore = FirebaseFirestore.getInstance();
 
         Bundle bundle = getIntent().getExtras();
-        petrolId = bundle.getString("petrolId");
-        petrolName = bundle.getString("petrolName");
+        stationId = bundle.getString("petrolId");
+        stationName = bundle.getString("petrolName");
         double lat = bundle.getDouble("latitude");
         double lon = bundle.getDouble("longitude");
-        coor = new LatLng(lat, lon);
-        editNameView.setText(petrolName);
+        stationCoordinates = new LatLng(lat, lon);
+        editNameView.setText(stationName);
 
-        final DocumentReference mRef = firestore.collection("petrol_stations").document(petrolId);
+        final DocumentReference mRef = fireStore.collection("petrol_stations").document(stationId);
         usersReportService = new UsersReportService(mRef);
 
         mRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -126,8 +108,7 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
                 usersReportService.sendAvailableFuelsReport(availableFuels, newAvailableFuels);
 
                 String name = editNameView.getText().toString();
-
-                if(validatePetrolName(name))
+                if (validatePetrolName(name))
                     usersReportService.sendPetrolNameReport(name);
 
                 Intent i = new Intent();
@@ -178,27 +159,55 @@ public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapR
         );
     }
 
+    /**
+     * Initialize fuel types switches on the view.
+     */
+    private void initSwitches() {
+        benzSwitch = findViewById(R.id.benzSwitch);
+        dieselSwitch = findViewById(R.id.dieselSwitch);
+        lpgSwitch = findViewById(R.id.lpgSwitch);
+        etaSwitch = findViewById(R.id.etaSwitch);
+        elecSwitch = findViewById(R.id.elecSwitch);
+        cngSwitch = findViewById(R.id.cngSwitch);
+        confirmBtn = findViewById(R.id.confirmBtn2);
+        editNameView = findViewById(R.id.editTextPetrolName);
+        reportNoExist = findViewById(R.id.notExistBtn);
+
+        switches = new LinkedList<>();
+        switches.add(benzSwitch);
+        switches.add(dieselSwitch);
+        switches.add(lpgSwitch);
+        switches.add(etaSwitch);
+        switches.add(elecSwitch);
+        switches.add(cngSwitch);
+    }
+
+    /**
+     * Validates name that has been provided by user.
+     * @param petrolName Petrol station name as string.
+     * @return True if correct. False if not.
+     */
     public boolean validatePetrolName(String petrolName) {
-        if (petrolName.equals(this.petrolName))
+        if (petrolName.equals(this.stationName))
             return false;
 
-        if(!petrolName.startsWith("Stacja Paliw")){
+        if (!petrolName.startsWith("Stacja Paliw")) {
             Toast.makeText(getBaseContext(), "Nazwa musi rozpoczynać się od: Stacja Paliw!", Toast.LENGTH_SHORT).show();
             return false;
         }
-        if(petrolName.length() >= 20) {
+        if (petrolName.length() >= 20) {
             Toast.makeText(getBaseContext(), "Maksymalna długość nazwy to 20 znaków!", Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        return  true;
+        return true;
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        googleMap.addMarker(new MarkerOptions().position(coor).title(petrolName));
+        googleMap.addMarker(new MarkerOptions().position(stationCoordinates).title(stationName));
         float zoomLevel = 16.0f;
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coor, zoomLevel));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(stationCoordinates, zoomLevel));
         googleMap.getUiSettings().setAllGesturesEnabled(false);
         googleMap.getUiSettings().setMapToolbarEnabled(false);
     }

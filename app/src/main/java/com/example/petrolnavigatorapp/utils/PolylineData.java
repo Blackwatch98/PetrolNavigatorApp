@@ -3,6 +3,9 @@ package com.example.petrolnavigatorapp.utils;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.maps.model.DirectionsLeg;
 
+/**
+ * Class that stores information about particular polyline.
+ */
 public class PolylineData {
 
     private Polyline polyline;

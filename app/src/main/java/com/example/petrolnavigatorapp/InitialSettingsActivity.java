@@ -12,13 +12,13 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.Map;
+/**
+ * This activity is initial settings menu where user set radius for petrol stations searching.
+ */
 
 public class InitialSettingsActivity extends AppCompatActivity {
 
@@ -27,6 +27,7 @@ public class InitialSettingsActivity extends AppCompatActivity {
     private Animation scale_up, scale_down;
     private FirebaseFirestore fireStore;
     private String userId;
+    private Button confirmButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,34 +37,31 @@ public class InitialSettingsActivity extends AppCompatActivity {
         fireStore = FirebaseFirestore.getInstance();
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        final Button confirmButton = findViewById(R.id.confirmButton1);
+        confirmButton = findViewById(R.id.confirmButton1);
         currentRadiusText = findViewById(R.id.radiusValue);
 
         seekBar = findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                currentRadiusText.setText(""+(seekBar.getProgress()+1)+"km");
+                currentRadiusText.setText("" + (seekBar.getProgress() + 1) + "km");
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                //do nothing
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                //do nothing
             }
         });
-
-
 
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int value = seekBar.getProgress()+1;
-                //WAŻNA ZALETA UPDATE POJEDYŃCZYCH WARTOŚCI SZYBKI I PRZYJEMNY
+                int value = seekBar.getProgress() + 1;
                 DocumentReference documentReference = fireStore.collection("users").document(userId);
                 documentReference.update("userSettings.searchRadius", value);
 
@@ -73,23 +71,19 @@ public class InitialSettingsActivity extends AppCompatActivity {
             }
         });
 
-        scale_up = AnimationUtils.loadAnimation(this,R.anim.scale_up);
-        scale_down = AnimationUtils.loadAnimation(this,R.anim.scale_down);
+        scale_up = AnimationUtils.loadAnimation(this, R.anim.scale_up);
+        scale_down = AnimationUtils.loadAnimation(this, R.anim.scale_down);
 
         confirmButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction()==MotionEvent.ACTION_DOWN)
-                {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     scale_up.setStartTime(0);
                     confirmButton.startAnimation(scale_up);
-                }
-                else if(motionEvent.getAction()==MotionEvent.ACTION_UP)
-                {
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     scale_up.setStartTime(0);
                     confirmButton.startAnimation(scale_down);
                 }
-
                 return false;
             }
         });

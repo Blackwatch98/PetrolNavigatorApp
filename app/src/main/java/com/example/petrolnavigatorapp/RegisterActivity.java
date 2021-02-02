@@ -23,6 +23,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * In this activity user can create a new account.
+ * Account availability is checked mostly by Firebase service but also has some inner validation.
+ */
+
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -47,9 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar2);
         loginReference = findViewById(R.id.loginReferenceText);
 
-        if(mAuth.getCurrentUser() != null)
-        {
-            //sprawdź czy wybrany został przynajmniej promień
+        if (mAuth.getCurrentUser() != null) {
             startActivity(new Intent(getApplicationContext(), InitialSettingsActivity.class));
             finish();
         }
@@ -66,7 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 final String login = mLogin.getText().toString().trim();
-                String password = mPassword.getText().toString().trim();
+                final String password = mPassword.getText().toString().trim();
 
                 if (TextUtils.isEmpty(login)) {
                     mLogin.setError("Login jest wymagany!");
@@ -85,37 +88,50 @@ public class RegisterActivity extends AppCompatActivity {
 
                 progressBar.setVisibility(View.VISIBLE);
 
-                mAuth.createUserWithEmailAndPassword(login, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful())
-                        {
-                            userId = mAuth.getCurrentUser().getUid();
-                            DocumentReference documentReference = fireStore.collection("users").document(userId);
-                            User user = new User(userId, login);
-                            documentReference.set(user)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                createNewAccount(login, password);
+            }
+        });
+    }
+
+    /**
+     * Creates new account using Firebase Authentication service.
+     *
+     * @param login    User's login as string.
+     * @param password User's password as string.
+     */
+
+    private void createNewAccount(String login, String password) {
+        if (login == null || password == null || mAuth == null || userId == null) {
+            System.out.println("Logging error!");
+            return;
+        }
+
+        mAuth.createUserWithEmailAndPassword(login, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    userId = mAuth.getCurrentUser().getUid();
+                    DocumentReference documentReference = fireStore.collection("users").document(userId);
+                    User user = new User(userId, login);
+                    documentReference.set(user)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Toast.makeText(RegisterActivity.this, "Udało ci się zarejestrować :)", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(RegisterActivity.this, "Rejestracja przebiegła pomyślnie. Witaj :)", Toast.LENGTH_SHORT).show();
                                     startActivity(new Intent(getApplicationContext(), InitialSettingsActivity.class));
                                     finish();
                                 }
                             })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(RegisterActivity.this, "Error!", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                        }
-                        else
-                        {
-                            Toast.makeText(RegisterActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                            progressBar.setVisibility(View.GONE);
-                        }
-                    }
-                });
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                } else {
+                    Toast.makeText(RegisterActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                }
             }
         });
     }

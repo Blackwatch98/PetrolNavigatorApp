@@ -26,6 +26,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Adapter for fuel list in PetrolPopUpActivity.
+ */
 public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecyclerViewAdapter.FuelRecyclerViewHolder> {
 
     private List<Fuel> fuelsList;
@@ -34,8 +37,7 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     private String petrolId;
     private boolean isMinimalDistanceReached;
 
-    public FuelsRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId, Boolean isMinimalDistanceReached)
-    {
+    public FuelsRecyclerViewAdapter(List<Fuel> fuels, Context con, String petrolId, Boolean isMinimalDistanceReached) {
         fuelsList = fuels;
         context = con;
         this.petrolId = petrolId;
@@ -46,7 +48,7 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     @NonNull
     @Override
     public FuelsRecyclerViewAdapter.FuelRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.fuel_list_row,parent,false);
+        View itemView = LayoutInflater.from(context).inflate(R.layout.fuel_list_row, parent, false);
         return new FuelsRecyclerViewAdapter.FuelRecyclerViewHolder(itemView);
     }
 
@@ -54,12 +56,12 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     public void onBindViewHolder(FuelsRecyclerViewAdapter.FuelRecyclerViewHolder holder, final int position) {
         holder.fuelIcon.setImageResource(fuelsList.get(position).getIcon());
         holder.dateText.setText(fuelsList.get(position).getName());
-        if(fuelsList.get(position).getPrice().equals("0.00"))
+        if (fuelsList.get(position).getPrice().equals("0.00"))
             holder.priceText.setText("Brak");
         else
-            holder.priceText.setText(fuelsList.get(position).getPrice() +"zł");
+            holder.priceText.setText(fuelsList.get(position).getPrice() + "zł");
 
-        if(fuelsList.get(position).getLastReportDate() == null)
+        if (fuelsList.get(position).getLastReportDate() == null)
             holder.dateText.setText("Brak");
         else {
             try {
@@ -80,7 +82,7 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
         holder.changeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!isMinimalDistanceReached) {
+                if (!isMinimalDistanceReached) {
                     Toast.makeText(context, "Jesteś zbyt daleko, aby wykonać zgłoszenie!", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -88,12 +90,12 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
                 intent.putExtra("fuelClass", String.valueOf(fuelsList.get(position).getPrice()));
                 intent.putExtra("fuelName", fuelsList.get(position).getName());
                 intent.putExtra("petrolId", petrolId);
-                ((PetrolPopUpActivity)context).startActivityForResult(intent, 1);
+                ((PetrolPopUpActivity) context).startActivityForResult(intent, 1);
             }
         });
     }
-    public LinkedList<Button> getButtonsList()
-    {
+
+    public LinkedList<Button> getButtonsList() {
         return changeButtonsList;
     }
 
@@ -103,18 +105,17 @@ public class FuelsRecyclerViewAdapter extends RecyclerView.Adapter<FuelsRecycler
     }
 
     public class FuelRecyclerViewHolder extends RecyclerView.ViewHolder {
-       ImageView fuelIcon;
-       EditText priceText;
-       TextView dateText;
-       Button changeButton;
+        ImageView fuelIcon;
+        EditText priceText;
+        TextView dateText;
+        Button changeButton;
 
-       FuelRecyclerViewHolder(View view)
-       {
-           super(view);
-           fuelIcon = view.findViewById(R.id.imageView);
-           priceText = view.findViewById(R.id.priceView);
-           dateText = view.findViewById(R.id.dateText);
-           changeButton = view.findViewById(R.id.changePriceBtn);
-       }
+        FuelRecyclerViewHolder(View view) {
+            super(view);
+            fuelIcon = view.findViewById(R.id.imageView);
+            priceText = view.findViewById(R.id.priceView);
+            dateText = view.findViewById(R.id.dateText);
+            changeButton = view.findViewById(R.id.changePriceBtn);
+        }
     }
 }

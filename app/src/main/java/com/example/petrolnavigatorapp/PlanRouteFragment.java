@@ -12,12 +12,10 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +28,6 @@ import android.widget.Toast;
 
 import com.example.petrolnavigatorapp.firebase_utils.FirestorePetrolsDB;
 import com.example.petrolnavigatorapp.services.PolylineService;
-import com.example.petrolnavigatorapp.utils.Petrol;
 import com.example.petrolnavigatorapp.utils.PolylineData;
 import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -47,8 +44,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PendingResult;
@@ -61,13 +56,19 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Fragment that finds routes to selected target on map
+ * and marks all points where fuel level of current vehicle is going to be low.
+ * Next it search for all petrol stations that user is able to reach.
+ * It cooperates with Google Directions API.
+ * Connected with VehiclesListFragment.
+ */
 public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnPolylineClickListener {
 
     private GoogleMap mMap;
     private ArrayList<Vehicle> userVehicles;
     private Vehicle currentVehicle;
     private FusedLocationProviderClient mFusedProviderClient;
-    protected LocationManager locationManager;
     private LatLng currentLocation;
     private Location mLastLocation;
     private LocationRequest request;
@@ -119,10 +120,8 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
         userVehicles = (ArrayList<Vehicle>) getArguments().getSerializable("userVehicles");
         if(userVehicles != null) {
             ArrayList<String> names = new ArrayList<>();
-            for (Vehicle vehicle : userVehicles) {
+            for (Vehicle vehicle : userVehicles)
                 names.add(vehicle.getName());
-                System.out.println("AUTO " + vehicle.getName());
-            }
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, names);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -141,9 +140,6 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                     .apiKey(getString(R.string.google_maps_key))
                     .build();
         }
-
-        //ArrayAdapter adapter = ArrayAdapter.createFromResource(getContext(), R.array.fuelTypes, android.R.layout.simple_spinner_item);
-
 
         carSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -164,36 +160,40 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 mMap.clear();
                 String location = searchView.getQuery().toString();
                 List<Address> addressList = null;
-                if(location != null && location != "") {
-                    if(userVehicles == null) {
-                        Toast.makeText(getContext(), "Musisz najpierw miec wybrany samochód!", Toast.LENGTH_SHORT).show();
+                if(!location.equals("")) {
+                    Toast.makeText(getContext(), "Lokacja nieznana! Podaj prawidłowy cel!", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                if(userVehicles == null) {
+                    Toast.makeText(getContext(), "Musisz najpierw wybrać samochód!", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                Geocoder geocoder = new Geocoder(view.getContext());
+                try {
+                    addressList = geocoder.getFromLocationName(location, 1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Address targetAddress = addressList.get(0);
+                LatLng latLng = new LatLng(targetAddress.getLatitude(), targetAddress.getLongitude());
+                final Marker targetMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        if(!marker.getTitle().equals("Rezerwa paliwa") && !marker.getTitle().equals(targetMarker.getTitle())) {
+                            Intent intent = new Intent(getContext(), PetrolPopUpActivity.class);
+                            intent.putExtra("latitude", marker.getPosition().latitude);
+                            intent.putExtra("longitude", marker.getPosition().longitude);
+                            getContext().startActivity(intent);
+                        }
                         return false;
                     }
-                    Geocoder geocoder = new Geocoder(view.getContext());
-                    try {
-                        addressList = geocoder.getFromLocationName(location, 1);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    Address address = addressList.get(0);
-                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    final Marker targetMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(location));
-                    mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                        @Override
-                        public boolean onMarkerClick(Marker marker) {
-                            if(!marker.getTitle().equals("Rezerwa paliwa") && !marker.getTitle().equals(targetMarker.getTitle())) {
-                                Intent intent = new Intent(getContext(), PetrolPopUpActivity.class);
-                                intent.putExtra("latitude", marker.getPosition().latitude);
-                                intent.putExtra("longitude", marker.getPosition().longitude);
-                                getContext().startActivity(intent);
-                            }
-                            return false;
-                        }
-                    });
+                });
 
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11));
-                    calculateDirections(targetMarker);
-                }
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11));
+                calculateDirections(targetMarker);
                 return false;
             }
 
@@ -213,6 +213,10 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
         mLastLocation = location;
     }
 
+    /**
+     * Find all possible routes to selected and get data about them.
+     * @param marker selected target marker
+     */
     private void calculateDirections(Marker marker) {
         com.google.maps.model.LatLng destination = new com.google.maps.model.LatLng (marker.getPosition().latitude, marker.getPosition().longitude);
         DirectionsApiRequest directions = new DirectionsApiRequest(geoApiContext);
@@ -221,20 +225,20 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
         directions.destination(destination).setCallback(new PendingResult.Callback<DirectionsResult>() {
             @Override
             public void onResult(DirectionsResult result) {
-                //result data
-                System.out.println("dane");
-                System.out.println(result.routes.length + " " + result.routes[0].legs.length);
-                System.out.println(result.routes[0].legs[0].distance+"km");
                 addPolyLines(result);
             }
 
             @Override
             public void onFailure(Throwable e) {
-                System.out.println("NIE UDAŁO SIE" + e);
+                e.getMessage();
             }
         });
     }
 
+    /**
+     * Using collected data about potential routes it marks them on the map.
+     * @param result result of directions search needed to build polyline
+     */
     private void addPolyLines(final DirectionsResult result) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
@@ -261,6 +265,10 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
         });
     }
 
+    /**
+     * Clicked polyline launches search algorithm.
+     * @param polyline selected route
+     */
     @Override
     public void onPolylineClick(Polyline polyline) {
         for(PolylineData data : polylineDataList) {
@@ -268,20 +276,16 @@ public class PlanRouteFragment extends Fragment implements OnMapReadyCallback, L
                 data.getPolyline().setColor(ContextCompat.getColor(getActivity(),R.color.light_blue));
                 data.getPolyline().setZIndex(1);
 
-                //Vehicle testVehicle = new Vehicle("BMW", 50, 10, 1, 20, 10);
-
-                //System.out.println(currentVehicle.getName() + " " +currentVehicle.getAverageFuelConsumption() + " " + currentVehicle.getCurrentFuelLevel() +
-                 //       " " + currentVehicle.getReserveFuelLevel());
                 PolylineService service = new PolylineService(currentVehicle, data.getPolyline());
-                LinkedList<LatLng> allPoints = service.getFuelReservePointOnRoute();
+                LinkedList<LatLng> allReservePoints = service.getFuelReservePointOnRoute();
 
                 FirestorePetrolsDB petrolsDB = new FirestorePetrolsDB(
                         mMap, getContext(), getActivity(), currentVehicle);
 
-                for(LatLng firstPoint : allPoints) {
-                    mMap.addMarker(new MarkerOptions().position(firstPoint).title("Rezerwa paliwa"));
+                for(LatLng point : allReservePoints) {
+                    mMap.addMarker(new MarkerOptions().position(point).title("Rezerwa paliwa"));
 
-                    petrolsDB.getPetrolsOnRoute(data.getPolyline().getPoints(), firstPoint,
+                    petrolsDB.getPetrolsOnRoute(data.getPolyline().getPoints(), point,
                             data.getPolyline().getPoints().get(0),
                             data.getPolyline().getPoints().get(data.getPolyline().getPoints().size() - 1),
                             geoApiContext);

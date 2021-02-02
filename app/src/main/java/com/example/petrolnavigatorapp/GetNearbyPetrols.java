@@ -4,6 +4,7 @@ package com.example.petrolnavigatorapp;
 import android.content.Intent;
 import android.os.AsyncTask;
 
+import com.example.petrolnavigatorapp.interfaces.TaskListener;
 import com.example.petrolnavigatorapp.utils.Petrol;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -29,34 +30,37 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GetNearbyPetrols2 extends AsyncTask<Object,String,String> {
+/**
+ * Class that communicates with Google Places API. It sends HTTP requests for data about petrol stations.
+ * It also process returned data and saves them in Cloud Firestore database.
+ * It is used only by admin.
+ */
+public class GetNearbyPetrols extends AsyncTask<Object, String, String> {
 
     private GoogleMap mMap;
     private String url;
-    private  String data;
+    private String data;
     private NavigationDrawerActivity drawerActivity;
     private FirebaseFirestore fireStore;
     private List<Marker> markers;
     private TaskListener taskListener;
-    private List<Petrol> petrolsList;
+    private List<Petrol> petrolStationsList;
 
-    GetNearbyPetrols2()
-    {
-        petrolsList = new LinkedList<>();
-    };
+    GetNearbyPetrols() {
+        petrolStationsList = new LinkedList<>();
+    }
 
     @Override
     protected String doInBackground(Object... objects) {
-        mMap = (GoogleMap)objects[0];
-        url = (String)objects[1];
+        mMap = (GoogleMap) objects[0];
+        url = (String) objects[1];
         markers = new LinkedList<>();
-        drawerActivity = (NavigationDrawerActivity)objects[2];
-        taskListener = (TaskListener)objects[3];
+        drawerActivity = (NavigationDrawerActivity) objects[2];
+        taskListener = (TaskListener) objects[3];
 
-        try
-        {
+        try {
             URL myURL = new URL(url);
-            HttpURLConnection httpURLConnection = (HttpURLConnection)myURL.openConnection();
+            HttpURLConnection httpURLConnection = (HttpURLConnection) myURL.openConnection();
             httpURLConnection.connect();
             InputStream is = httpURLConnection.getInputStream();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
@@ -64,19 +68,14 @@ public class GetNearbyPetrols2 extends AsyncTask<Object,String,String> {
             String line = "";
             StringBuilder stringBuilder = new StringBuilder();
 
-            while((line = bufferedReader.readLine()) != null)
-            {
+            while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line);
             }
 
             data = stringBuilder.toString();
-        }
-        catch(MalformedURLException e)
-        {
+        } catch (MalformedURLException e) {
             e.getMessage();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.getMessage();
         }
 
@@ -86,13 +85,11 @@ public class GetNearbyPetrols2 extends AsyncTask<Object,String,String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        try
-        {
+        try {
             final JSONObject parentObject = new JSONObject(s);
             final JSONArray resultsArray = parentObject.getJSONArray("results");
 
-            for(int i = 0; i < resultsArray.length(); i++)
-            {
+            for (int i = 0; i < resultsArray.length(); i++) {
                 JSONObject jsonObject = resultsArray.getJSONObject(i);
                 JSONObject locationObject = jsonObject.getJSONObject("geometry").getJSONObject("location");
 
@@ -101,14 +98,14 @@ public class GetNearbyPetrols2 extends AsyncTask<Object,String,String> {
 
                 JSONObject nameObject = resultsArray.getJSONObject(i);
                 final String petrolName = nameObject.getString("name");
-                String vincity = nameObject.getString("vicinity");
+                final String vincity = nameObject.getString("vicinity");
 
-                LatLng coor = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
-                petrolsList.add(new Petrol(petrolName,coor.latitude,coor.longitude,vincity));
+                final LatLng coordinates = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                petrolStationsList.add(new Petrol(petrolName, coordinates.latitude, coordinates.longitude, vincity));
 
                 MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.title(petrolName+"," + vincity);
-                markerOptions.position(coor);
+                markerOptions.title(petrolName + "," + vincity);
+                markerOptions.position(coordinates);
 
                 Marker mLocationMarker = mMap.addMarker(markerOptions);
                 markers.add(mLocationMarker);
@@ -128,16 +125,14 @@ public class GetNearbyPetrols2 extends AsyncTask<Object,String,String> {
 
             fireStore = FirebaseFirestore.getInstance();
             final CollectionReference reff = fireStore.collection("petrol_stations");
-            for(final Petrol petrol : petrolsList)
-            {
+            for (final Petrol petrol : petrolStationsList) {
                 reff.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        for(QueryDocumentSnapshot querySnapshot : queryDocumentSnapshots)
-                        {
+                        for (QueryDocumentSnapshot querySnapshot : queryDocumentSnapshots) {
                             double lat = Double.parseDouble(querySnapshot.get("lat").toString());
                             double lon = Double.parseDouble(querySnapshot.get("lon").toString());
-                            if(petrol.getLat() == lat && petrol.getLon() == lon)
+                            if (petrol.getLat() == lat && petrol.getLon() == lon)
                                 return;
 
                         }
@@ -145,9 +140,7 @@ public class GetNearbyPetrols2 extends AsyncTask<Object,String,String> {
                     }
                 });
             }
-        }
-        catch(JSONException e)
-        {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
         taskListener.onTaskFinish(markers);

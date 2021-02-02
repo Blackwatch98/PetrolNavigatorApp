@@ -17,9 +17,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
-import java.net.Inet4Address;
+/**
+ * This is an activity where user can log into the application.
+ * Account existence is checked mostly by Firebase service but also has some inner validation.
+ */
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -38,14 +40,14 @@ public class LoginActivity extends AppCompatActivity {
         mLogin = findViewById(R.id.loginTextEmailAddress);
         mPassword = findViewById(R.id.loginTextPassword);
         confirmBtn = findViewById(R.id.loginConfirmBtn);
-        progressBar = findViewById(R.id.progressBar);
-        registerReference = findViewById(R.id.registerReferenceText);
+        progressBar = findViewById(R.id.loginProgressBar);
+        registerReference = findViewById(R.id.registerReferenceTextView);
 
         registerReference.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
                 startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
+                finish();
             }
         });
 
@@ -75,14 +77,11 @@ public class LoginActivity extends AppCompatActivity {
                 mAuth.signInWithEmailAndPassword(login, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful())
-                        {
+                        if (task.isSuccessful()) {
                             startActivity(new Intent(getApplicationContext(), NavigationDrawerActivity.class));
-                            Toast.makeText(LoginActivity.this, "Udało ci się zalogować :)", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Logowanie przebiegło pomyślnie. Witaj :)", Toast.LENGTH_SHORT).show();
                             finish();
-                        }
-                        else
-                        {
+                        } else {
                             Toast.makeText(LoginActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);
                         }

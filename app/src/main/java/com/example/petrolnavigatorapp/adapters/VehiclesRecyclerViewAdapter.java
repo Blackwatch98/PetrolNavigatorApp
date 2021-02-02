@@ -6,35 +6,35 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.petrolnavigatorapp.ChangePriceActivity;
 import com.example.petrolnavigatorapp.ConfigureAddVehicleActivity;
 import com.example.petrolnavigatorapp.NavigationDrawerActivity;
-import com.example.petrolnavigatorapp.PetrolPopUpActivity;
 import com.example.petrolnavigatorapp.R;
+import com.example.petrolnavigatorapp.VehiclesListFragment;
 import com.example.petrolnavigatorapp.utils.Vehicle;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-public class VehiclesRecyclerViewAdapter extends RecyclerView.Adapter<VehiclesRecyclerViewAdapter.VehiclesRecyclerViewHolder>{
+/**
+ * Adapter for vehicles collection in VehiclesListFragment.
+ */
+public class VehiclesRecyclerViewAdapter extends RecyclerView.Adapter<VehiclesRecyclerViewAdapter.VehiclesRecyclerViewHolder> {
 
     private List<Vehicle> vehicleList;
     private Context context;
 
-    public VehiclesRecyclerViewAdapter(List<Vehicle> vehicleList, Context context)
-    {
+    public VehiclesRecyclerViewAdapter(List<Vehicle> vehicleList, Context context) {
         this.vehicleList = vehicleList;
         this.context = context;
     }
@@ -42,7 +42,7 @@ public class VehiclesRecyclerViewAdapter extends RecyclerView.Adapter<VehiclesRe
     @NonNull
     @Override
     public VehiclesRecyclerViewAdapter.VehiclesRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.vehicles_list_row,parent,false);
+        View itemView = LayoutInflater.from(context).inflate(R.layout.vehicles_list_row, parent, false);
         return new VehiclesRecyclerViewAdapter.VehiclesRecyclerViewHolder(itemView);
     }
 
@@ -58,7 +58,29 @@ public class VehiclesRecyclerViewAdapter extends RecyclerView.Adapter<VehiclesRe
             public void onClick(View view) {
                 Intent intent = new Intent(context, ConfigureAddVehicleActivity.class);
                 intent.putExtra("name", vehicleList.get(position).getName());
-                ((NavigationDrawerActivity)context).startActivityForResult(intent,1);
+                ((NavigationDrawerActivity) context).startActivityForResult(intent, 1);
+            }
+        });
+        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
+                FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                fireStore.collection("users").document(mAuth.getCurrentUser().getUid()).collection("vehicles")
+                        .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                            if (query.getString("name").equals(holder.vehicleName.getText())) {
+                                fireStore.collection("users").document(mAuth.getCurrentUser().getUid())
+                                        .collection("vehicles").document(query.getId()).delete();
+                                break;
+                            }
+                        }
+                        ((NavigationDrawerActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                new VehiclesListFragment()).commit();
+                    }
+                });
             }
         });
     }
@@ -78,8 +100,7 @@ public class VehiclesRecyclerViewAdapter extends RecyclerView.Adapter<VehiclesRe
         TextView fuelType;
         Button deleteButton;
 
-        VehiclesRecyclerViewHolder(View view)
-        {
+        VehiclesRecyclerViewHolder(View view) {
             super(view);
             vehicleCard = view.findViewById(R.id.vehicleCard);
             vehicleImage = view.findViewById(R.id.vehicleImage);

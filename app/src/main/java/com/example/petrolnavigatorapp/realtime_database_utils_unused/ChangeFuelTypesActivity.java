@@ -33,7 +33,7 @@
 //
 //public class ChangeFuelTypesActivity extends AppCompatActivity implements OnMapReadyCallback {
 //
-//    private HashMap<String,Boolean> fuelTypes;
+//    private HashMap<String, Boolean> fuelTypes;
 //    private List<Switch> switches;
 //    private Switch benzSwitch, dieselSwitch, lpgSwitch, etaSwitch, elecSwitch, cngSwitch;
 //    private Button confirmBtn, reportNoExist, cancelBtn;
@@ -78,38 +78,32 @@
 //        reff = FirebaseDatabase.getInstance().getReference().child("Petrols");
 //
 //        Bundle bundle = getIntent().getExtras();
-//        double lat=bundle.getDouble("latitude");
-//        double lon=bundle.getDouble("longitude");
+//        double lat = bundle.getDouble("latitude");
+//        double lon = bundle.getDouble("longitude");
 //        petrolName = bundle.getString("petrolName");
 //        editNameView.setText(petrolName);
-//        this.coor = new LatLng(lat,lon);
+//        this.coor = new LatLng(lat, lon);
 //
 //        reff.addValueEventListener(new ValueEventListener() {
 //            @Override
 //            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                if(dataSnapshot.exists())
-//                {
-//                    for(DataSnapshot ds : dataSnapshot.getChildren())
-//                    {
-//                        HashMap<String,Double> test = new HashMap<>();
-//                        test.put("latitude",coor.latitude);
+//                if (dataSnapshot.exists()) {
+//                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+//                        HashMap<String, Double> test = new HashMap<>();
+//                        test.put("latitude", coor.latitude);
 //                        test.put("longitude", coor.longitude);
 //
-//                        if(ds.child("coordinates").child("latitude").getValue().equals(test.get("latitude")) &&
-//                                ds.child("coordinates").child("longitude").getValue().equals(test.get("longitude")))
-//                        {
+//                        if (ds.child("coordinates").child("latitude").getValue().equals(test.get("latitude")) &&
+//                                ds.child("coordinates").child("longitude").getValue().equals(test.get("longitude"))) {
 //                            fuelTypes = (HashMap<String, Boolean>) ds.child("availableFuels").getValue();
 //                            myDs = ds;
-//                            if(fuelTypes != null)
-//                            {
+//                            if (fuelTypes != null) {
 //                                Iterator it = fuelTypes.entrySet().iterator();
 //                                while (it.hasNext()) {
-//                                    Map.Entry mapElement = (Map.Entry)it.next();
-//                                    System.out.println(mapElement.getKey() + " = " + mapElement.getValue());
-//                                    for(Switch sw : switches)
-//                                        if(sw.getText().equals(mapElement.getKey()))
-//                                        {
-//                                            if((Boolean) mapElement.getValue())
+//                                    Map.Entry mapElement = (Map.Entry) it.next();
+//                                    for (Switch sw : switches)
+//                                        if (sw.getText().equals(mapElement.getKey())) {
+//                                            if ((Boolean) mapElement.getValue())
 //                                                sw.setChecked(true);
 //                                        }
 //                                }
@@ -129,32 +123,28 @@
 //        confirmBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
-//                HashMap<String,Boolean> availableFuels = new HashMap<>();
-//                for(Switch sw : switches)
-//                {
-//                    if(sw.isChecked())
-//                        availableFuels.put(sw.getText().toString(),true);
+//                HashMap<String, Boolean> availableFuels = new HashMap<>();
+//                for (Switch sw : switches) {
+//                    if (sw.isChecked())
+//                        availableFuels.put(sw.getText().toString(), true);
 //                    else
-//                        availableFuels.put(sw.getText().toString(),false);
+//                        availableFuels.put(sw.getText().toString(), false);
 //                }
 //                myDs.getRef().child("availableFuels").setValue(availableFuels);
 //                finish();
 //            }
 //        });
 //
-//        scale_up = AnimationUtils.loadAnimation(this,R.anim.scale_up);
-//        scale_down = AnimationUtils.loadAnimation(this,R.anim.scale_down);
+//        scale_up = AnimationUtils.loadAnimation(this, R.anim.scale_up);
+//        scale_down = AnimationUtils.loadAnimation(this, R.anim.scale_down);
 //
 //        reportNoExist.setOnTouchListener(new View.OnTouchListener() {
 //            @Override
 //            public boolean onTouch(View view, MotionEvent motionEvent) {
-//                if(motionEvent.getAction()==MotionEvent.ACTION_DOWN)
-//                {
+//                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
 //                    scale_up.setStartTime(0);
 //                    reportNoExist.startAnimation(scale_up);
-//                }
-//                else if(motionEvent.getAction()==MotionEvent.ACTION_UP)
-//                {
+//                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
 //                    scale_up.setStartTime(0);
 //                    reportNoExist.startAnimation(scale_down);
 //                }
@@ -165,11 +155,11 @@
 //
 //        cancelBtn = findViewById(R.id.cancelBtn);
 //        cancelBtn.setOnClickListener(new View.OnClickListener() {
-//             @Override
-//             public void onClick(View view) {
-//                 finish();
-//             }
-//         }
+//                                         @Override
+//                                         public void onClick(View view) {
+//                                             finish();
+//                                         }
+//                                     }
 //        );
 //    }
 //

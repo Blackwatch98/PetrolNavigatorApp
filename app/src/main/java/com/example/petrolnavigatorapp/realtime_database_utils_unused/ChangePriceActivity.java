@@ -52,8 +52,7 @@
 //        fraction_picker.setValue(Character.getNumericValue((values.charAt(2))));
 //        fraction_picker2.setValue(Character.getNumericValue((values.charAt(3))));
 //
-//        confirmBtn.setOnClickListener(new View.OnClickListener()
-//        {
+//        confirmBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
 //                StringBuilder stringBuilder = new StringBuilder();
@@ -61,10 +60,10 @@
 //                        append(fraction_picker.getValue()).append(fraction_picker2.getValue());
 //
 //                Intent i = new Intent();
-//                i.putExtra("priceString",stringBuilder.toString());
-//                i.putExtra("fuelName",fuelName);
-//                setResult(RESULT_OK,i);
-//                Toast.makeText(getBaseContext(),"Wysłano zgłoszenie", Toast.LENGTH_SHORT).show();
+//                i.putExtra("priceString", stringBuilder.toString());
+//                i.putExtra("fuelName", fuelName);
+//                setResult(RESULT_OK, i);
+//                Toast.makeText(getBaseContext(), "Wysłano zgłoszenie", Toast.LENGTH_SHORT).show();
 //                finish();
 //            }
 //        });
@@ -72,7 +71,7 @@
 //        cancelBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
-//                Toast.makeText(getBaseContext(),"Anulowano zgłoszenie", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getBaseContext(), "Anulowano zgłoszenie", Toast.LENGTH_SHORT).show();
 //                finish();
 //            }
 //        });

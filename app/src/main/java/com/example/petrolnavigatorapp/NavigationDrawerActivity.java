@@ -14,15 +14,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.petrolnavigatorapp.interfaces.FindPetrolsListener;
 import com.example.petrolnavigatorapp.utils.Petrol;
 import com.example.petrolnavigatorapp.utils.Vehicle;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -31,13 +32,16 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * NavigationDrawer that holds switching and exchanging data between fragments.
+ */
 public class NavigationDrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         FilterDialog.FilterDialogListener, FindPetrolsListener, MapsFragment.UserLocalizationListener, ListFilterDialog.OrderPrefListener,
-        VehiclesFragment.VehiclesListener {
+        VehiclesListFragment.VehiclesListener {
 
     private DrawerLayout drawer;
     private Toolbar current_toolbar, map_toolbar, list_toolbar, settings_toolbar, vehicles_toolbar, plan_route_toolbar;
-    private List<Petrol> foundPetrols;
+    private List<Petrol> foundStations;
     private String prefFuel, prefType;
     private List<Vehicle> userVehicles;
     private LatLng userLocalization;
@@ -60,91 +64,101 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        //navigationView.bringToFront();
+
         onStartGetUserVehicles();
+        setToggles();
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,drawer,map_toolbar,
-                R.string.navigation_drawer_open,R.string.navigation_drawer_close);
-        ActionBarDrawerToggle toggle2 = new ActionBarDrawerToggle(this,drawer,settings_toolbar,
-                R.string.navigation_drawer_open,R.string.navigation_drawer_close);
-        ActionBarDrawerToggle toggle4 = new ActionBarDrawerToggle(this,drawer,vehicles_toolbar,
-                R.string.navigation_drawer_open,R.string.navigation_drawer_close);
-
-        drawer.addDrawerListener(toggle);
-        drawer.addDrawerListener(toggle2);
-        drawer.addDrawerListener(toggle4);
-        toggle.syncState();
-        toggle2.syncState();
-        toggle4.syncState();
-
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new MapsFragment()).commit();
             navigationView.setCheckedItem(R.id.maps);
         }
     }
 
+    /**
+     * Sets toggles for each fragment's toolbar.
+     */
+    private void setToggles() {
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, map_toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle2 = new ActionBarDrawerToggle(this, drawer, settings_toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle4 = new ActionBarDrawerToggle(this, drawer, vehicles_toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
+
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        drawer.addDrawerListener(toggle2);
+        toggle2.syncState();
+        drawer.addDrawerListener(toggle4);
+        toggle4.syncState();
+    }
+
     @Override
     public void onBackPressed() {
-        if(drawer.isDrawerOpen(GravityCompat.START))
+        if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
         else
             super.onBackPressed();
     }
 
+    /**
+     * Changes current seen fragment and sets new toolbar for it.
+     *
+     * @param menuItem Selected menu item that represents fragment.
+     * @return Flag that tells should selected item be displayed.
+     */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         current_toolbar.setVisibility(View.GONE);
-        switch (menuItem.getItemId())
-        {
+        switch (menuItem.getItemId()) {
             case R.id.maps:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         new MapsFragment()).commit();
                 current_toolbar = map_toolbar;
                 break;
             case R.id.list:
-                ArrayList<Petrol> petrols = new ArrayList<>(foundPetrols.size());
-                petrols.addAll(foundPetrols);
+                ArrayList<Petrol> petrolStationArrayList = new ArrayList<>(foundStations.size());
+                petrolStationArrayList.addAll(foundStations);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("petrols", petrols);
+                bundle.putSerializable("petrols", petrolStationArrayList);
                 bundle.putDouble("lat", userLocalization.latitude);
                 bundle.putDouble("lon", userLocalization.longitude);
                 bundle.putString("prefFuel", prefFuel);
                 bundle.putString("prefType", prefType);
-                PetrolsListFragment fragobj = new PetrolsListFragment();
-                fragobj.setArguments(bundle);
-
+                PetrolStationsListFragment fragment = new PetrolStationsListFragment();
+                fragment.setArguments(bundle);
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        fragobj).commit();
+                        fragment).commit();
                 current_toolbar = list_toolbar;
                 setSupportActionBar(current_toolbar);
-                ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this, drawer,list_toolbar,
-                        R.string.navigation_drawer_open,R.string.navigation_drawer_close);
+                ActionBarDrawerToggle toggle3 = new ActionBarDrawerToggle(this, drawer, list_toolbar,
+                        R.string.navigation_drawer_open, R.string.navigation_drawer_close);
                 drawer.addDrawerListener(toggle3);
                 toggle3.syncState();
                 break;
             case R.id.plan_route:
                 Bundle bundle2 = new Bundle();
-
-                if(userVehicles != null) {
+                if (userVehicles != null) {
                     ArrayList<Vehicle> vehicles = new ArrayList<>(userVehicles.size());
                     vehicles.addAll(userVehicles);
                     bundle2.putSerializable("userVehicles", vehicles);
                 }
-                PlanRouteFragment planRouteFragment = new PlanRouteFragment();
-                planRouteFragment.setArguments(bundle2);
+                PlanRouteFragment fragment2 = new PlanRouteFragment();
+                fragment2.setArguments(bundle2);
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        planRouteFragment).commit();
+                        fragment2).commit();
                 current_toolbar = plan_route_toolbar;
                 setSupportActionBar(current_toolbar);
-                ActionBarDrawerToggle toggle4 = new ActionBarDrawerToggle(this,drawer,plan_route_toolbar,
-                        R.string.navigation_drawer_open,R.string.navigation_drawer_close);
-                drawer.addDrawerListener(toggle4);
-                toggle4.syncState();
+                ActionBarDrawerToggle toggle5 = new ActionBarDrawerToggle(this, drawer, plan_route_toolbar,
+                        R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                drawer.addDrawerListener(toggle5);
+                toggle5.syncState();
                 break;
             case R.id.vehicles:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new VehiclesFragment()).commit();
+                        new VehiclesListFragment()).commit();
                 current_toolbar = vehicles_toolbar;
                 break;
             case R.id.settings:
@@ -156,8 +170,8 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(this, "Wylogowałeś się. Do zobaczenia :)", Toast.LENGTH_SHORT).show();
                 finish();
-                Intent intent2 = new Intent(NavigationDrawerActivity.this, LoginActivity.class);
-                startActivity(intent2);
+                Intent intent = new Intent(NavigationDrawerActivity.this, LoginActivity.class);
+                startActivity(intent);
                 break;
         }
         drawer.closeDrawer(GravityCompat.START);
@@ -169,13 +183,10 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.toolbarmenu, menu);
-        if(current_toolbar.equals(list_toolbar))
-        {
+        if (current_toolbar.equals(list_toolbar)) {
             menu.findItem(R.id.list_filter_icon).setVisible(true);
             menu.findItem(R.id.menu_item_filter).setVisible(false);
-        }
-        else if(current_toolbar.equals(plan_route_toolbar))
-        {
+        } else if (current_toolbar.equals(plan_route_toolbar)) {
             menu.findItem(R.id.list_filter_icon).setVisible(false);
             menu.findItem(R.id.menu_item_filter).setVisible(false);
         }
@@ -196,11 +207,17 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 filterDialog2.show(getSupportFragmentManager(), "dialog");
                 break;
             default:
-               break;
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Updates user preferred fuel in database and refreshes fragment.
+     *
+     * @param prefType Fuel type preferred by user.
+     * @param prefFuel Fuel preferred by user.
+     */
     @Override
     public void changeUserPreferences(String prefType, String prefFuel) {
         FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
@@ -216,57 +233,79 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         new MapsFragment()).commit();
             }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getApplicationContext(), "Nie udało się zmienić preferencji...", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
-
+    /**
+     * Gets petrol stations list that is passed to PetrolStationsListFragment.
+     *
+     * @param stations List of found petrol stations.
+     */
     @Override
-    public void getPetrolsList(List<Petrol> petrols) {
-        foundPetrols = petrols;
+    public void getPetrolsList(List<Petrol> stations) {
+        foundStations = stations;
     }
 
+    /**
+     * Gets user fuel filter preferences from FilterDialog.
+     *
+     * @param prefType Preferred fuel type.
+     * @param prefFuel Preferred fuel.
+     */
     @Override
     public void getUserPrefs(String prefType, String prefFuel) {
         this.prefType = prefType;
         this.prefFuel = prefFuel;
     }
 
+    /**
+     * Gets user location from MapsFragment. Then it is passed to PetrolStationsListFragment.
+     *
+     * @param latLng
+     */
     @Override
     public void getUserLocalization(LatLng latLng) {
         userLocalization = latLng;
     }
 
+    /**
+     * Refreshes PetrolStationsListFragment whenever sorting preferences are changed.
+     */
     @Override
     public void refreshList() {
-        ArrayList<Petrol> petrols = new ArrayList<>(foundPetrols.size());
-        petrols.addAll(foundPetrols);
+        ArrayList<Petrol> petrols = new ArrayList<>(foundStations.size());
+        petrols.addAll(foundStations);
         Bundle bundle = new Bundle();
         bundle.putSerializable("petrols", petrols);
         bundle.putDouble("lat", userLocalization.latitude);
         bundle.putDouble("lon", userLocalization.longitude);
         bundle.putString("prefFuel", prefFuel);
         bundle.putString("prefType", prefType);
-        PetrolsListFragment fragobj = new PetrolsListFragment();
-        fragobj.setArguments(bundle);
+        PetrolStationsListFragment fragment = new PetrolStationsListFragment();
+        fragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                fragobj).commit();
+                fragment).commit();
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode==RESULT_OK)
-        {
-            if(requestCode == 1 )
-            {
-                System.out.println("HALO");
+        if (resultCode == RESULT_OK) {
+            if (requestCode == 1) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new VehiclesFragment()).commit();
+                        new VehiclesListFragment()).commit();
             }
         }
-
     }
 
+    /**
+     * Gets list of user vehicles from database.
+     */
     private void onStartGetUserVehicles() {
         FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -277,20 +316,25 @@ public class NavigationDrawerActivity extends AppCompatActivity implements Navig
         userVehiclesCollection.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                 for(QueryDocumentSnapshot query : queryDocumentSnapshots) {
-                     userVehicles.add(new Vehicle(
-                             query.getString("name"),
-                             query.getDouble("tankCapacity"),
-                             query.getDouble("averageFuelConsumption"),
-                             Integer.parseInt(query.get("fuelTypeId").toString()),
-                             Double.parseDouble(query.get("currentFuelLevel").toString()),
-                             Double.parseDouble(query.get("reserveFuelLevel").toString())
-                     ));
-                 }
+                for (QueryDocumentSnapshot query : queryDocumentSnapshots) {
+                    userVehicles.add(new Vehicle(
+                            query.getString("name"),
+                            query.getDouble("tankCapacity"),
+                            query.getDouble("averageFuelConsumption"),
+                            Integer.parseInt(query.get("fuelTypeId").toString()),
+                            Double.parseDouble(query.get("currentFuelLevel").toString()),
+                            Double.parseDouble(query.get("reserveFuelLevel").toString())
+                    ));
+                }
             }
         });
     }
 
+    /**
+     * Updates user's vehicles list with new from VehiclesListFragment.
+     *
+     * @param userVehicles All users vehicles. Also taking new ones into account.
+     */
     @Override
     public void getUserVehicles(List<Vehicle> userVehicles) {
         this.userVehicles = userVehicles;

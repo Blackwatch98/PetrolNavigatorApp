@@ -1,5 +1,10 @@
 package com.example.petrolnavigatorapp.utils;
 
+/**
+ * Class that represents user account.
+ * Contains data about his/her login, id and settings in the application like for example
+ * petrol stations search radius.
+ */
 public class User {
 
     private String userId;
@@ -39,6 +44,9 @@ public class User {
         this.userSettings = userSettings;
     }
 
+    /**
+     * Class that contains information about user's settings like preferred fuel or search radius.
+     */
     public class UserSettings {
 
         private String prefFuelType;
